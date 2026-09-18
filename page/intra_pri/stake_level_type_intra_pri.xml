@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container>
+ 
+  <level_type>
+    <type>34</type>
+    <name>BDO</name>
+  </level_type>
+  
+  <level_type>
+    <type>100</type>
+    <name>Joint BDO</name>
+  </level_type>
+  
+  <level_type>
+    <type>12</type>
+    <name>BDO Operator</name>
+  </level_type>
+  
+  <level_type>
+    <type>13</type>
+    <name>DPRDO</name>
+  </level_type>
+  
+  <level_type>
+    <type>7</type>
+    <name>Webmaster</name>
+  </level_type>
+  
+</container>

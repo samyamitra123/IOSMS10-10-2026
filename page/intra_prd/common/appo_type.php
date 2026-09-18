@@ -1,0 +1,4 @@
+<p><b>First Memo / Present Memo / Appointment Type</b> (Under `PROFESSIONAL DETAILS`  Tab of employee profile
+) is not updated Please update to generate bill. Below are the Employee Lists </p>
+
+<p>PRI employees are requested to furnish their information regarding the present post they are currently belongs either it is <b>Direct or Promoted (viz., an employee joins in his/her service as a Secretary in GP level, now he/she belongs in the post of Executive Assistant. In this case he/she must opted for Promoted)   in Appointment Type field</b> under `PROFESSIONAL DETAILS` Tab of employee profile along with <b>First Memo / Present Memo data if not earlier filled up.</b> </p>

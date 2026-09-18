@@ -1,0 +1,916 @@
+<?php
+
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+
+
+header("Strict-Transport-Security: max-age=63072000");
+session_start();
+
+require '../../includes/config/config.php';
+require '../../includes/config/database.config.php';
+require '../../includes/library/database.class.php';
+require_once '../../includes/library/all_function.php';
+require '../../includes/library/cryptography.class.php';
+$cryptoGraph=new cryptography();
+$app_no = $_POST['app_no'];
+
+$db=new database();
+$StatePerm = array('BLOCK','DISTRICT');
+$stakeLevel = $_SESSION['user_info']['stake_level'];
+$stakeLoggedInOfficerCode = $_SESSION['user_info']['officer_id_const'];
+$savingCookieName = md5($cryptoGraph->encode($app_no.$stakeLoggedInOfficerCode,4));
+$cookie = $_COOKIE;
+$previousHist = isset($cookie[$savingCookieName])?$cookie[$savingCookieName]:'';
+
+?>
+<!--<div class="downpdf" align="right"><a href="<?= $config['base_url']?>page/intra_prd/block/pdf_block_details.php"><img src="<?= $config['base_url'] ?>themes/default/image/pdf_download.png"/></a></div>-->
+
+
+<?php 
+
+/*
+$remarks_prev_fetch = $db->fetch_table(" SELECT remarks FROM intra_pri_forwarding 
+							WHERE to_officer_id_const='".$_SESSION['user_info']['officer_id_const']."' AND status='2' AND application_id='".$id."' ");
+				*/	
+$Query = "SELECT forw.forwarding_id_pk,forw.from_officer_id_const, forw.is_read, forw.forwarding_id_pk as forwarding_id_pk, forw.remarks as remarks, forw.submitted_on, forw.officer_info, ipdm.designation , forw.for_app_rej as for_app_rej, forw.to_officer_id_const , forw.msg_file, forw.orderupload, master.officer_name as officer_name, master.login_level_stake, master.stake_user_code FROM intra_pri_forwarding as forw
+						LEFT JOIN intra_pri_master as master ON master.officer_id_const = forw.from_officer_id_const
+						LEFT JOIN intra_pri_designation_master as ipdm ON master.stake_level_code = ipdm.designation_code
+							WHERE forw.status IN ('1','2') AND forw.delete = 0 AND forw.application_id='".$app_no."' ORDER BY forw.forwarding_id_pk ASC ";	
+
+//print($Query); exit;			
+$remarks_prev_fetch = $db->fetch_table($Query);
+
+$remarksNewData = array();
+foreach($remarks_prev_fetch as $key=>$remarksData)
+     $remarksNewData[$remarksData['forwarding_id_pk']] = $remarksData;
+$remarks_prev_fetch = array();
+foreach($remarksNewData as $key=>$remarksData)
+     $remarks_prev_fetch[] = $remarksData;
+
+//print_r($remarks_prev_fetch); exit;
+foreach($remarks_prev_fetch as $key=>$remarksData)
+	 {
+	 	  if($remarksData['login_level_stake'] != 'STATE')
+	 	  {
+	 	  	/*if(!isset($remarksData['login_level_stake']))
+	 	  	{
+	 	  		print_r($remarksData); exit;
+	 	  	}*/
+
+	         $stakeUserCode = (int) $remarksData['stake_user_code'];
+	         $funcName = strtolower($remarksData['login_level_stake']).'Code';
+	         $blockName = $funcName($stakeUserCode);
+	         $remarks_prev_fetch[$key]['location'] = $remarksData['login_level_stake'].':'.$blockName;
+	 	  }
+	 }
+
+//var_dump($remarks_prev_fetch); die;
+$m_o = $db->fetch_table(" SELECT master_operator FROM intra_pri_designation_master WHERE designation_code='".$_SESSION['user_info']['stake_level_code']."' ");	
+
+$Query =" SELECT * FROM intra_pri_forwarding WHERE application_id='".$app_no."' AND from_officer_id_const ='".$_SESSION['user_info']['officer_id_const']."' AND status=1 ";
+
+//print($Query); exit;
+$app_status = $db->fetch_table($Query);
+if(count($app_status)<=0)
+  {
+		$Query =" SELECT * FROM intra_pri_forwarding WHERE application_id='".$app_no."' AND from_officer_id_const ='".$_SESSION['user_info']['officer_id_const']."' LIMIT 1 OFFSET 0";
+		$app_status = $db->fetch_table($Query);
+
+  }
+
+	//var_dump($app_status[0]['service_type']);	
+//print_r($app_status[0]['service_type']); exit;
+if($app_status[0]['service_type'] == '4'){
+	include 'ajax_intra_pri_overage_condonation_submit_last.php'; 
+}
+else if($app_status[0]['service_type'] == '5' && $app_status[0]['sub_menu'] == ''){
+	global $fi_sub_type; 
+	$fi_sub_type = "5"; 
+	include('ajax_intra_pri_9008_submit_last.php');
+
+	//include 'ajax_intra_pri_9008_submit_last.php?fi_sub=myForm_PREV'; 
+}
+else if($app_status[0]['service_type'] == '3'){
+	include 'ajax_preview_cg_form.php'; 
+}
+else if($app_status[0]['service_type'] == '1'){
+	include 'ajax_preview_transfer_form_district.php'; 
+}
+else if($app_status[0]['service_type'] == '2'){
+	include 'ajax_preview_transfer_form.php'; 
+}
+else if($app_status[0]['service_type'] == '5' && $app_status[0]['sub_menu'] == '5A'){
+	global $fi_sub_type; 
+	$fi_sub_type = "5A"; 
+	include('ajax_intra_pri_9008_submit_last.php');
+}
+else if($app_status[0]['service_type'] == '5' && $app_status[0]['sub_menu'] == '5B'){
+	global $fi_sub_type; 
+	$fi_sub_type = "5B"; 
+	include('ajax_intra_pri_9008_submit_last.php');
+}
+else if($app_status[0]['service_type'] == '5' && $app_status[0]['sub_menu'] == '5C'){
+	global $fi_sub_type; 
+	$fi_sub_type = "5C"; 
+	include('ajax_intra_pri_9008_submit_last.php');
+}
+else if($app_status[0]['service_type'] == '5' && $app_status[0]['sub_menu'] == '5'){
+	global $fi_sub_type; 
+	$fi_sub_type = "5"; 
+	include('ajax_intra_pri_9008_submit_last.php');
+}
+//print_r(($remarks_prev_fetch)); exit;	
+$countOfRemarks = count($remarks_prev_fetch);
+//print($countOfRemarks); exit;
+$lastRemarks = $remarks_prev_fetch[$countOfRemarks - 1];
+$sentRemarks = $remarks_prev_fetch[$countOfRemarks -2];
+unset($remarks_prev_fetch[$countOfRemarks -1]);
+if($lastRemarks['from_officer_id_const'] == $_SESSION['user_info']['officer_id_const'] && $lastRemarks['is_read'] == 0)
+   {
+			$Query = "update intra_pri_forwarding SET is_read ='1' WHERE forwarding_id_pk=".$lastRemarks['forwarding_id_pk'];
+			$db->update($Query);   	
+   }
+//print_r($sentRemarks); exit;
+$lastSentIds = array(
+	                     'sender'=>$sentRemarks['forwarding_id_pk'],
+	                     'reciever'=>$lastRemarks['forwarding_id_pk']
+                    );
+$lastSentIds = $cryptoGraph->encode(json_encode($lastSentIds),4);
+$from_officer_id_const = $lastRemarks['from_officer_id_const'];
+$countOfRemarks = $countOfRemarks -2;
+//print_r($lastRemarks); //exit;
+//print_r($stakeLoggedInOfficerCode); exit;
+//var_dump($m_o[0]['master_operator']);	die;
+//if($m_o[0]['master_operator'] =='M'){	
+
+foreach($remarks_prev_fetch as $key => $val){
+	
+	//print($stakeLevel."=");
+    //print_r($StatePerm);
+    //print($stakeLoggedInOfficerCode)
+	if(in_array($stakeLevel, $StatePerm) && $val['login_level_stake'] == 'STATE')
+	{
+		//print($stakeLoggedInOfficerCode.'<hr />'); 
+		//print($from_officer_id_const.'<hr />'); 
+         if($stakeLoggedInOfficerCode != $from_officer_id_const)
+		     continue;
+	}
+
+	if($val['for_app_rej'] == 'MR'){ $status = "May be Rejected";}
+	else if($val['for_app_rej'] == 'MF'){ $status = "May be Approved";}
+	else if($val['for_app_rej'] == 'FA'){ $status = "Forwarded for onward transmission";}
+	else if($val['for_app_rej'] == 'FR'){ $status = "Forwarded for backward transmission";}
+	else if($val['for_app_rej'] == 'FD'){ $status = "Following Documents required";}
+	else if($val['for_app_rej'] == 'RS'){ $status = "Returned for Re-submission";}
+	else if($val['for_app_rej'] == 'A'){ $status = "Approved";}
+	else if($val['for_app_rej'] == 'R'){ $status = "Rejected";}
+?>
+
+<div class="row col-md-8 offset-md-2" style="margin-bottom: 10px;"> 
+		<label for="inputPassword3" class="col-sm-12 col-form-label" style="background: #3E9B96;
+    color: #fff;
+    border-radius: 10px 10px 0px 0px;font-size: 14px;">Comments of <?php echo $val['officer_info']; ?>
+		: <span style="font-weight: 400;
+    font-size: 12px;
+    float: right;
+    line-height: 23px;">Date: <?php echo dateshow($val['submitted_on']); ?> <?php if($countOfRemarks == $key && $val['from_officer_id_const'] == $_SESSION['user_info']['officer_id_const'] &&  $lastRemarks['is_read'] == 0):?>| <a href="javascript:undo('<?php echo $lastSentIds; ?>');" style="color: #1137cf;
+    text-decoration: none;
+    background-color: #ffffff;
+    border-radius: 3px;
+    margin: 3px;
+    padding: 3px;
+    font-weight: 700;">Pull Back</a> <?php endif; ?></span></label>
+		<div class="col-sm-12" style="border: 1px solid #c6c6c6;
+    border-top: 0px;font-size: 12px;">
+			<?php echo ($val['remarks'] == '')?'NIL Remarks':$val['remarks']; ?>
+			<?php if($val['msg_file'] != ''): ?>
+			<div class="col-sm-12">
+				<i class="fa fa-paperclip"></i><a style="text-decoration:none" href="<?= $config['base_url']?>page/intra_pri/doc_download_application.php?app_id=<?= $crypto->encode($val['forwarding_id_pk'],4)?>" target="_blank"><?php echo $val['msg_file']; ?></a>
+			</div>
+		    <?php endif; ?>
+		<div class="col-sm-12">
+			<b>Status:</b><?php echo $status; ?>
+		</div>			
+		</div>
+		
+
+</div>
+
+<?php } 
+?>
+<?php if($lastRemarks['for_app_rej'] == 'R'):?>
+<div class="row col-md-8 offset-md-2" style="margin-bottom: 10px;">
+<label for="inputPassword3" class="col-sm-12 col-form-label" style="background: #3E9B96;
+    color: #fff;
+    border-radius: 10px 10px 0px 0px;font-size: 14px;">STATE
+		: <span style="font-weight: 400;
+    font-size: 12px;
+    float: right;
+    line-height: 23px;">Date: <?php echo dateshow($lastRemarks['submitted_on']); ?></span></label>	
+	  <div class="col-sm-12" style="border: 1px solid #c6c6c6;border-top: 0px;font-size: 12px;">
+	  	<?php echo $lastRemarks['remarks']?>
+	  </div>
+</div>
+<?php endif; ?>
+<!-- Approved Order Upload Section Start -->
+<?php if($lastRemarks['for_app_rej'] == 'A' && $lastRemarks['from_officer_id_const'] == $_SESSION['user_info']['officer_id_const'] && $lastRemarks['orderupload'] == 0):?>
+
+<div class="row col-md-8 offset-md-2" style="margin-bottom: 10px;">
+<label for="inputPassword3" class="col-sm-12 col-form-label" style="background: #3E9B96;
+    color: #fff;
+    border-radius: 10px 10px 0px 0px;font-size: 14px;">Upload Order
+		:</label>	
+		<?php //print_r($lastRemarks); ?>
+	  <div class="col-sm-12" style="border: 1px solid #c6c6c6;border-top: 0px;font-size: 12px;">
+	  	 <input type="file" class="form-control" name="orderupload" id="orderupload" />
+	  	 <input type="hidden" id="forwardId" value="<?php echo $cryptoGraph->encode($lastRemarks['forwarding_id_pk'],4)?>">
+	  	 <input type="button" class="btn btn-success" name="uploadorder" id="uploadorder" value="Upload Order">	  	
+	  </div>
+</div>	
+
+<?php elseif($lastRemarks['for_app_rej'] == 'A' && $lastRemarks['orderupload'] == 1):?>
+<div class="row col-md-8 offset-md-2" style="margin-bottom: 10px;">
+<label for="inputPassword3" class="col-sm-12 col-form-label" style="background: #3E9B96;
+    color: #fff;
+    border-radius: 10px 10px 0px 0px;font-size: 14px;">Download Order
+		: <span style="font-weight: 400;
+    font-size: 12px;
+    float: right;
+    line-height: 23px;">Order Date: <?php echo dateshow($lastRemarks['submitted_on']); ?></span></label>	
+	  <div class="col-sm-12" style="border: 1px solid #c6c6c6;border-top: 0px;font-size: 12px;">
+	  	<i class="fa fa-paperclip"></i><a style="text-decoration:none" href="<?= $config['base_url']?>page/intra_pri/doc_download_application.php?app_id=<?= $cryptoGraph->encode($lastRemarks['forwarding_id_pk'],4)?>" target="_blank"><?php echo $lastRemarks['msg_file']; ?></a>
+	  </div>
+</div>	       
+<?php endif; ?>
+<!-- Approved Order Upload Section Start -->  
+<input type="hidden" id="application_id" name="application_id" value="<?php echo $app_no; ?>" >
+<?php 
+if($app_status[0]['status'] == 1){
+	
+	//print_r($employee_data); exit;
+?>
+	
+<div class="row mb-3 row col-md-8 offset-md-2">
+	  <label for="inputPassword3" class="col-sm-2 col-form-label" >Forwarded To: </label>
+		<div class="col-sm-6" >
+		
+			<?php	
+      $app_firstIdQuery = "SELECT ipm.stake_user_code, ipm.officer_id_const FROM intra_pri_forwarding as ipf
+                      LEFT JOIN intra_pri_master as ipm ON ipf.from_officer_id_const = ipm.officer_id_const
+                      WHERE application_id='".$app_no."' order by forwarding_id_pk asc LIMIT 1 offset 0 ";
+      $app_firstId = $db->fetch_table($app_firstIdQuery);
+      $app_firstOfficer = $app_firstId[0]['officer_id_const'];
+      $app_firstId = $app_firstId[0]['stake_user_code'];
+
+      $LoggedInUserQuery = "SELECT * from intra_pri_master WHERE officer_id_const='".$_SESSION['user_info']['officer_id_const']."'";
+      $LoggedInData = $db->fetch_table($LoggedInUserQuery);
+      $LoggedInData = $LoggedInData[0];
+      $LoggedInUserName = $LoggedInData['officer_name'];
+      //print($LoggedInUserQuery);
+      $CheckIfTestLogin = (strpos($LoggedInUserName,'(TEST)'))?1:0;
+      //print_r($app_firstId); exit;
+
+			$officer_name = $db->fetch_table(" SELECT forwarding_user, district_id_fk FROM intra_pri_master WHERE mobile_no = '".$_SESSION['user_info']['stake_user_mob']."' ");
+			//var_dump($officer_name);
+			
+      $fusers = explode(',',$officer_name[0]['forwarding_user']);
+      $fusers[] = $app_firstId;
+			foreach ($fusers as $key=>$fuser) {
+				if($fuser == 'BDO')
+				 {
+				 	  if($officer_name[0]['district_id_fk'] > 0)
+				 	   { 
+				 	   	  unset($fusers[$key]);
+				 	   	  $Query = "SELECT block_code, block_name from prd_location_master_block WHERE district_id_fk=".$officer_name[0]['district_id_fk'];
+				 	   	  $bdoInArray = $db->fetch_table($Query);
+				 	   	  $blocksInfo = array();
+				 	   	  foreach($bdoInArray as $blockcode)
+				 	   	  {
+				 	   	  	 $fusers[]= $blockcode['block_code'].'BDO';
+				 	   	  	 $blocksInfo[$blockcode['block_code'].'BDO'] = $blockcode['block_name'];
+				 	   	  }
+				 	   }
+
+				 	  
+				 }
+			} 
+      $fusers = implode(',', $fusers);
+      $forwarding_qury_ex = str_replace(',', "','",$fusers);
+			//print_r($fusers); exit;
+
+		   /* $Query = " SELECT desig.* , master.officer_id_const as officer_id_const, master.officer_name as officer_name FROM intra_pri_designation_master as desig 
+			INNER JOIN intra_pri_master as master ON master.stake_level_code= desig.designation_code
+			WHERE master.stake_user_code IN ('".$officer_name[0]['forwarding_user']."') AND master.active_status='1' AND '".$app_status[0]['service_type']."' = any( string_to_array( master.role_assign, ',' ) ) ";
+            */
+
+           /* $Query = "SELECT ipm.officer_id_const, ipm.officer_name, ipdm.stake_user_code_suffix from intra_pri_master as ipm
+                      LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+                      WHERE ipm.stake_user_code IN ('".$forwarding_qury_ex."') AND ipm.active_status=1 AND '".$app_status[0]['service_type']."' = any( string_to_array( ipm.role_assign, ',' ) ) "; */
+            $Query = "SELECT ipm.officer_id_const, ipm.officer_name, ipdm.stake_user_code_suffix, ipm.stake_user_code from intra_pri_master as ipm
+                      LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+                      WHERE ipm.stake_user_code IN ('".$forwarding_qury_ex."') AND '".$app_status[0]['service_type']."' = any( string_to_array( ipm.role_assign, ',' ) ) AND ipm.work_status=1 ";
+
+             //print_r($Query); exit;
+	          $forwardOfficers = $db->fetch_table($Query);
+	          //print_r($forwardOfficers); exit;
+            $stakeUserCode = $_SESSION['user_info']['stake_user_code']; 
+	          // New for STATE
+	          if($_SESSION['user_info']['stake_level'] == 'STATE')
+	          {
+	          	
+	          	$Query = "SELECT ipm.officer_id_const, ipm.officer_name, ipdm.stake_user_code_suffix, ipm.stake_user_code from intra_pri_forwarding as ipf 
+	          	          LEFT JOIN intra_pri_master as ipm ON ipf.from_officer_id_const = ipm.officer_id_const
+	          	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+	          	          WHERE ipf.application_id='".$app_no."' AND ipm.work_status=1";
+	          	$forwardbyOfficers = $db->fetch_table($Query);  
+	          	$forwardOfficers = array_merge($forwardOfficers,$forwardbyOfficers);        
+	          	//print_r($forwardOfficers);
+	          }
+
+          /* if($stakeUserCode == 'MIC')
+             { 
+                //print_r($forwardOfficers); exit;
+			          $newForwardOfficers = array();
+			          foreach($forwardOfficers as $key=>$value)
+			          {
+			          	if($value['stake_user_code_suffix'] == 'SEC')
+			          	 $newForwardOfficers[$value['officer_id_const']] = $value;
+			          }
+             }
+           else 
+             {*/
+			          $newForwardOfficers = array();
+			          foreach($forwardOfficers as $key=>$value)
+			          {
+			          	 $newForwardOfficers[$value['officer_id_const']] = $value;
+			          }             	
+             //}   
+					//var_dump($forwardOfficers); die;
+			?>		
+		  <select class="form-control" id="for" name="for">
+			<option value="" >-- Please Select --</option>
+      <?php foreach($newForwardOfficers as $forwardOfficer):
+      	  if((strpos($forwardOfficer['officer_name'],'(TEST)') && $CheckIfTestLogin ==0) || $_SESSION['user_info']['officer_id_const'] == $forwardOfficer['officer_id_const'] ) { continue; }
+          $BdoLocation = isset($blocksInfo[$forwardOfficer['stake_user_code']])?'('.$blocksInfo[$forwardOfficer['stake_user_code']].')':'';
+      	?>
+      	<option value="<?php echo $forwardOfficer['officer_id_const']; ?>" ><?php echo $forwardOfficer['officer_name']; ?> (<?php echo $forwardOfficer['stake_user_code_suffix']; ?>) <?php echo $BdoLocation; ?> 
+      	<?php if($app_firstOfficer == $forwardOfficer['officer_id_const']) { echo "(Proposer)"; } ?></option>
+      <?php endforeach;?>
+						
+		  </select>
+		</div>  
+</div>  
+<div class="row col-md-12 offset-md-2">
+<p>*Note: Once you click a Reason Entry Box will open. Please fill up for final submission.</p>	
+</div>	
+<center>
+<?php 
+	
+	//if($app_status[0]['status'] == 1){
+	$get_const = $db->fetch_table(" SELECT from_officer_id_const FROM intra_pri_forwarding WHERE application_id='".$app_no."' ORDER BY forwarding_id_pk ASC ");		
+	if($get_const[0]['from_officer_id_const'] == $_SESSION['user_info']['officer_id_const'] ){
+		if($m_o[0]['master_operator'] == 'O'){
+	?>
+		  <button type="button" class="btn btn-success" id="submit_app" onclick="return may_be_for(this.id);" > MAY BE APPROVED </button>
+		  <button type="button" class="btn btn-danger"  onclick="return may_be_rej(this.id);" > MAY BE REJECTED </button>
+	<?php }
+	else if($m_o[0]['master_operator'] == 'M'){ 
+
+		?>
+		<button type="button" class="btn btn-success" onclick="return for_app_trans(this.id);" > FORWARDED FOR ONWARD TRANSMISSION </button>
+		<button type="button" class="btn btn-danger"  onclick="return for_rej_trans(this.id);" > FORWARDED FOR BACKWARD TRANSMISSION </button>
+	<?php 
+     
+       }
+	       }
+	else { ?> 
+
+
+
+			<button type="button" class="btn btn-success" onclick="return for_app_trans(this.id);" > 
+        <?php echo ($stakeUserCode == 'MIC')?'FORWARDED FOR ONWARD TRANSMISSION':'FORWARDED FOR ONWARD TRANSMISSION'; ?>
+			</button>
+			<?php if($stakeUserCode != 'MIC'):?>
+			<button type="button" class="btn btn-danger"  onclick="return for_rej_trans(this.id);" > 
+       <?php echo'FORWARDED FOR BACKWARD TRANSMISSION '; ?>
+		  </button>
+		<?php endif; ?>
+
+
+		<?php if($m_o[0]['master_operator'] == 'O'){ ?>	
+			<button type="button" class="btn btn-warning" onclick="return doc_wanting(this.id);" > FOLLOWING DOCUMENTS WANTING </button>
+		<?php } 
+		if($m_o[0]['master_operator'] == 'M' && $stakeUserCode != 'MIC'){ ?>
+			<button type="button" class="btn btn-warning" onclick="return re_submission(this.id);" > RETURN FOR RE-SUBMISSION </button>
+	<?php  }
+	
+		$last_step = $db->fetch_table(" SELECT final_approval_stake_level_code FROM intra_pri_role_assigment WHERE sub_menu='".$app_status[0]['sub_menu']."' ");	
+		$final_approval_stake_level_code = explode(',',$last_step[0]['final_approval_stake_level_code']);
+		if(in_array($_SESSION['user_info']['stake_level_code'],$final_approval_stake_level_code)){ ?>
+			<button type="button" class="btn btn-success" onclick="return approve(this.id);" > APPROVED </button>
+			<button type="button" class="btn btn-danger" onclick="return reject(this.id);" > REJECTED </button>
+	<?php	}
+	}
+	}
+
+?>
+</center>
+<div class="row col-md-12 offset-md-2">
+
+	<div class="row mb-3" style="display:none;" id="remarks_divs" > 
+		<label for="inputPassword3" class="col-sm-2 col-form-label" >Reason: </label>
+		<div class="col-sm-6">
+			<textarea class="form-control" name="remarks_res" id="reject_remarks" placeholder="Reason" rows="5" cols="40" onkeyup="javascript:saveTocookie(this);"><?php echo $previousHist; ?></textarea>
+
+			<button type="button" class="btn btn-primary btn-sm" id="submit_rej" name="submit_rej" onclick="return may_be_rej_send(this.id);" > <?php echo ($stakeUserCode == 'MIC')?'REJECT':'SEND'; ?> </button>
+		</div>
+	</div>
+	
+	
+	<div class="row mb-3" style="display:none;" id="comments_div" > 
+		<label for="inputPassword3" class="col-sm-2 col-form-label" >Comments: </label>
+		<div class="col-sm-6">
+			<textarea type="text" class="form-control" name="remarks_comm" id="remarks_comm" placeholder="Comments" rows="5" cols="40" onkeyup="javascript:saveTocookie(this);"><?php echo $previousHist; ?></textarea>
+
+      <?php //if ($stakeUserCode == 'MIC'): ?>
+         <input type="file" class="form-control" name="remarksupload" id="remarksupload" />
+      <?php //endif; ?>
+			<button type="button" class="btn btn-primary btn-sm" id="comment_app" name="submit_app" onclick="return may_be_for_send(this.id);" > <?php echo ($stakeUserCode == 'MIC')?'FORWARD':'SEND'; ?> </button>
+		</div>
+	</div>
+	
+	
+	<div class="row mb-3" style="display:none;" id="remarks_reject_div" > 
+		<label for="inputPassword3" class="col-sm-2 col-form-label" >Reason: </label>
+		<div class="col-sm-6">
+			<textarea type="text" class="form-control" name="remarks_res_rej" id="remarks_res_rej" placeholder="Reason" rows="5" cols="40" onkeyup="javascript:saveTocookie(this);"><?php echo $previousHist; ?></textarea>
+			<button type="button" class="btn btn-primary btn-sm" id="final_reject" name="final_reject" onclick="return reject_send(this.id);" > SEND </button>
+		</div>
+	</div>
+	
+	<div class="row mb-3" style="display:none;" id="comments_approve_div" > 
+		<?php if($app_status[0]['service_type'] == '5'): ?>
+		<div class="col-sm-12">
+			
+        <label for="inputPassword3" class="col-sm-2 col-form-label" >Approved Remunaration:</label>
+        <div class="col-sm-6">
+				<input type="number" class="form-control" name="remunaration" id="remunaration" value="" placeholder="In Rs">
+			  </div>
+			
+		</div>
+		<?php endif; ?>
+		<?php if($app_status[0]['service_type'] == '3'): ?>
+		<div class="col-sm-12">
+		<label for="incumbent_post" class="col-sm-12 col-form-label">Incumbent:<?php echo ($employee_data[0]['applicant_name']); ?></label>	
+        <label for="incumbent_post" class="col-sm-6 col-form-label" >Group:</label>
+        <div class="col-sm-6">
+			<select name="incumbent_post" id="incumbent_post">
+				<option value="">Select Incumbent Post</option>
+				<option value="Gr-A">Group A</option>
+				<option value="Gr-B">Group B</option>
+				<option value="Gr-C">Group C</option>
+				<option value="Gr-D">Group D</option>
+			</select>	
+	    </div>
+			
+		</div>
+		<?php endif; ?>		
+		<div class="col-sm-12">
+		<label for="inputPassword3" class="col-sm-2 col-form-label" >Comments: </label>
+		<div class="col-sm-6">
+			<textarea type="text" class="form-control" name="remarks_comm_app" id="remarks_comm_app" placeholder="Comments" rows="5" cols="40" onkeyup="javascript:saveTocookie(this);"><?php echo $previousHist; ?></textarea>
+			<button type="button" class="btn btn-primary btn-sm" id="final_approval" name="final_approval" onclick="return approve_send(this.id);" > SEND </button>
+		</div>
+	  </div>
+	</div>
+</div>		
+	
+<input type="hidden" id="service_type" name="service_type" value="<?php echo $app_status[0]['service_type']; ?>" >
+<input type="hidden" id="emp_id_const" name="emp_id_const" value="<?php echo $app_status[0]['emp_id_const']; ?>" >
+<input type="hidden" id="sub_menu" name="sub_menu" value="<?php echo $app_status[0]['sub_menu']; ?>" >
+<input type="hidden" id="for_app_rej_status" name="for_app_rej_status" value="" >
+<script type="text/javascript">
+	$('#uploadorder').click(function(){
+   
+      if (confirm("Are You Sure! You want to procced") == true) {
+      var forwardId = $('#forwardId').val();
+      var property = document.getElementById('orderupload').files[0];
+      //console.log(property);
+      if(property != undefined)
+	 		{
+	 			//console.log("I am in checking mode"); 
+				var image_name = property.name;
+
+				var image_extension = image_name.split('.').pop().toLowerCase();
+				if($.inArray(image_extension,['pdf']) == -1){
+				  alert("Only Pdf file allowed to upload");
+				  return false;
+				}  	 			
+        var form_data = new FormData();
+				form_data.append("file",property);	
+				form_data.append('forwardId',forwardId);   	
+	  	  $.ajax({
+					url : 'upload_order_pri.php',
+						  type : 'POST',
+						  data:form_data,
+						  contentType:false,
+						  cache:false,
+						  processData:false,
+							success : function(response) {
+								//console.log(response); 
+							    var response = JSON.parse(response);
+					            if(response.status == 'error')
+					            {
+				                   alert(response.data);
+					            }
+					            else if(response.status == 'success')
+					            {
+		                           alert(response.data);
+		                           resetcookie()
+							       window.location.reload();
+					            }	
+							  
+							},
+							error:function(){
+							  alert('Server Error');
+							}
+					  });	
+
+				} 
+			}
+	});
+function saveTocookie(thisobj)
+ {
+ 	 var cookieName = '<?php echo $savingCookieName; ?>';
+ 	 var textValue = thisobj.value;
+ 	 if(textValue.length > 5)
+ 	 	 {
+					var timeToAdd = 1000 * 60 * 60 * 24 * 7 * 4 * 6;
+					var date = new Date();
+					var expiryTime = parseInt(date.getTime()) + timeToAdd;
+					date.setTime(expiryTime);
+					var utcTime = date.toUTCString();
+					document.cookie = cookieName+"="+textValue+"; expires=" + utcTime + ";"; 	
+	   } 
+ }
+ function resetcookie()
+ {
+ 	// alert("I am in Reset Function");
+ 	 var cookieName = '<?php echo $savingCookieName; ?>';
+ 	 var textValue = '';
+ 	 //if(textValue.length > 5)
+ 	 	 //{
+					//var timeToAdd = 1000 * 60 * 60 * 24 * 7 * 4 * 6;
+					var date = new Date();
+					var expiryTime = parseInt(date.getTime());
+					date.setTime(expiryTime);
+					var utcTime = date.toUTCString();
+					document.cookie = cookieName+"="+textValue+"; expires=" + utcTime + ";"; 	
+	   //} 
+ }
+function undo(k)
+  {
+  	  var application_id = $("#application_id").val();
+  	  if (confirm("Are You Sure! You want to procced") == true) {
+  	  $.ajax({
+				url : 'undo_forward_intra_pri.php',
+				type : 'POST',
+				data : { 
+						     "application_id": application_id,
+						     "lastSent":k
+						   },
+							success : function(response) {
+								console.log(response);
+							alert('Application Revert Back to you Successfully');
+							window.location.reload();
+						}
+				});		
+				} 
+  }
+function may_be_for(k){
+	$("#remarks_divs").hide();
+	var officer_id_const = $("#for").val();
+	
+	//alert(officer_id_const);
+	
+	if($('#for').val()==''){
+		alert('Please Select Forwarding Officer.');
+		$('#for').focus();
+		return false;
+	}
+				
+	//return false;
+	var application_id = $("#application_id").val();
+	var service_type = $("#service_type").val();
+	var remarks = $("#remarks_comm").val();
+	remarks = remarks.replace(/("|')/g,"");
+	var emp_id_const = $("#emp_id_const").val();
+	var sub_menu = $("#sub_menu").val();
+	var for_app_rej_status = 'MF';
+	if (confirm("Are You Sure! You want to procced") == true) {
+		$.ajax({
+				url : 'update_forward_intra_pri.php',
+				type : 'POST',
+				data : { "officer_id_const" : officer_id_const,
+						"type": k,
+						"service_type": service_type,
+						"application_id": application_id,
+						"for_app_rej_status": for_app_rej_status,
+						"emp_id_const": emp_id_const,
+						"sub_menu": sub_menu,
+						"remarks": remarks },
+							success : function(response) {
+							console.log(response);
+							resetcookie()
+							window.location.reload();
+						}
+				});	
+			}	
+}
+
+function uploadDocument(uploadId,application_id,officer_id_const)
+   {
+      var property = document.getElementById(uploadId).files[0];
+      //console.log(property);
+      if(property != undefined)
+	 		{
+	 			//console.log("I am in checking mode"); 
+				var image_name = property.name;
+
+				var image_extension = image_name.split('.').pop().toLowerCase();
+				if($.inArray(image_extension,['pdf']) == -1){
+				  alert("Only Pdf file allowed to upload");
+				  return false;
+				}  	 			
+        var form_data = new FormData();
+				form_data.append("file",property);	
+				form_data.append('application_id',application_id);
+				form_data.append('officer_id_const',officer_id_const);
+				  $.ajax({
+					  url : 'ajax_commentdoc.php',
+					  type : 'POST',
+					  data:form_data,
+					  contentType:false,
+					  cache:false,
+					  processData:false,
+						success : function(response) {
+							//console.log(response); 
+						    var response = JSON.parse(response);
+				            if(response.status == 'error')
+				            {
+			                   return response.status;
+				            }
+				            else if(response.status == 'success')
+				            {
+	                           return response.status;
+				            }	
+						  
+						},
+						error:function(){
+						  alert('Server Error');
+						}
+				  });	
+//return false;
+			} 
+			/*else
+			  return true;	*/
+   }
+function may_be_for_send(k){ 
+	 // alert(k); return false; 
+	  var officer_id_const = $("#for").val();
+		
+		//alert(officer_id_const);
+		
+		if($('#for').val()==''){
+			alert('Please Select Forwarding Officer.');
+			$('#for').focus();
+			return false;
+		}
+		//return false;
+	  var application_id = $("#application_id").val();
+
+      var property = document.getElementById('remarksupload').files[0];
+      //console.log(property);
+      var form_data = new FormData();
+      if(property != undefined)
+	 		{
+	 			console.log("I am in checking mode"); 
+				var image_name = property.name;
+
+				var image_extension = image_name.split('.').pop().toLowerCase();
+				if($.inArray(image_extension,['pdf']) == -1){
+				  alert("Only Pdf file allowed to upload");
+				  return false;
+				}  	 			
+
+				form_data.append("file",property);	
+			 }
+
+		var service_type = $("#service_type").val();
+		var remarks = $("#remarks_comm").val();
+		remarks = remarks.replace(/("|')/g,"");
+		remarks = encodeURIComponent(remarks);	
+		var emp_id_const = $("#emp_id_const").val();
+		var sub_menu = $("#sub_menu").val();
+		var for_app_rej_status = $("#for_app_rej_status").val();							 
+		form_data.append('application_id',application_id);
+		form_data.append('officer_id_const',officer_id_const);
+		form_data.append('type',k);
+		form_data.append('service_type',service_type);				
+		form_data.append('for_app_rej_status',for_app_rej_status);
+		form_data.append('sub_menu',sub_menu);				
+		form_data.append('remarks',remarks);				
+		form_data.append('emp_id_const',emp_id_const);				
+    if (confirm("Are You Sure! You want to procced") == true) {
+    	$("#comment_app").html('Sending in process please wait...');
+		$.ajax({
+				  url : 'update_forward_intra_pri.php',
+				  type : 'POST',
+				  data:form_data,
+				  contentType:false,
+				  cache:false,
+				  processData:false,
+				  success : function(response) {
+							alert(response);
+							resetcookie()
+							window.location.reload();
+						}
+				});	
+		  }
+}
+
+function may_be_rej_send(k){
+	var officer_id_const = $("#for").val();
+	
+	//alert(officer_id_const);
+	if($('#for').val()==''){
+		alert('Please Select Forwarding Officer.');
+		$('#for').focus();
+		return false;
+	}
+	//return false;
+	var application_id = $("#application_id").val();
+	var service_type = $("#service_type").val();
+	var remarks = $("#reject_remarks").val();
+	remarks = remarks.replace(/("|')/g,"");
+	remarks = encodeURIComponent(remarks);
+	//remarks = remarks.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+	//alert(remarks);
+	var emp_id_const = $("#emp_id_const").val();
+	var sub_menu = $("#sub_menu").val();
+	var for_app_rej_status = $("#for_app_rej_status").val();	
+	if (confirm("Are You Sure! You want to procced") == true) {
+		$.ajax({
+				url : 'update_forward_intra_pri.php',
+				type : 'POST',
+				data : { "officer_id_const" : officer_id_const,
+						"type": k,
+						"service_type": service_type,
+						"application_id": application_id,
+						"for_app_rej_status": for_app_rej_status,
+						"emp_id_const": emp_id_const,
+						"sub_menu": sub_menu,
+						"remarks": remarks },
+							success : function(response) {
+							alert(response);
+							resetcookie();
+							window.location.reload();
+						}
+				});		
+	   }
+}
+
+
+
+function approve_send(k){ 
+	var remunaration = 0;
+	<?php if($app_status[0]['service_type'] == '5'): ?>
+	remunaration = $("#remunaration").val();
+    <?php endif; ?>
+    var incumbent_post = 0;
+	<?php if($app_status[0]['service_type'] == '3'): ?>
+	incumbent_post = $("#incumbent_post").val();
+	if(incumbent_post == '')
+		{
+			alert("Select Incumbent Post to approve");
+			return false;
+		}
+    <?php endif; ?>    
+	var officer_id_const = $("#for").val();
+	var application_id = $("#application_id").val();
+	var service_type = $("#service_type").val();
+	var remarks = $("#remarks_comm_app").val();
+  remarks = remarks.replace(/("|')/g,"");
+  remarks = encodeURIComponent(remarks);
+	var emp_id_const = $("#emp_id_const").val();
+	var sub_menu = $("#sub_menu").val();
+	var for_app_rej_status = $("#for_app_rej_status").val();	
+	//alert(remarks);
+	if (confirm("Are You Sure! You want to procced") == true) {
+		$.ajax({
+				url : 'update_forward_intra_pri.php',
+				type : 'POST',
+				data : { "officer_id_const" : officer_id_const,
+						"type": k,
+						"service_type": service_type,
+						"application_id": application_id,
+						"for_app_rej_status": for_app_rej_status,
+						"emp_id_const": emp_id_const,
+						"sub_menu": sub_menu,
+						"remarks": remarks,
+                        "remunaration":remunaration,
+                        "incumbent_post":incumbent_post,
+						 },
+							success : function(response) {
+								//console.log(response);
+							alert('Successfully Approved');
+							resetcookie();
+							window.location.reload();
+						}
+				});		
+	  }
+}
+
+function reject_send(k){
+	/*var officer_id_const = $("#for").val();
+	
+	//alert(officer_id_const);
+	if($('#for').val()==''){
+		alert('Please Select Forwarding Officer.');
+		$('#for').focus();
+		return false;
+	}*/
+	//return false;
+	var application_id = $("#application_id").val();
+	var service_type = $("#service_type").val();
+	var remarks = $("#remarks_res_rej").val();
+	remarks = remarks.replace(/("|')/g,"");
+	remarks = encodeURIComponent(remarks);
+	var emp_id_const = $("#emp_id_const").val();
+	var sub_menu = $("#sub_menu").val();
+	var for_app_rej_status = $("#for_app_rej_status").val();	
+	if (confirm("Are You Sure! You want to procced") == true) {
+		$.ajax({
+				url : 'update_forward_intra_pri.php',
+				type : 'POST',
+				data : { //"officer_id_const" : officer_id_const,
+						"type": k,
+						"service_type": service_type,
+						"application_id": application_id,
+						"for_app_rej_status": for_app_rej_status,
+						"emp_id_const": emp_id_const,
+						"sub_menu": sub_menu,
+						"remarks": remarks },
+							success : function(response) {
+							//alert(response);
+							alert('Application Rejection Successfully');
+							resetcookie();
+							window.location.reload();
+						}
+				});	
+			}	
+}
+
+
+function doc_wanting(k){
+	$("#comments_div").show();
+	$("#remarks_divs").hide();
+	$("#for_app_rej_status").val('FD');	
+}
+
+function re_submission(k){
+	$("#comments_div").show();
+	$("#remarks_divs").hide();
+	$("#for_app_rej_status").val('RS');	
+}
+
+function for_app_trans(k){
+	$("#comments_div").show();
+	$("#remarks_divs").hide();
+	$("#for_app_rej_status").val('FA');	
+}
+
+function for_rej_trans(k){ 
+	$("#remarks_divs").show();
+	$("#comments_div").hide();
+	$("#for_app_rej_status").val('FR');	
+}
+
+function may_be_rej(k){
+	$("#remarks_divs").show();
+	$("#comments_div").hide();
+	$("#for_app_rej_status").val('MR');
+}
+function approve(k){
+	$("#comments_approve_div").show();
+	$("#remarks_reject_div").hide();
+	$("#for_app_rej_status").val('A');	
+}
+function reject(k){
+	$("#remarks_reject_div").show();
+	$("#comments_approve_div").hide();
+	$("#for_app_rej_status").val('R');
+}
+
+</script>

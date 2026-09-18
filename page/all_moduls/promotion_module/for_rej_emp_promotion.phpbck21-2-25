@@ -1,0 +1,92 @@
+ <?
+
+/********************************************** New Page made by ANJAN for ZP ************************************************************/
+
+ob_start();
+session_start();
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require_once '../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+require_once '../../../includes/library/myvalidation.class.php';
+
+
+
+
+if($_SERVER['HTTP_REFERER']==''){
+	header("Location:../../dashboard.php");
+}
+
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '. $config['base_url'] . "page/login.php");
+	exit;
+}
+
+
+
+if(!isset($_SERVER['HTTP_REFERER'])){
+    header('Location:'.$config['base_url']."page/error.php?id=1");
+    exit("Do not paste URL directly");
+    
+} elseif (strpos($_SERVER['HTTP_REFERER'], $config['base_url']) === false) {
+    // substring is not found in string
+    header('Location:'. $config['base_url']."page/error.php?id=2");
+    exit("<p style='background-color:#f00;'>Wrong website referer found</p>");
+}
+
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+/*
+
+$sec_time_token=$_POST['sec_tok'];
+$session_token=$_SESSION['security_token'];
+$enc_session=md5('369'.$session_token);
+$emp_count=$_POST['emp_count'];
+*/
+//$loan_id_pk = $_REQUEST['loan_id_pk'];
+
+$cryptoGraph=new cryptography();
+$db = new database();
+$send_id = $_POST['send_id'];
+$emp_id_fk = $_POST['emp_id_fk'];
+//var_dump($emp_id_fk); die;
+
+if($send_id == 'FORWARD')
+{ 
+//echo substr($_SESSION['location']['district_id'],0,7);exit;
+								
+	$query_update_forward = $db->update( "UPDATE prd_employee_promotion_details SET zp_forward_status = '1' WHERE 
+								emp_id_fk='".$emp_id_fk."'  AND approval_status in ('2') AND 
+								zp_id_fk = '".substr($_SESSION['location']['district_id'],0,7)."' AND 
+								delete_status = '1'");
+	
+}
+else if($send_id == 'REJECT')
+{ //echo 22; die;
+								
+	$query_update_reject = $db->update( "UPDATE prd_employee_promotion_details SET approval_status = '1', zp_forward_status='0' WHERE 
+								emp_id_fk='".$emp_id_fk."'  AND approval_status in ('2') AND 
+								zp_id_fk = '".substr($_SESSION['location']['district_id'],0,7)."' AND 
+								delete_status = '1'");
+}
+
+
+	if($query_update_forward){
+	$_SESSION['msg']= '<div class="alert alert-success" style="text-align:center"><strong>Forward Successfully.</strong></div>';
+		header('location:emp_promotion_forward.php?lock='.$cryptoGraph->encode(sent,4));
+	//	header('Location:emp_increment_edit_sal.php?&emp_id='.$cryptoGraph->encode($emp_id_pk,4));
+		exit(0);
+	}
+	else if($query_update_reject){
+	$_SESSION['msg']= '<div class="alert alert-success" style="text-align:center"><strong>Forward Rejected Successfully.</strong></div>';
+		header('location:emp_promotion_forward.php?lock='.$cryptoGraph->encode(reject,4));
+		exit(0);
+	}
+
+@pg_close($con);
+?>

@@ -1,0 +1,553 @@
+ <style>
+					ul.mynav {
+						list-style-type: none;
+						margin: 0;
+						padding: 0;
+					}
+					ul.mynav a:link, ul.mynav a:visited {
+						display: block;
+						font-weight: bold;
+						color: #FFFFFF;
+						background-color: #3BAAE3;
+						/*padding: 4px;*/
+						margin:2px;
+						border-radius:3px;
+						
+						text-decoration: none;
+						text-transform: uppercase;
+						height:35px;
+						padding:8px 0px 1px 27px;
+					}
+					ul.mynav a:hover, ul.mynav a:active {
+						background-color: #1988c1;
+					}
+					ul.mynav img{
+						vertical-align: middle;
+						padding-right: 10px;
+					}
+					.ui-accordion .ui-accordion-content{
+						margin: 0px;
+						padding: 10px;
+					}
+					.ui-widget {
+					    font-size:14px;
+					}
+					.accordion .mynav ul li a img{
+						border: 0px;
+					}
+					.accordion .mynav ul li a{
+							height:60px;
+							padding-left:10px;
+					}
+					.accordion h2{
+						margin: 0px;
+						padding-top: 10px;
+						font-size: 16px;
+					}
+					
+				
+				
+				.button
+				{
+					padding-left:785px;
+				}
+				.school table
+					{
+						border-collapse:collapse;
+						background-color: #FFFFFF;
+						font-family: "calibri";
+						 
+					}
+				.school table, .school td, .school th
+					{
+						/*border:1px solid #fff;*/
+						padding: 4px;
+						text-align:center;
+					}
+					
+			
+				.school .title h2{
+					color: #FFF;
+					text-align: center;
+					padding: 0px;
+					margin: 0px;
+					background-color: #0D8BBD;
+					border-radius: 8px;
+					-moz-border-radius: 8px;
+				}
+				.school .action .ui-widget{
+					font-size: 11px;
+				}
+				.school .action{
+					text-align: center;
+				}
+				.school .action .ui-button .ui-button-text{
+					padding: 20px 10px;
+				}
+				
+				td,tr{
+					/*font-size: 14px;
+					font-family: "calibri";*/
+				}
+				.text_r{
+					font-weight:bold;
+					width:30%;
+					line-height:2.1
+				}
+				.text_r2{
+					font-weight:bold;
+					width:70%;
+					line-height:2.1
+				}
+				.text_l{
+					text-align: left;
+				}
+				h2.head_contact{
+					color: #FFF;
+					text-transform: uppercase;
+					text-align: center;
+					background-color: #7DB2E2;
+					margin: 1px;
+					border-radius: 5px;
+					-moz-border-radius: 5px;
+					font-size:16px;
+				}	
+									
+					
+				</style>
+				
+<?php
+
+session_start();
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require_once '../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+
+if($_SERVER['HTTP_REFERER']==''){
+	header("Location:../../../dashboard.php");
+}
+
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '. $config['base_url'] . "page/login.php");
+	exit;
+}
+
+
+
+if(!isset($_SERVER['HTTP_REFERER'])){
+    header('Location:'.$config['base_url']."page/error.php?id=1");
+    exit("Do not paste URL directly");
+    
+} elseif (strpos($_SERVER['HTTP_REFERER'], $config['base_url']) === false) {
+    // substring is not found in string
+    header('Location:'. $config['base_url']."page/error.php?id=2");
+    exit("<p style='background-color:#f00;'>Wrong website referer found</p>");
+}
+
+header("X-Frame-Options: SAMEORIGIN");
+header("X-Content-Type-Options: nosniff");
+header("X-XSS-Protection: 1; mode=block");
+
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, max-age=0, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+
+
+$cryptoGraph=new cryptography();
+
+$emp_id_pk = $cryptoGraph->decode($_GET['id'],4);
+//print($emp_id_pk); exit;
+$db=new database();
+
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+
+$emp_data=$db->fetch_table("select * from prd_employee_master where emp_id_pk='".$cryptoGraph->decode($_GET['id'],4)."'");
+$emp_data_desig=$db->fetch_table("select * from prd_employee_promotion_details where emp_id_fk='".$cryptoGraph->decode($_GET['id'],4)."' 
+									AND delete_status='1' AND approval_status IN (2,3,4,5)");
+								//var_dump($emp_data_desig); die;	
+	if($emp_data_desig[0]['emp_desig'] > 0){ 
+			$condition = "prd_employee_promotion_details.emp_desig";
+	}
+	else if($emp_data_desig[0]['pre_emp_desig'] > 0){ 
+		$condition = "CAST(prd_employee_promotion_details.pre_emp_desig as bigint)";
+	}
+	
+
+
+/*$promotion_data = $db->fetch_table("SELECT emp_first_name, emp_second_name, emp_last_name, prd_employee_promotion_details.emp_id_fk,
+ prd_employee_promotion_details.emp_pay_scale, prd_employee_promotion_details.emp_pay_in_payband,
+  prd_employee_promotion_details.emp_grade_pay, prd_employee_promotion_details.emp_desig,
+   prd_employee_promotion_details.emp_pay_band, prd_employee_promotion_details.effective_date,
+    status, approval_status, description ,increment_type,cas_type
+FROM prd_employee_promotion_details 
+INNER JOIN prd_employee_master ON prd_employee_master.emp_id_pk = prd_employee_promotion_details.emp_id_fk 
+INNER JOIN prd_dise_code_master ON prd_dise_code_master.code = CAST(prd_employee_promotion_details.emp_desig as character varying)
+									WHERE
+										prd_employee_promotion_details.emp_id_fk = '".$emp_id_pk."'
+										AND prd_employee_promotion_details.status in ('1','2','3')
+										AND prd_employee_promotion_details.gp_id_fk = '".substr($_SESSION['location']['gp_id'],0,7)."' 
+										AND prd_employee_promotion_details.delete_status = '1'
+										");*/
+
+// fetch promotion details of employee fom the mad_employee_promotion_details table
+
+//var_dump($_SESSION['user_info']['stake_abbr']); die;
+if($_SESSION['user_info']['stake_abbr'] == 'GP' || $_SESSION['user_info']['stake_abbr'] == 'DA' || $_SESSION['user_info']['stake_abbr'] == 'BDO' || $_SESSION['user_info']['stake_abbr'] == 'EO'){ 
+			$promotion_data = $db->fetch_table("SELECT emp_first_name, emp_second_name, emp_last_name, prd_employee_promotion_details.emp_id_fk,
+			 prd_employee_promotion_details.emp_pay_scale, prd_employee_promotion_details.emp_pay_in_payband,
+			  prd_employee_promotion_details.emp_grade_pay, prd_employee_promotion_details.emp_desig, prd_employee_promotion_details.ropa_level,
+			   prd_employee_promotion_details.emp_pay_band, prd_employee_promotion_details.effective_date,prd_employee_promotion_details.dop_doi,approval_status, description ,increment_type,cas_type,prd_employee_promotion_details.increment_amount, prd_employee_promotion_details.increment_condisation
+			FROM prd_employee_promotion_details 
+			INNER JOIN prd_employee_master ON prd_employee_master.emp_id_pk = prd_employee_promotion_details.emp_id_fk 
+			INNER JOIN prd_dise_code_master ON prd_dise_code_master.code = CAST(prd_employee_promotion_details.emp_desig as character varying)
+			WHERE
+				prd_employee_promotion_details.emp_id_fk = '".$emp_id_pk."'
+				AND prd_employee_promotion_details.approval_status in (2,3,4,5,6)
+				AND prd_employee_promotion_details.delete_status = '1' order by increment_id desc
+				");
+										
+										
+}
+else if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)' || $_SESSION['user_info']['stake_abbr'] == 'SECRETARY' || $_SESSION['user_info']['stake_abbr'] == 'AEO'){ 
+				
+			$Query = "SELECT emp_first_name, emp_second_name, emp_last_name, prd_employee_promotion_details.emp_id_fk,
+			 prd_employee_promotion_details.emp_pay_scale, prd_employee_promotion_details.emp_pay_in_payband,
+			  prd_employee_promotion_details.emp_grade_pay, prd_employee_promotion_details.emp_desig, pre_emp_desig, prd_employee_promotion_details.ropa_level,
+			   prd_employee_promotion_details.emp_pay_band, prd_employee_promotion_details.effective_date,prd_employee_promotion_details.dop_doi,
+			   approval_status, designation_name ,increment_type,cas_type,prd_employee_promotion_details.increment_amount, prd_employee_promotion_details.increment_condisation
+			FROM prd_employee_promotion_details 
+			INNER JOIN prd_employee_master ON prd_employee_master.emp_id_pk = prd_employee_promotion_details.emp_id_fk 
+			INNER JOIN zpemp_emp_desig_master ON zpemp_emp_desig_master.designation_id = ".$condition."
+			WHERE
+				prd_employee_promotion_details.emp_id_fk = '".$emp_id_pk."'
+				AND prd_employee_promotion_details.approval_status in (2,3,4,5,6)
+				AND prd_employee_promotion_details.delete_status = '1' order by increment_id desc 
+				";						
+			$promotion_data = $db->fetch_table($Query);
+
+
+
+}
+
+/************************************************* ZP end **********************************************************************************************/
+
+		$emp_count=count($promotion_data);
+		$emp_name=  $promotion_data[0]['emp_first_name'].' '.$promotion_data[0]['emp_second_name'].' '.$promotion_data[0]['emp_last_name'];
+		//$lock_status=$emp_data[0]['interim_lock_status'];
+		$emp_pay_band=$promotion_data[0]['emp_pay_band'];
+		$emp_pay_in_payband=$promotion_data[0]['emp_pay_in_payband'];
+		$emp_grade_pay=$promotion_data[0]['emp_grade_pay'];
+		$emp_pay_scale=$promotion_data[0]['emp_pay_scale']; 
+		$emp_desig = $promotion_data[0]['emp_desig']; 
+		$effective_date = $promotion_data[0]['effective_date'];
+		$increment_type = $promotion_data[0]['increment_type'];
+		//$single_double_increment = $promotion_data[0]['dop_or_doi'];
+		//$status = $promotion_data[0]['status'];
+		$approval_status = $promotion_data[0]['approval_status'];
+		$cas_type=$promotion_data[0]['cas_type'];
+		$dop_doi=$promotion_data[0]['dop_doi'];
+		$increment_amount=$promotion_data[0]['increment_amount'];
+		$ropa_level=$promotion_data[0]['ropa_level'];
+		$increment_condisation=$promotion_data[0]['increment_condisation'];
+
+$code_data = $db->fetch_table("SELECT code, description FROM prd_dise_code_master ");
+
+function fun_common($tcode, $code){
+	foreach ($code as $key) {
+		if($key['code'] == $tcode){
+				return $key['description'];
+		}
+	}
+}
+function fun_payband($val){
+		$db = new database();
+		$data = @$db->fetch_table("SELECT payband_name FROM prd_payband_master where payband_code='".$val."';");
+		return $data[0]['payband_name'];
+	}
+function fun_grade_pay($val){
+		$db = new database();
+		$dist_data2 = @$db->fetch_table("SELECT grade_amount FROM prd_dise_gradepay_master where grade_code='".$val."';");
+		return $dist_data2[0]['grade_amount'];
+	}
+//function fun_dist($val){
+//		$db = new database();
+//		$dist_data2 = @$db->fetch_table("SELECT district_code, district_name FROM prd_location_master_district where district_id_pk='".$val."';");
+//		return $dist_data2[0]['district_name'];
+//	}
+function fun_bank($val){
+		$db = new database();
+		$dist_data2 = @$db->fetch_table("SELECT bank_name FROM mad_dise_bank_master where bank_code='".$val."';");
+		return $dist_data2[0]['bank_name'];
+	}
+function date_frmt($original_date){
+	if($original_date =="0001-01-01" || $original_date =='1970-01-01' || $original_date =='' || $original_date == NULL){
+		return "---";
+	}
+	else{
+		$old=explode("-",$original_date);
+        $new=$old[2]."-".$old[1]."-".$old[0];
+		return $new;
+	}
+}	
+
+function fun_payscale($val){
+		$db = new database();
+		$data = @$db->fetch_table("SELECT payscale_range FROM prd_dise_payscale_master where payscale_code='".$val."';");
+		return $data[0]['payscale_range'];
+	}
+	
+$desig = $db->fetch_table("SELECT code,description FROM prd_dise_code_master WHERE code ='".$emp_desig."'");
+
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+ 
+$desig_zp = $db->fetch_table("SELECT designation_id,designation_name FROM zpemp_emp_desig_master WHERE designation_id ='".$emp_desig."'"); 
+
+/************************************************* ZP end **********************************************************************************************/
+
+?>
+
+
+<!--<div class="downpdf" align="right"><a href="<?= $config['base_url']?>page/intra_mad/block/pdf_employe_details.php?id=<?php echo $_GET['id'] ?>"><img src="<?= $config['base_url'] ?>themes/default/image/pdf_download.png"/></a></div>-->
+<div id="accordion" >
+       
+        
+       
+      
+        <h3 id="att" >PROMOTION DETAILS</h3>
+        <div id="attraction">
+            <h1 class="heading"  align="center">PROMOTION/CAS DETAILS OF EMPLOYEE</h1>
+			<table border="0" width="100%" class="ajax_table">
+				<tr>
+					<td class="text_r">Employee Name :</td>
+					<td><?php echo $emp_name; ?></td>
+					<?php if($increment_type == 1) { ?>
+					<td class="text_r">Designation :</td>
+					<td><?php 
+					
+					/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+					
+				if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)' || $_SESSION['user_info']['stake_abbr'] == 'SECRETARY' || $_SESSION['user_info']['stake_abbr'] == 'AEO'){
+					echo $desig_zp[0]['designation_name'];
+				}
+				else if($_SESSION['user_info']['stake_abbr'] == 'GP' || $_SESSION['user_info']['stake_abbr'] == 'DA' || $_SESSION['user_info']['stake_abbr'] == 'BDO' || $_SESSION['user_info']['stake_abbr'] == 'EO'){
+					echo $desig[0]['description'];
+				}
+				
+				/************************************************* ZP end **********************************************************************************************/
+				
+				?></td>
+                    <? } else{?>
+                    <td class="text_r"> </td>
+					<td></td>
+                    <? } ?> 
+				</tr>
+                
+				<!--<tr>
+					<td class="text_r">Pay Band :</td>
+					<td><?php //echo fun_payband($emp_pay_band); ?></td>
+					
+					<td class="text_r">Pay Scale:</td>
+					<td style="text-transform:uppercase;"><?php //echo fun_payscale($emp_pay_scale); ?></td>
+				</tr>-->
+				
+				<tr>
+					<td class="text_r">Basic :</td>
+					<td><?php echo $emp_pay_in_payband; ?></td>
+					
+					<td class="text_r">Level:</td>
+					<td style="text-transform:uppercase;"><?php echo $ropa_level; ?></td>
+				</tr>
+				
+				<tr>
+										
+					<!--<td class="text_r">Grade Pay :</td>
+					<td style="text-transform:uppercase;"><?php //echo fun_grade_pay($emp_grade_pay)  ; ?></td>-->
+					<td class="text_r">CAS Type:</td>
+                    <td style="text-transform:uppercase;"><?php if($cas_type != 0){ echo $cas_type.' '.'Year'; } else{ echo "N/A";} ?></td>
+					<!--<td style="text-transform:uppercase;"><?php echo  $cas_type.' '.'Year'; ?></td>-->
+					<td class="text_r">Increment Amount :</td> 
+					<td><?php  if($approval_status=='3'||$approval_status=='4'||$approval_status=='5') {echo $increment_amount;}else{ echo "N/A";} ?></td>
+                  
+				</tr>
+                <tr>
+					<td class="text_r">Type of Increment :</td>
+					<td><?php if($increment_type == 1) { echo "Promotion"; } else if($increment_type == 2){ echo "Career Advancement Scheme (CAS)"; } ?></td>
+				<td class="text_r">Promotion/CAS Date :</td>
+					<td><?php echo dateshow($effective_date); ?></td>
+				</tr>
+                <tr>
+              <td class="text_r">Single Increment/ Double Increment :</td>
+					<td><?php if($dop_doi == 3) { echo "Double Increment";}  else if($dop_doi == 4){ echo "Single Increment";  }else{ echo "N/A";}?></td>
+                    <!--<td class="text_r">Pay in Pay Band :</td> 
+                  <td><?php if($approval_status=='3' ||$approval_status=='4'||$approval_status=='5') {  echo $emp_pay_in_payband;}else{ echo "N/A";} ?></td>-->
+					<td class="text_r"></td> 
+					<td> </td>
+               </tr>
+               
+			</table>
+            <div align="center">
+           
+		   
+            </br>
+				<? if($approval_status=='3' )
+				 {?> 
+                		<a class="btn btn-success"   id="approve" data-toggle="modal"  data-target="#approve_k">APPROVE</a>
+                <? }?>
+				<? if( $approval_status=='2' ||$approval_status=='3') {?> 
+                         <a class="btn btn-danger"   id="reject" data-toggle="modal"  data-target="#reject_k">REJECT</a>
+                <? }?>
+			</div>
+        </div>
+        
+        
+            </div>
+ <?php
+    function dateshow($dateval)
+	{	
+		$date=substr($dateval,0,10);
+		//return $date;
+		$datearr=explode('-',$date);
+		$dob= $datearr['2'].'-'.$datearr['1'].'-'.$datearr['0'];
+		return $dob=='--'?'':$dob;
+	}
+?>                                           
+                                   
+      
+      
+       </div>
+       <input type="hidden" name="emp_id" id="emp_id" value=<?php echo $cryptoGraph->encode($emp_data[0]['emp_id_pk'],4); ?> />
+      
+                
+<script>
+				//$.noConflict();
+	
+//		$( "#accordion" ).accordion({
+//			collapsible: true,
+//			heightStyle: "content",
+//			collapsible: true,
+//		
+//		});
+	
+	    $( ".ajax_table tr:odd" ).css( "background-color", "#CCE6FF");
+		$( ".ajax_table tr:even" ).css( "background-color", "#DDF7FF");	
+				
+		$( ".ajax_table tr" ).css( "font-size", "14px");
+		$( ".ajax_table tr" ).css( "font-family", "calibri");
+		
+		
+//    function approve(k)
+//{
+//	$('#approve_k').modal('show');
+//
+//}
+//
+//function reject(k)
+//{
+//
+//	$('#reject_k').modal('show');
+//
+//}
+		$(document).ready(function(){	
+		
+		
+		$("#approve").on("click", function() {
+		   //$('#approve_k').hide();
+		   $('#approve_k').modal('show');
+		});
+		
+		$("#reject").on("click", function() {
+		   //$('#approve_k').hide();
+		   $('#reject_k').modal('show');
+		});
+		$("#no1").on("click", function() {
+		   $('#approve_k').hide();
+		 //  $('#approve_k').modal('hide');
+		});
+
+		$("#close1").on("click", function() {
+		   
+			$('#approve_k').hide();
+		   //$('#approve_k').modal('hide');
+		   
+		});
+
+		$("#no2").on("click", function() {
+		   $('#reject_k').hide();
+		});
+
+		$("#close2").on("click", function() {
+		   $('#reject_k').hide();
+		});
+	});	
+</script>
+
+<form name="approve_promostio" id="approve_promostion" action="block_emp_promotion_approve_reject.php" method="post">
+<div class="modal fade bs-example-modal-sm" id="approve_k" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-modal-parent="#schprfModal">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content" >
+     <div class="modal-header">
+	  <h4 class="modal-title" id="myModalLabel">Approve</h4>
+        <button type="button" class="close" id="close1" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+       
+      </div>
+	
+ <div class="modal-body"> 
+      <p class="alert alert-warning"><strong><i class="fa fa-exclamation-triangle"></i> Are You Sure To Approve ?</strong></p>
+      
+      <input type="hidden" id="action_app" name="apr" value="<?=$cryptoGraph->encode('APPROVE',4);?>"/>
+      <input type="hidden" id="action_app" name="emp_id" value="<?=$cryptoGraph->encode($emp_id_pk,4);?>"/>
+      <input type="hidden" id="dop_doi" name="dop_doi" value="<?=$cryptoGraph->encode($dop_doi,4);?>"/>
+	  <input type="hidden" name="increment_condisation" id="increment_condisation" value=<?php echo $increment_condisation; ?> />
+	  <input type="hidden" name="new_ropa_level" id="new_ropa_level" value=<?php echo $ropa_level; ?> />
+       
+      </div>
+	
+      <div class="modal-footer">
+      <div class="btn-group">
+        <input type="submit" name="submit" value="YES" class="btn btn-success finalize" />
+        <button type="button" id="no1" class="btn btn-warning" >NO</button>      
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+ </form>
+ <!-----------------------------------------------------------------APPROVE MODAL END----------------------------------------------------> 
+ <form name="reject_promostion" id="reject_promostion" action="block_emp_promotion_approve_reject.php" method="post">
+<div class="modal fade bs-example-modal-sm" id="reject_k" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-modal-parent="#schprfModal">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content" >
+     <div class="modal-header">
+	 <h4 class="modal-title" id="myModalLabel">REJECT</h4>
+        <button type="button" class="close" id="close2" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        
+      </div>
+	
+ <div class="modal-body"> 
+      <p class="alert alert-warning"><strong><i class="fa fa-exclamation-triangle"></i> Are You Sure To Reject ?</strong></p>
+      
+      
+      <input type="hidden" id="action_app" name="apr" value="<?=$cryptoGraph->encode('REJECT',4);?>"/>
+      <input type="hidden" id="action_app" name="emp_id" value="<?=$cryptoGraph->encode($emp_id_pk,4);?>"/>
+	  <input type="hidden" name="increment_condisation" id="increment_condisation" value=<?php echo $increment_condisation; ?> />
+      </div>
+	   
+      <div class="modal-footer">
+      <div class="btn-group">
+        <input type="submit" name="submit" value="YES" class="btn btn-success finalize" />
+      
+        <button type="button" class="btn btn-warning" id="no2">NO</button>      
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </form>
+ <!-----------------------------------------------------------------REJECT MODAL END----------------------------------------------------> 
+ 
+<?php  @pg_close($con); ?>

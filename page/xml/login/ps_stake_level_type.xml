@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container>
+
+  <level_type>
+    <type>2</type>
+    <name>State Level User</name>
+  </level_type>
+   <level_type>
+    <type>10</type>
+    <name>District Level User</name>
+  </level_type>
+  <level_type>
+    <type>9</type>
+    <name>Panchayat Samiti Level User</name>
+  </level_type>
+  
+  <level_type>
+    <type>7</type>
+    <name>Webmaster</name>
+  </level_type>
+</container>

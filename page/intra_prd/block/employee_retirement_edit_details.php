@@ -1,0 +1,454 @@
+<?
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+session_start();
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require_once '../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+
+
+//require '../../../includes/third-party/PHPMailer/class.phpmailer.php';
+
+//require '../../../includes/third-party/PHPMailer/PHPMailerAutoload.php';
+
+//require_once '../../all_function/mail/mail_fun.php';
+
+
+
+if($_SERVER['HTTP_REFERER']==''){
+	header("Location:../../../dashboard.php");
+}
+
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '. $config['base_url'] . "page/login.php");
+	exit;
+}
+$cryptoGraph=new cryptography();
+
+
+?>
+<style>
+	
+.school table
+	{
+		border-collapse:collapse;
+		background-color: #FFFFFF;
+		font-family: "calibri";
+	}
+.school table, .school td, .school th
+	{
+		/*border:1px solid #fff;*/
+		padding: 4px;
+		text-align:center;
+	}
+	
+.school table th{
+		background-color: #3E9B96;
+		border:1px solid #fff;
+		color: #fff;
+		padding: 6px;
+		text-align:center;
+	}
+.school table{
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		overflow: hidden;
+		font-size: 14px;
+	}
+.school{
+	background-color: #FFFFFF;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	padding: 10px;
+	
+}
+.school .title h2{
+	color: #FFF;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	background-color: #0D8BBD;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+.school .action .ui-widget{
+	font-size: 11px;
+}
+.school .action{
+	text-align: center;
+}
+.school .action .ui-button .ui-button-text{
+	padding: 5px 10px;
+}
+</style>
+
+<?php
+if($_GET['confirm'] == 'success'){
+	$msg='<div class="alert alert-success" style="text-align:center"><strong>Employee Profile Submitted Successfully...</strong></div>';
+}else if($_GET['confirm'] == 'false'){
+	$msg='<div class="alert alert-success" style="text-align:center"><strong>Employee Profile Submission Fails...</strong></div>';
+}
+
+//$tchcd=isset($_GET['tchcd']) ? $_GET['tchcd']:'';
+
+
+//------------------------------ PAGE VARIABLES --------------------------------------------------------------------------------
+
+//Page variables
+$common['title'] = "Profile Form| PRD | Govt. of West Bengal ";
+
+//Meta tag variables
+//$common['meta']['keyword'] = 'West Bengal School Education Department, SED department';
+//$common['meta']['description'] = 'West Bengal School Education Department, SED department';
+
+//Self variable
+
+//------------------------------------------------------- HEADER --------------------------------------------------------------
+require '../../../page/layout/header.php';
+//---------------------------------- MENU -------------------------------------------------------------------------------------
+require '../../../page/layout/menu.php';
+//-----------------------------Business Logic----------------------------------------------------------------------------------
+?>
+<script>
+    	$(document).ready(function(){
+		  $( "tr:odd" ).css( "background-color", "#CCE6FF" );
+		  $( "tr:even" ).css( "background-color", "#DDF7FF" );
+		  //$( ".table:last" ).css( "border-radius", "0px 0px 5px 5px" );
+		  
+		  $("#dialog").dialog({
+				autoOpen : false,
+				modal: true,
+				width:900,
+				opacity: 1,
+				height:580,
+				//resize: "auto",
+
+				show : {
+					effect : "fade",
+					duration : 500
+				},
+				hide : {
+					effect : "fade",
+					duration : 500
+				},
+			});
+
+			$(".sendtoddo a").click(function() {
+				//alert('hello');
+				var link = $(this).attr('href');
+				//alert(link);
+				$(document).ajaxStart(function(){
+				    $("#wait").css("display","block");
+				  });
+				$(document).ajaxComplete(function(){
+				    $("#wait").css("display","none");
+				    
+				});
+			    $(".emplist").load('<?= $config['base_url'] ?>page/intra_prd/block/ajax_ret_employee_edit_details.php?id='+link, function(responseTxt,statusTxt,xhr){
+				  if(statusTxt=="error"){
+			        //alert("Error: "+xhr.status+": "+xhr.statusText);
+			        $("#error_msg").css("display","block");
+			      } else {
+			      	$("#error_msg").css("display","none");
+			      }
+			  	});
+				
+				//$(".dial").html($(this).attr('href'));
+				//$("#dialog").dialog("open");
+				
+				return false;
+			});
+			//Disable right click
+		  /*$(document).bind("contextmenu",function(e){
+			        e.preventDefault();
+			});*/
+		});
+		
+		/*$(document).ready(function() {
+			setTimeout(function() {
+				$("#confMsg").fadeOut(3500);
+			},5500);
+		});*/
+		
+    </script>
+<?
+$db=new database();
+/*echo "select emp_first_name,emp_second_name,emp_last_name,emp_form_status,emp_id_pk,emp_desig,emp_status from prd_employee_master where emp_form_status in('1','2','3','4','5') AND emp_status in('10','7') AND gp_id_fk='".$_SESSION['location']['gp_id']."' order by emp_first_name";*/
+$arr=$db->fetch_table("select emp_first_name,emp_status,emp_second_name,emp_last_name,emp_id_pk,emp_form_status,emp_id_pk,emp_desig,emp_status,recruitment_type from prd_employee_master where emp_form_status in('1','2','3','4','5','99','6') AND emp_status in('10','7','11','99','6') AND block_id='".$_SESSION['location']['block_id']."' order by emp_first_name");
+
+//$arr=$db->fetch_table("SELECT flag from prd_location_master_gp WHERE gp_code='".$_SESSION['location']['gpcode']."'");
+//$arr_delete=$db->fetch_table("select emp_id_const,emp_first_name,emp_second_name,emp_last_name,emp_status,emp_id_pk,emp_system_code from prd_employee_master where emp_status in('1','7','10')and emp_form_status in('1','2','3','4','5')  AND gp_id_fk='".$_SESSION['location']['gp_id']."' order by emp_id_const");
+
+
+
+?>
+
+<div class="content">
+<? require '../../../page/common_back_btns.php'; ?>
+   <div class="welcome_msg">
+                      <h2>WELCOME:  <?php echo $_SESSION['user_info']['stake_abbr']; ?>
+                      <?php
+					  if(isset($_SESSION['location']['gp_name'])) {
+                          echo $_SESSION['location']['gp_name'];
+                      }elseif(isset($_SESSION['location']['block_name'])) {
+                          echo $_SESSION['location']['block_name'];
+                      } elseif(isset($_SESSION['location']['district_name'])) {
+                          echo $_SESSION['location']['district_name'];
+                      } elseif(isset($_SESSION['location']['state_name'])) {
+                          echo $_SESSION['location']['state_name'];
+                    } ?></h2><h3>
+					<? echo $_SESSION['location']['block_name']. " ,".$_SESSION['location']['district_name'];
+                      ?></h3>
+       </div>
+<div class="row" id="cont">
+<div class="content">
+      <div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad"> 
+        <div class="col-sm-12" style="width:98%">
+<h1 class="heading">EDIT EMPLOYEE DETAILS</h1>
+<div class="border"></div>
+</br>
+<div id="msg_session">
+<?php 
+if($msg){
+echo "<br/>";
+echo $msg;
+echo "<br/>";
+}
+if(isset($_SESSION['msg'])){
+	echo "<br/>";
+	echo $_SESSION['msg'];
+	echo "<br/>";
+	unset($_SESSION['msg']);
+}
+?>
+</div>
+<div class="emplist">
+<div class="school">
+<div class="table-responsive">
+<table width="100%">
+<tr>
+<th>Serial No.</th>
+<th>Name</th>
+<th>Primary</th>
+<th>Professional</th>
+<th>Personal</th>
+<th>Contact</th>
+<th>Status</th>
+<!--<th>Send To BDO</th>-->
+<!--<th>Action</th>-->
+</tr>
+
+
+
+
+
+
+<?php $cnt=1; if(count($arr)){ foreach($arr as $item){ ?>
+
+<?php
+
+if($item['emp_status']=='10' & $item['emp_form_status']=='5'){
+	$status='<span style="color:#660066;font-weight:bold">PROFILE NOT SENT</span>';
+}
+else if($item['emp_status']=='10') {
+	if($item['emp_form_status']=='1' ||$item['emp_form_status']=='2' || $item['emp_form_status']=='3' || $item['emp_form_status']=='4')
+	$status='<span style="color:#127C89;font-weight:bold">PROFILE INCOMPLETE</span>';
+}
+else if($item['emp_status']=='99' && $item['recruitment_type']!='0') {
+	if($item['emp_form_status']=='1' ||$item['emp_form_status']=='2' || $item['emp_form_status']=='3' || $item['emp_form_status']=='4'  || $item['emp_form_status']=='5' || $item['emp_form_status']=='99')
+	$status='<span style="color:#127C89;font-weight:bold">WAITING FOR APPROVAL</span>';
+}
+else if($item['emp_status']=='11') {
+	if($item['emp_form_status']=='1' ||$item['emp_form_status']=='2' || $item['emp_form_status']=='3' || $item['emp_form_status']=='4'  || $item['emp_form_status']=='5')
+	$status='<span style="color:#127C89;font-weight:bold">PROFILE ACTION REQUIRED</span>';
+}
+else if($item['emp_status']=='7') {
+	$status='<span style="color:RED;font-weight:bold">PROFILE REJECTED</span>';
+}
+
+
+ //print($status); exit;
+?>
+
+<tr>
+
+<td><?= $cnt;?></td>
+<td><?= $item['emp_first_name'].' '.$item['emp_second_name'].' '.$item['emp_last_name']?></td>
+
+<td><? if(($item['emp_form_status']=='1' || $item['emp_form_status']=='2' || $item['emp_form_status']=='3' || $item['emp_form_status']=='4' || $item['emp_form_status']=='5' || $item['emp_form_status']=='99') && $item['emp_status']!='11' ){ ?>
+<a href="profile_ret_entry_basic_edit.php?emp_id_pk=<?= $cryptoGraph->encode($item['emp_id_pk'],4) ?>">
+<!--<span class="glyphicon glyphicon-pencil"></span>-->
+<img width="25" src="<?= $config['base_url'];?>themes/default/image/edit_icon.png" alt="Edit"  />
+</a><? } ?>
+</td>
+
+<td>
+<? if($item['emp_form_status']=='2'|| $item['emp_form_status']=='3' || $item['emp_form_status']=='4' || $item['emp_form_status']=='5' || $item['emp_form_status']=='99'){ ?>
+<a href="profile_ret_entry_prof.php?emp_id_pk=<?= $cryptoGraph->encode($item['emp_id_pk'],4) ?>">
+<!--<span class="glyphicon glyphicon-pencil"></span>-->
+<img width="25" src="<?= $config['base_url'];?>themes/default/image/edit_icon.png" alt="Edit"  />
+</a><? } ?>
+</td>
+
+<!--<td>
+<? if(($item['emp_form_status']=='3'|| $item['emp_form_status']=='4' || $item['emp_form_status']=='5' || $item['emp_form_status']=='99') && $item['emp_status']!='11'){ ?>
+<a href="profile_entry_sal.php?emp_id_pk=<?= $cryptoGraph->encode($item['emp_id_pk'],4) ?>&desig=<?=$cryptoGraph->encode($item['emp_desig'],4) ?>">
+<span class="glyphicon glyphicon-pencil"></span>
+<img width="25" src="<?= $config['base_url'];?>themes/default/image/edit_icon.png" alt="Edit"  />
+</a><? } ?>
+</td>-->
+
+<td><? if(($item['emp_form_status']=='4' || $item['emp_form_status']=='4' || $item['emp_form_status']=='5' || $item['emp_form_status']=='99') && $item['emp_status']!='11'){ ?>
+<a href="profile_ret_entry_per.php?emp_id_pk=<?= $cryptoGraph->encode($item['emp_id_pk'],4) ?>&desig=<?=$cryptoGraph->encode($item['emp_desig'],4) ?>">
+<!--<span class="glyphicon glyphicon-pencil"></span>-->
+<img width="25" src="<?= $config['base_url'];?>themes/default/image/edit_icon.png" alt="Edit"  />
+</a><? } ?>
+</td>
+
+<td><? if(($item['emp_form_status']=='5'|| $item['emp_form_status']=='99') && $item['emp_status']!='11'){ ?>
+<a href="profile_ret_entry_contact.php?emp_id_pk=<?= $cryptoGraph->encode($item['emp_id_pk'],4) ?>">
+<!--<span class="glyphicon glyphicon-pencil"></span>-->
+<img width="25" src="<?= $config['base_url'];?>themes/default/image/edit_icon.png" alt="Edit"  />
+</a><? } ?>
+</td>
+<td><?php echo $status; ?></td>
+
+<?php /*<td class="sendtoddo"><? if($item['emp_status']=='99'){ ?><a href="<?php echo $cryptoGraph->encode($item['emp_id_pk'],4) ?>"><img width="25" src="<?= $config['base_url'];?>themes/default/image/send.png" alt="Edit"/></a>
+<? } else{ ?>
+<img width="25" src="<?= $config['base_url'];?>themes/default/image/send_disable.png" alt="Edit" />
+<?php } ?></td>*/?>
+
+
+
+
+
+<? 
+if($item['emp_status']=='10'){
+//	$delete_status='<a style="cursor:pointer;" onclick="view_gp_modal('.$item['emp_id_pk'].')"><p class="text-primary" style="font-weight:bold"><i class="fa fa-trash-o fa-2x" aria-hidden="true"></i></p></a>';
+}
+else {
+	
+// $delete_status='<!--<a onclick="view_bdo_modal('.$item['emp_id_pk'].')">--><p class="text-primary" style="font-weight:bold">PROFILE REJECTED</p><!--</a>-->';
+ 
+}
+                                                                      
+?>
+
+
+
+<!--<td><?= $delete_status; ?>
+</td>-->
+
+
+
+
+
+</tr>
+<?php $cnt++;} } else { ?>
+<tr>
+<td colspan="10" style="color:red;font-weight:bold">No Data Found</td>
+</tr>
+
+<? } ?>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="clear"></div>
+
+<? require '../../../page/layout/footer.php'; ?>
+
+<script>
+/*$(document).ready(function () {
+	 $("#delete_id").click(function () {
+		// alert(22);
+		 $('#emp_id_pk').val("<?= ($item['emp_id_pk']);?>");
+		 
+
+						
+	 });
+});*/
+
+function view_bdo_modal(emp_id_pk)
+{
+	
+// alert(emp_id_pk);	
+$('#bdo_modal').modal('show');
+ $('#emp_id_pk').val(emp_id_pk);
+	$('#status').val(0);
+	$("#reason").hide();
+	$("#reason_lbl").hide();
+}
+
+function view_gp_modal(emp_id_pk)
+{
+	
+// alert(emp_id_pk);	
+$('#bdo_modal').modal('show');
+ $('#emp_id_pk').val(emp_id_pk);
+	 $('#status').val(1);
+	  $("#reason").show();
+	    $("#reason_lbl").show();
+	  
+}
+
+
+
+/*function redirect_page()
+{
+var a=($('#emp_id_pk').val());
+
+
+		window.location.href=("emp_delete_profile_submit.php?id="+a);
+		  
+}
+*/
+
+
+</script>
+
+
+<div class="modal fade bs-example-modal-md" aria-hidden="true" id="bdo_modal">
+ 
+     <div class="modal-dialog modal-md">
+     <div class="modal-content">
+     <div class="modal-header">
+		<h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        
+      </div>
+      
+      <div class="modal-body"> 
+     
+   
+      </div>
+         <form action="emp_delete_profile_submit.php" method="post">
+          <div class="form-group">
+            <label for="message-text" class="control-label" id="reason_lbl">Reason:</label>
+            <textarea class="form-control" id="reason" name="reason" draggable="false"></textarea>
+         <input type="hidden" id="emp_id_pk" name="emp_id_pk" value="" />
+         <input type="hidden" id="status" name="status" value="" />
+          </div>
+     
+      <div class="modal-footer">
+      <div class="btn-group" role="group">
+		<input type="submit" name="submit" value="YES" id="save" class="btn btn-primary">
+        <button type="button" class="btn btn-warning" data-bs-dismiss="modal">NO</button>
+		</div>
+      </div>
+       </form>
+    </div>
+  </div>
+</div>

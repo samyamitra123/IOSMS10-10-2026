@@ -1,0 +1,41 @@
+body {
+	font-family:Georgia;
+	font-size: 12px;
+}
+.table_border{
+	border-collapse:collapse;
+}
+
+.table_td{
+	border:1px solid black;
+	padding:5px;
+}
+
+.table_th{
+	border:1px solid black;
+	padding:5px;
+}
+
+table .heading{
+	background-color: #666;
+	color: #FFF;
+	padding:5px;
+}
+
+td{
+	padding:0 3px 0 3px;
+}
+
+.colgray{
+	
+	background-color: #EEE;
+}
+.statusn{
+	color: #F20000;
+	font-size: 18px;
+}
+.statusf{
+	color: green;
+	font-size: 18px;
+}
+

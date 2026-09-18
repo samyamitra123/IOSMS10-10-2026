@@ -1,0 +1,505 @@
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+ob_start();
+session_start();
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require_once '../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+
+//   Kalyan Ghosh   16/3/2017    Start
+if($_SERVER['HTTP_REFERER']==''){
+	header("Location:../../../dashboard.php");
+}
+
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '.$config['base_url']."page/login.php");
+	exit;
+}
+
+
+
+if(!isset($_SERVER['HTTP_REFERER'])){
+    header('Location:'.$config['base_url']."page/error.php?id=1");
+    exit("Do not paste URL directly");
+    
+} elseif (strpos($_SERVER['HTTP_REFERER'], $config['base_url']) === false) {
+    // substring is not found in string
+    header('Location:'. $config['base_url']."page/error.php?id=2");
+    exit("<p style='background-color:#f00;'>Wrong website referer found</p>");
+}
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+//   Kalyan Ghosh   16/3/2017    Finish
+
+if(isset($_SESSION['location']['gpcode'])){
+	$str=$_SESSION['location']['gpcode'];
+	$state10=substr($str,0,4); 
+}
+
+
+$cryp = new cryptography();
+
+$emp_id_pk=$cryp->decode($_GET['id'],4);
+//$dise=$cryp->decode($_GET['gp_id'],4);
+//$time_token=time();
+//$_SESSION['security_token']=$time_token;
+//$enc_token=md5('371371371'.$time_token);
+
+error_reporting(0);
+$time_token=time();
+$_SESSION['security_token']=$time_token;
+$enc_token=md5('369'.$time_token);
+$db=new database();
+
+?>
+<style>
+	.form-horizontal .control-label 
+	{
+		text-align:left;
+	}
+</style>
+
+<?php
+
+$cryptoGraph=new cryptography();
+if($_GET['confirm'] == 'success'){
+	$msg='<div class="alert alert-success" style="text-align:center"><strong>Professional Details of the Employee submitted Successfully...</strong></div>';
+}else if($_GET['confirm'] == 'false'){
+	$msg='<div class="alert alert-danger" style="text-align:center"><strong>Data insertion failed. Please try again...</strong></div>';
+}
+
+//------------------------------ PAGE VARIABLES --------------------------------------------------------------------------------
+
+//Page variables
+$common['title'] = "WBULBHRMS | Govt. of West Bengal ";
+
+//------------------------------------------------------- HEADER --------------------------------------------------------------
+//require '../../../../page/municipality_admin/common.php';
+
+
+?>
+  
+<!-- Latest compiled and minified JavaScript -->
+    <div class="row" id="cont">
+    <div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad"> 
+    <div class="col-sm-12">
+<!--<h1 class="heading">Salary Details AS ON 1st January 2016 </h1>-->
+
+<?php 
+if($msg){
+echo $msg;
+echo "<br/>";
+}
+if($error_msg){
+echo $error_msg;
+echo "<br/>";
+}
+
+function dateshow($dateval)
+{	
+	$date=substr($dateval,0,10);
+	//return $date;
+	$datearr=explode('-',$date);
+	$dob= $datearr['2'].'-'.$datearr['1'].'-'.$datearr['0'];
+	return $dob=='--'?'':$dob;
+}
+
+function code_master($dateval)
+{
+	$db=new database();
+	 $arr = $db->fetch_table("SELECT code, description, code_master_id_pk
+																		FROM prd_dise_code_master WHERE code ='".$dateval."' AND length(code)=3
+																		");
+	return $arr[0]['description'];																	
+																		
+}
+function dist_name($dateval)
+{	$db=new database();
+    $arr = $db->fetch_table("select district_id_pk,district_name from prd_location_master_district where district_id_pk='".$dateval."'");
+	return $arr[0]['district_name'];
+}
+function ps_name($dateval)
+{	$db=new database();
+	//echo "select ps_id_pk,ps_name,ps_code from prd_location_master_panchayat_samiti where ps_code='".$dateval."'";exit;
+	$arr=$db->fetch_table("select ps_id_pk,ps_name,ps_code from prd_location_master_panchayat_samiti where ps_code='".$dateval."'");
+	return $arr[0]['ps_name'];
+}
+
+
+function block_name($dateval)
+{	$db=new database();
+	$arr=$db->fetch_table("select block_id_pk,block_name,block_code from prd_location_master_block where block_id_pk='".$dateval."'");
+	return $arr[0]['block_name'];
+}
+
+function gp_name($dateval)
+{	$db=new database();
+     $arr=$db->fetch_table("select gp_id_pk,gp_name,gp_code from prd_location_master_gp where gp_code='".$dateval."'");
+	return $arr[0]['gp_name'];
+}
+
+
+?>
+
+
+
+<div><center><h1 class="heading">INSERT ADDITIONAL DATA IN EMPLOYEE PROFILE</h1></center></div>
+
+<br />
+	<?php 
+	
+		$arr=$db->fetch_table("select* from prd_stake_epension_employee_profile where emp_id_fk='".$emp_id_pk."'");
+		$momo_no= $arr[0]['first_momo_no'];
+		$wef_date=$arr[0]['first_momo_wef_date'];
+		$stake=$arr[0]['stake_level_id_fk']; 
+		$status= $arr[0]['status'];
+		$present_memo_no=$arr[0]['present_memo_no'];
+		$present_momo_date=$arr[0]['presnt_memo_wef_date'];
+	?>
+
+<strong style="color:#E93437;"><center><noscript>This Form Is Blocked. Enable Javascript In Your Browser To View The Form.</noscript></center></strong>
+<div id="form_show" class="dashcontenr">
+
+	<form class="form-horizontal" id="loginForm" method="post" action="employee_epension_data_insert.php">
+	<input type="hidden" name="emp_id_pk" value="<?=$cryptoGraph->encode($emp_id_pk,4) ?>" />
+	<input type="hidden" name="sec_tok" id="sec_tok" value="<?=$enc_token?>" />
+	<!-- Removed undefined $identity1 and $identity2 from div id -->
+	<div class="loan_id" style="/*border: solid 1px #000000;*/"> 
+    
+  <div class="row mb-3" >
+        <label for="inputPassword3" class="col-sm-2 control-label">Present Joining Memo no<span class="star_color">(Memo No. of joining in the present post in present office)</span>:<span class="star_color">*</span></label>
+        <div class="col-sm-4">
+          <input  type="text" class="form-control" name="p_momo_no" id="p_memo_no" readonly placeholder="MEMO NUMBER" value="<?php echo $present_memo_no;?>" autocomplete="off"   >
+        </div>
+         <label for="inputPassword3" class="col-sm-2 control-label">Present Joining Memo Date<span class="star_color">*</span></label>
+        <div class="col-sm-4">
+        	<input type="text" class="form-control" id="p_tch_date" name="p_tch_date"    value="<?php  echo dateshow($present_momo_date);?>" placeholder="DD-MM-YY" readonly />
+        </div>
+     </div>
+     
+     <div class="row mb-3" >
+        <label for="inputPassword3" class="col-sm-2 control-label">First Joining Memo no:<span class="star_color">*</span></label>
+        <div class="col-sm-4">
+          <input  type="text" class="form-control" name="momo_no" id="memo_no" readonly placeholder="MEMO NUMBER" value="<?php echo $momo_no;?>" autocomplete="off"   >
+        </div>
+         <label for="inputPassword3" class="col-sm-2 control-label">First Joining Memo Date<span class="star_color">*</span></label>
+        <div class="col-sm-4">
+        	<input type="text" class="form-control" id="tch_date" name="tch_date"    value="<?php  echo dateshow($wef_date);?>" placeholder="DD-MM-YY" readonly />
+        </div>
+     </div>
+
+		<!-- Debug: Show all employee profile data -->
+		<div class="row mb-3">
+			<div class="col-sm-12">
+				<h4>Employee Profile Data (Debug)</h4>
+				
+			</div>
+		</div>
+     
+     
+      <div class="row mb-3" >
+        
+         <label for="inputPassword3" class="col-sm-2 control-label">First Joining In<span class="star_color">*</span></label>
+        <div class="col-sm-4">
+        
+                <select name="stake_lvl_select"  readonly style="width:100%;" id="stake_lvl_select" class="form-control">
+                  <option value=""><?=  code_master($stake); ?></option>
+
+                </select>
+        </div>
+     </div>
+	 
+   
+ <?php if($stake=='557')
+ {
+	 
+	 $display= "style='display:yes;'";
+	 $display1= "style='display:none;'";
+	 $display2= "style='display:none;'";
+	 $district_id=$arr[0]['district_id_fk']; 
+	  $display1= "style='display:none;'";
+ }
+ else if($stake=='556')
+ {
+	 $display1= "style='display:yes;'";
+	 $display2= "style='display:none;'";
+	 $ps_code=$arr[0]['ps_code'];
+	 $district_id=$arr[0]['district_id_fk'];
+	 //$display= "style='display:none;'";
+ }
+ else if($stake=='555')
+ {
+	 $display2= "style='display:yes;'";
+	 $display= "style='display:none;'";
+	 $display1= "style='display:none;'";
+	 $block_id_fk=$arr[0]['block_id_fk'];
+	 $district_id=$arr[0]['district_id_fk'];
+	 $gp_code= $arr[0]['gp_code'];
+ }
+ else
+ {
+	$display3= "style='display:none;'";
+	$display2= "style='display:none;'";
+	$display= "style='display:none;'";
+	$display1= "style='display:none;'";
+
+ }
+ ?>
+   
+   <div class="row mb-3"  >
+ 
+ <label for="inputPassword3"  id="district_show" class="col-sm-2 control-label  " <?php echo $display;?>>District<span class="star_color">*</span></label>
+ 
+ <div class="col-sm-4">
+  
+    <select class="form-control"  name="district_id" readonly id="district_id" <?php echo $display;?> >
+     <option value=""  ><?=dist_name($district_id); ?></option>
+    </select>
+  </div>
+  
+  
+  <label for="inputPassword3"  class="col-sm-2 control-label" id="ps_show" <?php echo $display1;?>>PS<span class="star_color">*</span></label>
+  
+  <div class="col-sm-4">
+  
+    <select class="form-control" readonly id="ps_code" name="ps_code"  <?php echo $display1;?> >
+     <option value=""  ><?= ps_name($ps_code); ?></option>
+    </select>
+   </div>
+  </div>  
+    
+    
+    <div class="row mb-3"  >
+    
+    <label for="inputPassword3"  id="district_show_gp" class="col-sm-2 control-label  " <?php echo $display2;?>>District<span class="star_color">*</span></label>
+    
+    <div class="col-sm-4">
+   
+        <select class="form-control" name="district_gp" readonly id="district_gp" <?php echo $display2;?> >
+         <option value="" ><?= dist_name($district_id); ?></option>
+        </select>
+    </div>       
+    <label for="inputPassword3"  class="col-sm-2 control-label" id="block_show" <?php echo $display2;?>>BLOCK<span class="star_color">*</span></label>
+    
+    <div class="col-sm-4">
+      <select class="form-control"  readonly id="block_id" name="block_id" <?php echo $display2;?> >
+         <option value=""  ><?= block_name($block_id_fk); ?></option>
+       </select>
+    </div>  
+    </div>
+   <div class="row mb-3"  >
+    
+    <label for="inputPassword3"  id="gp_show" class="col-sm-2 control-label  " <?php echo $display2;?>>GP<span class="star_color">*</span></label>
+    
+    <div class="col-sm-4">
+    
+        <select class="form-control" id="gp_code" readonly name="gp_code" <?php echo $display2;?>>
+         <option value="" ><?= gp_name($gp_code); ?></option>
+        </select>
+    </div>    
+    </div>
+ </div>
+
+<p style="border-top:1px dashed #27769F; text-align:center; width:800px;"></p>
+<div class="row mb-3">
+
+<div class="col-sm-12" style="margin-left:30%;">
+<!--<button type="submit" class="btn btn-info" >SAVE & CONTINUE <i class=""></i></button>-->
+
+
+
+
+
+
+   
+<?php if($status=='2' )
+
+
+{?>
+
+    <a class="btn btn-success" data-bs-toggle="modal"  onClick="send_action('approve');">Approve</a>
+    <a class="btn btn-danger" data-bs-toggle="modal" onClick="send_action('reject');">Reject</a> 
+	<?php }?>
+
+
+</div>
+</div>
+
+</form>
+</div>
+
+
+
+</div>
+<div class="clear"></div>
+    
+<?
+  //----------------------------------- FOOTER ----------------------------------------------------------------------------------
+//require '../../../../page/municipality_admin/footer.php';
+//----------------------------------------------------------------------------------------------------------------------------
+?>  
+    <!--   kalyan ghosh 10/3/2017   start  --> 
+    <script>
+		
+	
+  $(document).ready(function(){
+        $('#form_show').show();
+		
+     /*$( "#tch_date" ).datepicker({
+	changeMonth: true,
+	changeYear: true,
+	yearRange: "-100:+0",
+	dateFormat: 'dd-mm-yy',
+	//minDate:dateToday	 
+	});*/
+	
+	});
+	
+	
+		$('#stake_lvl_select').change(function(e) 
+	{
+		var id=$(this).val();
+		var emp_desig=$('#desig').val();
+		var user=$('#logged_user').val();
+		
+		if(id=='555')
+		{
+			$('#district_show').hide();
+			$('#district_id').hide();
+			$('#ps_show').hide();
+			$('#ps_code').hide();
+			$('#ps_show').val('');
+			$('#ps_code').val('')
+			$('#district_show').val('');
+			$('#district_id').val('');
+			$('#district_show_gp').show();
+			$('#district_gp').show();
+			$('#block_show').show();
+			$('#block_id').show();
+			$('#gp_show').show();
+			$('#gp_code').show();
+			
+		}
+		else if(id=='556')
+		{
+			$('#district_show').show();
+			$('#district_id').show();
+			$('#ps_show').show();
+			$('#ps_code').show();
+			$('#district_show_gp').hide();
+			$('#district_gp').hide();
+			$('#block_show').hide();
+			$('#block_id').hide();
+			$('#gp_show').hide();
+			$('#gp_code').hide();
+			
+			$('#district_show_gp').val('');
+			$('#district_gp').val('');
+			$('#block_show').val('');
+			$('#block_id').val('');
+			$('#gp_show').val('');
+			$('#gp_code').val('');
+			
+			
+						
+		}
+		else if(id=='557')
+		{
+			$('#district_show').show();
+			$('#district_id').show();
+			$('#ps_show').hide();
+			$('#ps_code').hide();
+			$('#district_show_gp').hide();
+			$('#district_gp').hide();
+			$('#block_show').hide();
+			$('#block_id').hide();
+			$('#gp_show').hide();
+			$('#gp_code').hide();
+			
+			
+			$('#ps_show').val('');
+			$('#ps_code').val('');
+			$('#district_show_gp').val('');
+			$('#district_gp').val('');
+			$('#block_show').val('');
+			$('#block_id').val('');
+			$('#gp_show').val('');
+			$('#gp_code').val('');
+		}
+		
+	});
+	
+	function send_action(k)
+ {
+	var emp_id='<?php echo $cryptoGraph->encode($emp_id_pk,4) ?>';
+	
+
+	if(k=='approve')
+	{
+		var flag='<?php echo $cryptoGraph->encode('approve',4) ?>';
+		$('#emp_id_k').val(emp_id);
+		$('#flag').val(flag);
+		$('#approve_show').show();
+		$('#reject_show').hide();
+	}
+	else if(k=='reject')
+	{
+		var flag='<?php echo $cryptoGraph->encode('reject',4) ?>';
+		$('#emp_id_k').val(emp_id);
+		$('#approve_show').hide();
+		$('#reject_show').show();
+		$('#flag').val(flag);
+	}
+	$('#approve_reject').modal('show');
+	
+ }
+
+	/*function show_block(val)
+	{
+		$.post('<?= $config['base_url'] ?>page/all_moduls/update_epension_emp_profile/ajax_block_details.php?district='+val, function(data){
+		$("#block_id").html(data);	
+		});
+	}
+	
+	function show_gp(vall)
+	{
+		var old_gp=''+$('#gp_id_fk').val()+'';
+		$.post('<?= $config['base_url'] ?>page/all_moduls/update_epension_emp_profile/ajax_gp_details.php?block='+vall+'&old_gp='+old_gp, function(data){
+		$("#gp_code").html(data);	
+		});
+	}
+	
+	function show_ps(val)
+	{
+		$.post('<?= $config['base_url'] ?>page/all_moduls/update_epension_emp_profile/ajax_ps_details.php?district='+val, function(data){
+		$("#ps_code").html(data);	
+		});
+	}*/
+
+
+	
+  </script>
+  <?php  @pg_close($con); ?>
+  
+    <style>
+  .loan_id
+  	{
+	  width:800px;
+	  border:1px solid #000000;
+	  padding:9px;
+	  margin-bottom:5px;
+	 }
+  .delete_one
+  	{
+	  float:right;
+	  }
+  </style>
+  

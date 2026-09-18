@@ -1,0 +1,1931 @@
+<?php 
+	require '../includes/config/config.php';
+	require '../includes/config/database.config.php';
+	require '../includes/library/database.class.php';
+	global $db;
+	$db=new database();	
+   class Master {
+   	 var $districts = array();
+   	 var $districtblocks = array();
+   	 var $gps = array();
+   	 var $blockInfo = array();
+   	 function __construct()
+   	   {
+          $this->district = $this->getDistrict();
+          $this->districtblocks = $this->getDistrictBlocks();
+          $this->gps = $this->getAllGps();
+
+   	   }
+      function getSalaryDetails($yearMonth,$level)
+      {
+        global $db;
+        $month = array(
+                         'April'=>'04',
+                         'May'=>'05',
+                         'Jun'=>'06',
+                         'Jul'=>'07',
+                         'Aug'=>'08',
+                         'Sep'=>'09',
+                         'Oct'=>'10',
+                         'Nov'=>'11',
+                         'Dec'=>'12',
+                         'Jan'=>'01',
+                         'Feb'=>'02',
+                         'Mar'=>'03'
+                      );
+        $yearData = array();
+        if($level== 'gp')
+        {
+          foreach($month as $key => $m)
+          {
+           $Query = "SELECT count(*) as employee, SUM(gross_salary) as gross , SUM(net) as net from prd_monthly_salary_archive_final WHERE salary_monthyear='".$yearMonth.$m."' AND requisition_type='1001' AND gp_id_fk > '0' AND delete_status='1'";  
+            $data = $db->fetch_table($Query); 
+           $data[0]['month'] = $key;
+           $yearData[] = $data[0];        
+          }
+
+          print_r(json_encode($yearData)); 
+
+        }
+        if($level== 'ps')
+        {
+          foreach($month as $key => $m)
+          {
+           $Query = "SELECT count(*) as employee, SUM(gross_salary) as gross , SUM(net) as net from prd_monthly_salary_archive_final WHERE salary_monthyear='".$yearMonth.$m."' AND requisition_type='1001' AND ps_id_fk > '0' AND delete_status='1'";  
+           $data = $db->fetch_table($Query); 
+           $data[0]['month'] = $key;
+           $yearData[] = $data[0];        
+          }
+
+          print_r(json_encode($yearData)); 
+
+        }  
+        if($level== 'zp')
+        {
+          foreach($month as $key => $m)
+          {
+           $Query = "SELECT count(*) as employee, SUM(gross_salary) as gross , SUM(net) as net from prd_monthly_salary_archive_final WHERE salary_monthyear='".$yearMonth.$m."' AND requisition_type='1001' AND zp_id_fk > '0' AND delete_status='1'";  
+           $data = $db->fetch_table($Query); 
+           $data[0]['month'] = $key;
+           $yearData[] = $data[0];        
+          }
+
+          print_r(json_encode($yearData)); 
+
+        }              
+       /* if($level== 'ps')
+          $Query = "SELECT count(*), SUM(gross_salary) as gross, SUM(net) as net from prd_monthly_salary_archive_final WHERE salary_monthyear='".$yearMonth."' AND requisition_type='1001' AND ps_id_fk > '0' AND delete_status='1'";    
+        if($level== 'zp')
+          $Query = "SELECT count(*), SUM(gross_salary) as gross, SUM(net) as net from prd_monthly_salary_archive_final WHERE salary_monthyear='".$yearMonth."' AND requisition_type='1001' AND zp_id_fk > '0' AND delete_status='1'";               
+        
+        print_r($data);*/
+      }
+     function updatePsNgipfStatus($Argument)
+      {
+        global $db;
+        if($Argument['psid'] > 0)
+        {
+          $ngipfStatus = ($Argument['status']==0)?1:0;
+          $ngipfMsg = ($Argument['status']==0)?'InActive':'Active';
+          $Query ="update prd_location_master_panchayat_samiti SET ngipf_status=".$ngipfStatus.' WHERE ps_id_pk='.$Argument['psid'];
+          $db->update($Query);
+          echo json_encode(array('status'=>'success', 'msg'=>$ngipfMsg, 'statustxt'=>$ngipfStatus));
+        }
+       else 
+        {
+           echo json_encode(array('status'=>'fail'));
+        } 
+
+      }  
+     function updateBlockNgipfStatus($Argument)
+      {
+        global $db;
+        if($Argument['blockcode'] > 0)
+        {
+          $ngipfStatus = ($Argument['status']==0)?1:0;
+          $ngipfMsg = ($Argument['status']==0)?'InActive':'Active';
+          $Query ="update prd_location_master_block SET ngipf_status=".$ngipfStatus." WHERE block_code='".$Argument['blockcode']."'";
+          //print($Query); exit;
+          $db->update($Query);
+          echo json_encode(array('status'=>'success', 'msg'=>$ngipfMsg, 'statustxt'=>$ngipfStatus));
+        }
+       else 
+        {
+           echo json_encode(array('status'=>'fail'));
+        } 
+
+      }      
+     function updateBlockSalStatus($Argument)
+      {
+        global $db;
+        if($Argument['blockcode'] > 0)
+        {
+          $ngipfStatus = ($Argument['status']==0)?1:0;
+          $ngipfMsg = ($Argument['status']==0)?'InActive':'Active';
+          $Query ="update prd_location_master_block SET salary_status=".$ngipfStatus." WHERE block_code='".$Argument['blockcode']."'";
+          //print($Query); exit;
+          $db->update($Query);
+          echo json_encode(array('status'=>'success', 'msg'=>$ngipfMsg, 'statustxt'=>$ngipfStatus));
+        }
+       else 
+        {
+           echo json_encode(array('status'=>'fail'));
+        } 
+
+      }
+     function updateBlockPrevSal($Argument)
+      {
+        global $db;
+        if($Argument['blockcode'] > 0)
+        {
+          $ngipfStatus = ($Argument['status']==0)?1:0;
+          $ngipfMsg = ($Argument['status']==0)?'InActives':'Active';
+          $Query ="update prd_location_master_block SET prev_year_sal=".$ngipfStatus." WHERE block_code='".$Argument['blockcode']."'";
+          //print($Query); exit;
+          $db->update($Query);
+          echo json_encode(array('status'=>'success', 'msg'=>$ngipfMsg, 'statustxt'=>$ngipfStatus));
+        }
+       else 
+        {
+           echo json_encode(array('status'=>'fail'));
+        } 
+
+      }          
+     function updatePsSalaryStatus($Argument)
+      {
+        global $db;
+        if($Argument['psid'] > 0)
+        {
+          $ngipfStatus = ($Argument['status']==0)?1:0;
+          $ngipfMsg = ($Argument['status']==0)?'InActive':'Active';
+          $Query ="update prd_location_master_panchayat_samiti SET prev_year_sal=".$ngipfStatus.' WHERE ps_id_pk='.$Argument['psid'];
+          $db->update($Query);
+          echo json_encode(array('status'=>'success', 'msg'=>$ngipfMsg, 'statustxt'=>$ngipfStatus));
+        }
+       else 
+        {
+           echo json_encode(array('status'=>'fail'));
+        } 
+
+      }  
+     function pspfsubscription($Argument)
+      {
+        global $db;
+        if($Argument['psid'] > 0)
+        {
+          $ngipfStatus = ($Argument['status']==0)?1:0;
+          $ngipfMsg = ($Argument['status']==0)?'InActive':'Active';
+          $Query ="update prd_location_master_panchayat_samiti SET ngipf_sal=".$ngipfStatus." WHERE ps_code='".$Argument['psid']."'";
+          //print($Query); exit;
+          $db->update($Query);
+          echo json_encode(array('status'=>'success', 'msg'=>$ngipfMsg, 'statustxt'=>$ngipfStatus));
+        }
+       else 
+        {
+           echo json_encode(array('status'=>'fail','msg'=>json_encode($Argument)));
+        } 
+
+      }    
+     function gppfsubscription($Argument)
+      {
+        global $db;
+        if($Argument['psid'] > 0)
+        {
+          $ngipfStatus = ($Argument['status']==0)?1:0;
+          $ngipfMsg = ($Argument['status']==0)?'InActive':'Active';
+          $Query ="update prd_location_master_block SET ngipf_sal=".$ngipfStatus." WHERE block_code='".$Argument['psid']."'";
+          //print($Query); exit;
+          $db->update($Query);
+          echo json_encode(array('status'=>'success', 'msg'=>$ngipfMsg, 'statustxt'=>$ngipfStatus));
+        }
+       else 
+        {
+           echo json_encode(array('status'=>'fail','msg'=>json_encode($Argument)));
+        } 
+
+      }                       
+     function getEmployeeMemoUpdate()
+       {
+           global $db; 
+           $Query = "SELECT emp_id_pk from prd_employee_master WHERE update_status != '3'";
+           $empInArray = $db->fetch_table($Query); 
+           $MemoEmp = array();
+           foreach($empInArray as $emp)
+           {
+             $MemoEmp[] = "'".$emp['emp_id_pk']."'";
+           }
+           $MemoEmp = implode(',',$MemoEmp);
+           $Query = "select emp_id_fk, first_momo_no,first_momo_wef_date,present_memo_no,presnt_memo_wef_date from prd_stake_epension_employee_profile where emp_id_fk IN (".$MemoEmp.")";
+           $empMissingInArray = $db->fetch_table($Query); 
+           foreach($empMissingInArray as $empMissing)
+             {
+                $Query = "update prd_employee_master SET 
+                          emp_first_memo_no='".$empMissing['first_momo_no']."',
+                          emp_first_memo_date='".$empMissing['first_momo_wef_date']."',
+                          emp_present_memo_no='".$empMissing['present_memo_no']."',
+                          emp_present_memo_date='".$empMissing['presnt_memo_wef_date']."',
+                          update_status='3'
+                          WHERE emp_id_pk='".$empMissing['emp_id_fk']."'";
+             }
+           //print_r($empMissingInArray);
+           //print_r($Query); exit;
+       }
+     function getEmployeeNoAppoGP()
+       {
+          global $db; 
+          $dataFetch = array(
+
+                               'pem.emp_id_const',
+                               'pem.emp_first_name',
+                               'pem.emp_second_name',
+                               'pem.emp_last_name',
+                               'pdpm.payscale_range',
+                               'pdpm.group',                               
+                               //'pem.emp_desig',
+                              // 'pem.gp_id_fk',
+                               'lmg.gp_name',
+                              // 'lmg.block_id_fk',
+                               'lmb.block_name',
+                               //'lmb.district_id_fk',
+                               'lmd.district_name',
+                               'pdcm.description as designation',
+                               'pem.emp_mobile_no',
+                               'pem.emp_mail_id'                               
+                            );
+          $dataFetch = implode(', ',$dataFetch);
+          $Query ="SELECT ".$dataFetch." from prd_employee_master as pem
+                   LEFT JOIN prd_dise_code_master as pdcm ON cast(pem.emp_desig AS varchar) = pdcm.code
+                   LEFT JOIN prd_location_master_gp as lmg ON pem.gp_id_fk = lmg.gp_id_pk
+                   LEFT JOIN prd_location_master_block as lmb ON lmg.block_id_fk = lmb.block_id_pk
+                   LEFT JOIN prd_location_master_district as lmd ON lmb.district_id_fk = lmd.district_id_pk
+                   LEFT JOIN prd_dise_payscale_master as pdpm ON pem.emp_pay_scale = pdpm.payscale_code
+                   WHERE pem.update_status!='3' AND pem.gp_id_fk != 0 AND pem.emp_status = 1 AND pdcm.description NOT LIKE '%(Cons)' AND  lmd.district_name NOT LIKE 'TEST%'";
+          $empInArray = $db->fetch_table($Query);  
+          echo json_encode($empInArray); //exit;
+
+       }  
+    function getEmployeeNoAppoPS()
+       {
+           global $db; 
+          $dataFetch = array(
+                               'pem.emp_id_const',
+                               'pem.emp_first_name',
+                               'pem.emp_second_name',
+                               'pem.emp_last_name',
+                               'pdpm.payscale_range',
+                               'pdpm.group',
+                               //'pem.emp_desig',
+                              // 'pem.gp_id_fk',
+                               'lmps.ps_name',
+                              // 'lmg.block_id_fk',
+                              // 'lmb.block_name',
+                               //'lmb.district_id_fk',
+                               'lmd.district_name',
+                               'pdcm.description as designation',
+                               'pem.emp_mobile_no',
+                               'pem.emp_mail_id'                               
+                            );
+          $dataFetch = implode(', ',$dataFetch);
+          $Query ="SELECT ".$dataFetch." from prd_employee_master as pem
+                   LEFT JOIN prd_dise_code_master as pdcm ON cast(pem.emp_desig AS varchar) = pdcm.code
+                   LEFT JOIN prd_location_master_panchayat_samiti as lmps ON pem.ps_id_fk = lmps.ps_id_pk
+                   LEFT JOIN prd_location_master_district as lmd ON lmps.district_id_fk = lmd.district_id_pk
+                   LEFT JOIN prd_dise_payscale_master as pdpm ON pem.emp_pay_scale = pdpm.payscale_code
+                   WHERE pem.update_status!='3' AND pem.ps_id_fk != 0 AND pem.emp_status = 1 AND pdcm.description NOT LIKE '%(Cons)' AND  lmd.district_name NOT LIKE 'TEST%'";
+          $empInArray = $db->fetch_table($Query);  
+          //print_r($empInArray); 
+          echo json_encode($empInArray);       
+       }
+    function getEmployeeNoAppoZP()
+       {
+            global $db; 
+
+          $dataFetch = array(
+                               'pem.emp_id_const',
+                               'pem.emp_first_name',
+                               'pem.emp_second_name',
+                               'pem.emp_last_name',
+                               'pdpm.payscale_range',
+                               'pdpm.group',
+                               //'pem.emp_desig',
+                              // 'pem.gp_id_fk',
+                              // 'lmps.ps_name',
+                              // 'lmg.block_id_fk',
+                              // 'lmb.block_name',
+                               //'lmb.district_id_fk',
+                               'lmd.district_name',
+                               'pdcm.designation_name as designation',
+                               'pem.emp_mobile_no',
+                               'pem.emp_mail_id'                               
+                            );
+          $dataFetch = implode(', ',$dataFetch);
+          $Query ="SELECT ".$dataFetch." from prd_employee_master as pem
+                   LEFT JOIN zpemp_emp_desig_master as pdcm ON cast(pem.emp_desig AS varchar) = cast(pdcm.designation_id AS varchar)
+                   LEFT JOIN prd_location_master_district as lmd ON pem.zp_id_fk = lmd.district_id_pk
+                   LEFT JOIN prd_dise_payscale_master as pdpm ON pem.emp_pay_scale = pdpm.payscale_code
+                   WHERE pem.update_status !='3' AND pem.zp_id_fk != 0 AND pem.emp_status = 1 AND pdcm.description NOT LIKE '%(Cons)' AND  lmd.district_name NOT LIKE 'TEST%'";
+          $empInArray = $db->fetch_table($Query);  
+          //print_r($empInArray); 
+          echo json_encode($empInArray);         
+       }
+  
+     function getEmployee($select='null')
+       {
+         
+          global $db; 
+          $where = array();
+          $where[] = 'pem.gp_id_fk != 0';
+          $where[] = 'pem.emp_cosolidated_pay = 0';
+          $where[] = 'pem.emp_status = 1';
+          $where[] = "( pem.emp_desig >= '1114' AND pem.emp_desig <= '1124' )";
+          $blockId = isset($_GET['block_id'])?$_GET['block_id']:0;
+          if($blockId > 0)
+          {
+            $where[] = "lmb.block_code='".$blockId."'";
+          }
+          $districtId = isset($_GET['district_id'])?$_GET['district_id']:0;
+          if($districtId > 0)
+          {
+            $where[] = "lmd.district_code='".$districtId."'";
+          }
+          $offdate = isset($_GET['offdate'])?$_GET['offdate']:0;
+          if($offdate > 0)
+          {
+            $where[] = "pem.transfer_date <= '2021-06-30'";
+          } 
+          $where = implode(' AND ',$where);         
+          //AND pem.emp_join_prsnt_office_date < '2021-06-30'
+           //print($select == 'all'); exit;
+          if($select == 'all')
+          {
+
+              $dataFetch = array(
+                                   'pem.emp_id_const',
+                                   'pem.emp_first_name',
+                                   'pem.emp_second_name',
+                                   'pem.emp_last_name',
+                                   'pem.emp_sex',
+                                   'pem.emp_dob',
+                                   'pem.emp_join_prsnt_office_date',
+                                   'pem.transfer_date',
+                                   'pdcm.description as designation',
+                                   'lmg.gp_name',
+                                   'lmb.block_name',
+                                   'lmd.district_name',
+                                );            
+          }
+          else if($select == 'count')
+          {
+              $dataFetch = array(
+                                   'count(pem.emp_id_const) as numberofEmployee'
+                                );
+          }
+          else
+          {  
+              $dataFetch = array(
+                                   'pem.emp_id_const',
+                                   'pem.emp_first_name',
+                                   'pem.emp_second_name',
+                                   'pem.emp_last_name',
+                                   'pem.emp_sex',
+                                   'pem.emp_dob',
+                                   'pem.emp_join_prsnt_office_date',
+                                   'pdcm.description as designation',
+                                   'lmg.gp_name',
+                                   'lmb.block_name',
+                                   'lmd.district_name',
+                                   'pem.emp_mobile_no'
+                                   /*'pdpm.payscale_range',
+                                   'pdpm.group',                               
+                                   //'pem.emp_desig',
+                                   'lmg.gp_name',
+                                   'lmg.gp_code',
+                                   'lmg.lgd as gp_lgd',
+                                  // 'lmg.block_id_fk',
+                                   'lmb.block_name',
+                                   'lmb.block_code',
+                                   'lmb.lgd as block_lgd',
+                                   'lmd.district_name',
+                                   'lmd.district_code',
+                                   'lmd.lgd as district_lgd',
+                                   
+                                   'pem.emp_mobile_no',
+                                   'pem.emp_mail_id'   */                            
+                                );
+          }
+          $dataFetch = implode(', ',$dataFetch);
+           //print($dataFetch); exit;
+          $Query ="SELECT ".$dataFetch." from prd_employee_master as pem
+                   LEFT JOIN prd_dise_code_master as pdcm ON cast(pem.emp_desig AS varchar) = pdcm.code
+                   LEFT JOIN prd_location_master_gp as lmg ON pem.gp_id_fk = lmg.gp_id_pk
+                   LEFT JOIN prd_location_master_block as lmb ON lmg.block_id_fk = lmb.block_id_pk
+                   LEFT JOIN prd_location_master_district as lmd ON lmb.district_id_fk = lmd.district_id_pk
+                   LEFT JOIN prd_dise_payscale_master as pdpm ON pem.emp_pay_scale = pdpm.payscale_code
+                   WHERE ".$where;
+                   //AND pem.emp_join_prsnt_office_date < '2021-06-30'
+          //print_r($Query); exit;         
+          $empInArray = $db->fetch_table($Query);  
+          if($select == 'all')
+          {
+            foreach($empInArray as $key=>$item)
+              {
+                 $empInArray[$key]['emp_sex'] = ($empInArray[$key]['emp_sex'] ==91)?'M':'F';
+              }              
+          }
+          //print_r($empInArray); exit;
+          echo json_encode($empInArray); //exit;
+
+       }
+     function getPsEmployee($select=0)
+       {
+          global $db;
+          $where = array();
+          $where[] = 'pem.ps_id_fk != 0';
+          $where[] = 'pem.emp_cosolidated_pay = 0';
+          $where[] = 'pem.emp_status = 1';
+          //$where[] = "( pem.emp_desig >= '1114' AND pem.emp_desig <= '1124' )";
+          $blockId = isset($_GET['block_id'])?$_GET['block_id']:0;
+          if($blockId > 0)
+          {
+            $where[] = "lmb.block_code='".$blockId."'";
+          }
+          $districtId = isset($_GET['district_id'])?$_GET['district_id']:0;
+          if($districtId > 0)
+          {
+            $where[] = "lmd.district_code='".$districtId."'";
+          }
+          $offdate = isset($_GET['offdate'])?$_GET['offdate']:0;
+          if($offdate > 0)
+          {
+            $where[] = "pem.transfer_date <= '2021-06-30'";
+          } 
+          $where = implode(' AND ',$where);  
+
+          if($select == 'all')
+          {
+            $dataFetch = array(
+                                   'pem.emp_id_const',
+                                   'pem.emp_first_name',
+                                   'pem.emp_second_name',
+                                   'pem.emp_last_name',
+                                   'pem.emp_sex',
+                                   'pem.emp_dob',
+                                   'pem.emp_join_prsnt_office_date',
+                                   'pem.transfer_date',
+                                   'pdcm.description as designation',
+                                   'lmb.block_name',
+                                   'lmd.district_name',
+                                   'pem.emp_mobile_no'
+                              );
+          }
+          else if($select == 'count')
+          {
+              $dataFetch = array(
+                                   'count(pem.emp_id_const) as numberofEmployee'
+                                );
+          }          
+          else
+          {
+            $dataFetch = array(
+                               'pem.emp_id_const',
+                               'pem.emp_first_name',
+                               'pem.emp_second_name',
+                               'pem.emp_last_name',
+                               'pem.emp_sex',
+                               'pem.emp_dob',
+                               'pem.emp_dob',
+                               'pem.emp_join_prsnt_office_date',
+                               'pem.transfer_date',
+                               'pdcm.description as designation',
+                               'lmb.block_name',
+                               'lmd.district_name',
+                               'pem.emp_mobile_no'
+                               /*'pem.emp_id_const',
+                               'pem.emp_first_name',
+                               'pem.emp_second_name',
+                               'pem.emp_last_name',
+                               'pem.emp_sex',
+                               'pdpm.payscale_range',
+                               'pdpm.group',
+                               //'pem.emp_desig',
+                              // 'pem.gp_id_fk',
+                               'lmps.ps_name',
+                               'lmps.ps_code',
+                               'lmb.lgd as ps_lgd',
+                              // 'lmg.block_id_fk',
+                              // 'lmb.block_name',
+                               //'lmb.district_id_fk',
+                               'lmd.district_name',
+                               'lmd.district_code',
+                               'lmd.lgd as district_lgd',
+                               'pdcm.description as designation',
+                               'pem.emp_mobile_no',
+                               'pem.emp_mail_id'   */                            
+                            );
+          }
+          $dataFetch = implode(', ',$dataFetch);
+          $Query ="SELECT ".$dataFetch." from prd_employee_master as pem
+                   LEFT JOIN prd_dise_code_master as pdcm ON cast(pem.emp_desig AS varchar) = pdcm.code
+                   LEFT JOIN prd_location_master_panchayat_samiti as lmps ON pem.ps_id_fk = lmps.ps_id_pk
+                   LEFT JOIN prd_location_master_block as lmb ON lmps.ps_code = lmb.block_code
+                   LEFT JOIN prd_location_master_district as lmd ON lmps.district_id_fk = lmd.district_id_pk
+                   LEFT JOIN prd_dise_payscale_master as pdpm ON pem.emp_pay_scale = pdpm.payscale_code
+                   LEFT JOIN psemp_ps_profile as ppp ON pem.ps_id_fk = ppp.ps_id_fk
+                   WHERE ".$where;
+                   //pem.ps_id_fk != 0 AND emp_cosolidated_pay = 0 AND pem.emp_status = 1 AND emp_desig = '9003'
+                   // AND pem.emp_join_prsnt_office_date < '2021-06-30'
+          $empInArray = $db->fetch_table($Query);  
+          if($select == 'all')
+          {          
+            foreach($empInArray as $key=>$item)
+              {
+                 $empInArray[$key]['emp_sex'] = ($empInArray[$key]['emp_sex'] ==91)?'M':'F';
+                 //unset($empInArray[$key]['access_key']);
+                 //unset($empInArray[$key]['emp_otp']);
+              } 
+          }
+          //print_r($empInArray); exit;
+          echo json_encode($empInArray);       
+       }
+     function getZpEmployee($select=0)
+       {
+            global $db; 
+
+         if($select == 'all')
+          {
+              $dataFetch = array(
+                                   'pem.emp_id_const',
+                                   'pem.emp_first_name',
+                                   'pem.emp_second_name',
+                                   'pem.emp_last_name',
+                                   'pem.emp_mobile_no',
+                                   'pem.emp_mail_id',                                    
+                                   'pdpm.payscale_range',
+                                   'pdpm.group',
+                                   //'pem.emp_desig',
+                                  // 'pem.gp_id_fk',
+                                  // 'lmps.ps_name',
+                                  // 'lmg.block_id_fk',
+                                  // 'lmb.block_name',
+                                   //'lmb.district_id_fk',
+                                   'lmd.district_name',
+                                   'lmd.district_code',
+                                   'lmd.lgd as district_lgd',
+                                   'pdcm.designation_name as designation'
+                                   
+                                );            
+          }
+          else  
+          {              
+          $dataFetch = array(
+                               'pem.emp_first_name',
+                               'pem.emp_second_name',
+                               'pem.emp_last_name',
+                               'pem.emp_sex',
+                               'pem.emp_status_deputation',
+                               'pdpm.payscale_range',
+                               'pdpm.group',
+                               //'pem.emp_desig',
+                              // 'pem.gp_id_fk',
+                              // 'lmps.ps_name',
+                              // 'lmg.block_id_fk',
+                              // 'lmb.block_name',
+                               //'lmb.district_id_fk',
+                               'lmd.district_name',
+                               'lmd.lgd as district_lgd',
+                               'pdcm.designation_name as designation',
+                               'pem.emp_mobile_no',
+                               'pem.emp_mail_id'                               
+                            );
+        }
+        //print_r($dataFetch); exit;   
+          $dataFetch = implode(', ',$dataFetch);
+          $Query ="SELECT ".$dataFetch." from prd_employee_master as pem
+                   LEFT JOIN zpemp_emp_desig_master as pdcm ON cast(pem.emp_desig AS varchar) = cast(pdcm.designation_id AS varchar)
+                   LEFT JOIN prd_location_master_district as lmd ON pem.zp_id_fk = lmd.district_id_pk
+                   LEFT JOIN prd_dise_payscale_master as pdpm ON pem.emp_pay_scale = pdpm.payscale_code
+                   WHERE pem.zp_id_fk != 0 AND emp_cosolidated_pay = 0 AND pem.emp_status = 1";
+          $empInArray = $db->fetch_table($Query); 
+          if($select == 'all')
+          {
+            echo json_encode($empInArray); exit;
+          }  
+          $NewArray = array();
+          foreach($empInArray as $emp)
+          {
+            $NewArray[] = array(
+                               'Name'=> $emp['emp_first_name'].''.$emp['emp_second_name'].''.$emp['emp_last_name'],
+                               'gender'=>($emp['emp_sex'] ==91)?'M':'F',
+                               'Deputation'=>($emp['emp_status_deputation'] == 1)?'Yes':'No',
+                               'PayScale'=>$emp['payscale_range'],
+                               'group'=>$emp['group'],
+                               'District'=>$emp['district_name'],
+                               'Designation'=>$emp['designation'],
+                               'Mobile'=>$emp['emp_mobile_no'],
+                               'Email'=>$emp['emp_mail_id'],
+
+                             );
+          }
+          //print_r($empInArray); 
+          echo json_encode($NewArray);      
+       }
+     function SalaryReports()
+      {
+          $dis = isset($_POST['district'])?$_POST['district']:0;
+          $postYear = isset($_POST['year'])?$_POST['year']:0;
+          $postMonth = isset($_POST['month'])?$_POST['month']:0;
+          $pri_type = isset($_POST['pri_type'])?$_POST['pri_type']:0;
+          $priType = array('Gram Panchyat', 'Panchyat Samiti', 'Zilla Parishad');   
+
+          $months = array('01' => 'Jan.', '02' => 'Feb.', '03' => 'Mar.', '04' => 'Apr.', '05' => 'May', '06' => 'Jun.', '07' => 'Jul.', '08' => 'Aug.', '09' => 'Sep.', '10' => 'Oct.', '11' => 'Nov.', '12' => 'Dec.');
+          if($dis === 'all')
+          {
+            foreach($this->district as $district)
+            {
+                if($pri_type == 'Gram Panchyat')
+                  {
+                    $this->blockSalary[] = array(
+                                                   'district'=>$district['district_name'],
+                                                   'block'=> $this->getSalBlockDetails($district['district_id_pk'],$postYear,$postMonth)
+                                                );
+                  }
+                
+                if($pri_type == 'Panchyat Samiti'){
+                  $this->blockSalary[] = array(
+                                                   'district'=>$district['district_name'],
+                                                   'block'=> $this->getSalPSDetails($district['district_id_pk'],$postYear,$postMonth)
+                                                );
+                }
+                if($pri_type == 'Zilla Parishad'){
+                  $this->blockSalary[] = array(
+                                                   'district'=>$district['district_name'],
+                                                   'block'=> $this->getSalZPDetails($district['district_id_pk'],$postYear,$postMonth)
+                                                );
+                }                
+            }
+
+          }
+          else
+          {
+            if($dis>0 && $pri_type == 'Gram Panchyat')
+              {
+                $this->blockSalary = $this->getSalBlockDetails($dis,$postYear,$postMonth);
+              }
+            
+            if($dis>0 && $pri_type == 'Panchyat Samiti'){
+              $this->blockSalary = $this->getSalPSDetails($dis,$postYear,$postMonth);
+            }
+            if($dis>0 && $pri_type == 'Zilla Parishad'){
+              $this->blockSalary = $this->getSalZPDetails($dis,$postYear,$postMonth);
+            }            
+           }
+          //$filename = 
+          require_once('template/salary-report.php');
+                
+      }
+      function getSalZPDetails($dis,$postYear,$postMonth)
+       {
+          global $db; 
+          $newDistrict = array();
+          foreach($this->district as $district)
+          {
+              $newDistrict[$district['district_id_pk']] = $district['district_name'];
+          }          
+         /* $Query = "SELECT plmps.ps_id_pk, plmps.ps_name,plmps.ps_code, ppp.* from prd_location_master_panchayat_samiti as plmps
+                    LEFT JOIN psemp_ps_profile as ppp ON plmps.ps_id_pk=ppp.ps_id_fk
+                    WHERE plmps.district_id_fk = ".$dis;
+           
+          $psInfo = $db->fetch_table($Query);
+          $psInfoQuery = array();
+          $psIds = array();
+          foreach($psInfo as $pitem)
+          {
+            $psInfoQuery[$pitem['ps_id_pk']] = $pitem;
+            $psIds[] = $pitem['ps_id_pk'];
+          }
+          $this->psInfo = $psInfoQuery;  */ 
+          $monthYear = $postYear.$postMonth;
+          $Query = "SELECT DISTINCT(pbbd.zp_id_fk) from prd_block_bill_details as pbbd 
+                      LEFT JOIN prd_sftp_benf_upload_response as psbur ON pbbd.block_bill_pk = psbur.bill_id_fk 
+                      WHERE pbbd.zp_id_fk ='".$dis."' AND pbbd.salary_monthyear='".$monthYear."' AND psbur.active_status=1";
+          $psApprovedBill = $db->fetch_table($Query);  
+          //print_r($psApprovedBill); exit;      
+          $blockSalaryStructure = array();
+          foreach($psApprovedBill as $block)
+            {
+              $Query = "SELECT SUM(net) as netSalary, SUM(gross_salary) as grossSalary from prd_monthly_salary_archive_final WHERE zp_id_fk='".$block['zp_id_fk']."' AND salary_monthyear='".$monthYear."' AND delete_status='1' AND is_saved='1' AND lock_status='0'";
+              $blockSalary = $db->fetch_table($Query);
+              //print_r($blockSalary); exit;
+              $blockSalaryStructure[] = array(
+                                                 'district'=>$newDistrict[$dis],
+                                                 'block'=>$newDistrict[$dis],
+                                                 'grossSalary'=>$blockSalary[0]['grosssalary'],
+                                                 'netSalary'=>$blockSalary[0]['netsalary'],
+                                                 
+                                             );
+              //print_r($blockSalary); exit;
+            }
+          return $blockSalaryStructure;
+       }      
+      function getSalPSDetails($dis,$postYear,$postMonth)
+       {
+          global $db; 
+          $newDistrict = array();
+          foreach($this->district as $district)
+          {
+              $newDistrict[$district['district_id_pk']] =$district['district_name'];
+          }          
+          $Query = "SELECT plmps.ps_id_pk, plmps.ps_name,plmps.ps_code, ppp.* from prd_location_master_panchayat_samiti as plmps
+                    LEFT JOIN psemp_ps_profile as ppp ON plmps.ps_id_pk=ppp.ps_id_fk
+                    WHERE plmps.district_id_fk = ".$dis;
+           
+          $psInfo = $db->fetch_table($Query);
+          $psInfoQuery = array();
+          $psIds = array();
+          foreach($psInfo as $pitem)
+          {
+            $psInfoQuery[$pitem['ps_id_pk']] = $pitem;
+            $psIds[] = $pitem['ps_id_pk'];
+          }
+          $this->psInfo = $psInfoQuery;   
+          $monthYear = $postYear.$postMonth;
+          $Query = "SELECT DISTINCT(pbbd.ps_id_fk) from prd_block_bill_details as pbbd 
+                      LEFT JOIN prd_sftp_benf_upload_response as psbur ON pbbd.block_bill_pk = psbur.bill_id_fk 
+                      WHERE pbbd.ps_id_fk IN (".implode(',',$psIds).") AND pbbd.salary_monthyear='".$monthYear."' AND psbur.active_status=1";
+          $psApprovedBill = $db->fetch_table($Query);        
+          $blockSalaryStructure = array();
+          foreach($psApprovedBill as $block)
+            {
+              $Query = "SELECT SUM(net) as netSalary, SUM(gross_salary) as grossSalary from prd_monthly_salary_archive_final WHERE ps_id_fk='".$block['ps_id_fk']."' AND salary_monthyear='".$monthYear."' AND delete_status='1' AND is_saved='1' AND lock_status='0'";
+              $blockSalary = $db->fetch_table($Query);
+              //print_r($blockSalary); exit;
+              $blockSalaryStructure[] = array(
+                                                 'district'=>$newDistrict[$dis],
+                                                 'block'=>$psInfoQuery[$block['ps_id_fk']]['ps_name'],
+                                                 'grossSalary'=>$blockSalary[0]['grosssalary'],
+                                                 'netSalary'=>$blockSalary[0]['netsalary'],
+                                                 
+                                             );
+              //print_r($blockSalary); exit;
+            }
+          return $blockSalaryStructure;
+       }
+      function getSalBlockDetails($dis,$postYear,$postMonth)
+       {
+          global $db;
+          $Query = "SELECT block_name,block_code from prd_location_master_block 
+                    WHERE district_id_fk = ".$dis;
+          
+          $blockInfo = $db->fetch_table($Query);
+          $BlockInfoQuery = array();
+          $BlockName = array();
+          $newDistrict = array();
+          foreach($this->district as $district)
+          {
+              $newDistrict[$district['district_id_pk']] =$district['district_name'];
+          }
+          foreach($blockInfo as $block)
+          {
+            $BlockInfoQuery[] = "'".$block['block_code']."'";
+            $BlockName[$block['block_code']] = $block['block_name'];
+          }
+            $this->BlockName = $BlockName;
+            $BlockInfoQuery = implode(',',$BlockInfoQuery);
+            $monthYear = $postYear.$postMonth;
+            $Query = "SELECT DISTINCT(pbbd.block_code) from prd_block_bill_details as pbbd 
+                      LEFT JOIN prd_sftp_benf_upload_response as psbur ON pbbd.block_bill_pk = psbur.bill_id_fk 
+                      WHERE pbbd.block_code IN (".$BlockInfoQuery.") AND pbbd.salary_monthyear='".$monthYear."' AND psbur.active_status=1";
+            
+            $bdoblockInfo = $db->fetch_table($Query);
+            $blockSalaryStructure = array();
+            foreach($bdoblockInfo as $block)
+            {
+              $Query = "SELECT SUM(net) as netSalary, SUM(gross_salary) as grossSalary from prd_monthly_salary_archive_final WHERE block_code='".$block['block_code']."' AND salary_monthyear='".$monthYear."' AND delete_status='1' AND is_saved='1' AND lock_status='0'";
+              $blockSalary = $db->fetch_table($Query);
+              //print_r($blockSalary); exit;
+              $blockSalaryStructure[] = array(
+                                                 'district'=>$newDistrict[$dis],
+                                                 'block'=>$BlockName[$block['block_code']],
+                                                 'grossSalary'=>$blockSalary[0]['grosssalary'],
+                                                 'netSalary'=>$blockSalary[0]['netsalary'],
+                                                 
+                                             );
+              //print_r($blockSalary); exit;
+            }
+           return $blockSalaryStructure;
+           
+          //$this->blockInfo = $db->fetch_table($Query);
+       }      
+      function CreatejsonFinance()
+       {
+          global $db;
+          $panchyatData = $this->GetAllPanchyatSamiti();
+          $Query = "SELECT plmps.ps_id_pk, plmps.ps_name,plmps.ps_code, ppp.* from prd_location_master_panchayat_samiti as plmps
+                    LEFT JOIN psemp_ps_profile as ppp ON plmps.ps_id_pk=ppp.ps_id_fk
+                    WHERE ppp.exe_officer_name NOT LIKE 'test%'";
+          $allPanchyatData = $db->fetch_table($Query);
+          //print_r( $allPanchyatData);
+          $Query = "SELECT * from prd_location_master_district";
+          $allDistricts = $db->fetch_table($Query); 
+          $districtName = array();
+          foreach($allDistricts as $district)
+          {
+            $districtName[$district['district_code']] = $district['district_name'];
+          }
+          
+          $Query = "SELECT * from prd_dise_admin WHERE treasury_name NOT LIKE 'test%'";
+          $allBlocksData = $db->fetch_table($Query); 
+          $allBlockWise = array();
+          foreach($allBlocksData as $blockData)
+          {
+            $allBlockWise[$blockData['block_code']]= $blockData;
+          }         
+          //print_r($allBlockWise); exit;         
+          $Query = "SELECT plm.block_code, plmg.gp_name ,pgp.* from prd_location_master_block as plm
+                    LEFT JOIN prd_location_master_gp as plmg ON plm.block_id_pk = plmg.block_id_fk
+                    LEFT JOIN prd_gp_profile as pgp ON plmg.gp_id_pk = pgp.gp_id_fk
+                    WHERE pgp.road_name NOT LIKE 'test%'";
+          $allGpsData = $db->fetch_table($Query);
+          $allGpBlockWise = array();
+          foreach($allGpsData as $gpData)
+          {
+            $allGpBlockWise[$gpData['block_code']][]= $gpData;
+          }
+          //print_r($allGpBlockWise);
+          $FinceJsonData = array();
+          foreach($allPanchyatData as $panchyatData)
+          {
+            $tempData = array();
+            $tempData['hoo_code_of_bdo_office'] = $allBlockWise[$panchyatData['ps_code']]['hoo_code'];
+            $tempData['office_name_bdo'] = 'Office of the BDO '.$panchyatData['ps_name'];
+            $tempData['hoo_code_of_panchayet_samities'] = $panchyatData['hoo_code'];
+            $tempData['officer_name_of_panchayet_samities'] = 'Office of the EO '.$panchyatData['ps_name'];
+            $tempData['ps_code'] = $panchyatData['ps_code'];
+            $tempData['ps_name'] = $panchyatData['ps_name'];
+
+            
+
+            foreach($allGpBlockWise[$panchyatData['ps_code']] as $gpData)
+            {
+                $gpTempData = array();
+                $gpTempData['gp_code'] = $gpData['gp_code'];
+                $gpTempData['gp_name'] = $gpData['gp_name'];   
+                $gpTempData['premises_number_and_name_of_road_street_lane'] = $gpData['road_name'];  
+                $gpTempData['city_town_village'] = $gpData['vill_name']; 
+                $gpTempData['post_office'] = $gpData['post_office'];   
+                $gpTempData['police_station'] = $gpData['police_station']; 
+                $gpTempData['state'] = "West Bengal";  
+                $gpTempData['district'] = $districtName[$allBlockWise[$panchyatData['ps_code']]['distcd']];  
+                $gpTempData['pin_code'] = $gpData['pin_code'];      
+                $tempData['gpdata'][] = $gpTempData;
+            }
+
+            $FinceJsonData[] = $tempData;
+          }
+         echo json_encode($FinceJsonData);
+       }
+      function saveHooCode($NewData)
+       {
+          global $db;
+          $panchyatData = $this->GetAllPanchyatSamiti();
+          //print_r($panchyatData); exit;
+          $Query = array();
+          $psQuery = array();          
+          foreach($NewData as $data)
+          {
+                $UpdateArg = array(
+                                "operator_code_pf='".$data['gp_operator_code']."'",
+                                "t_code_pf='".$data['treasury_code']."'",
+                                "hoo_code='".$data['bdo_hoo_code']."'"
+
+                              );
+                if($data['ps_operator_code'] != '' && $data['treasury_code'] != '' && $data['ps_hoo_code'] != '' && $panchyatData[$data['block_code']] != '' )
+                {
+                    $psUpdateArg = array(
+                                        "pl_code_pf ='".$data['ps_operator_code']."'",
+                                        "treasury_code='".$data['treasury_code']."'",
+                                        "hoo_code='".$data['ps_hoo_code']."'"
+                                      );    
+                    $psQuery[] = " update psemp_ps_profile SET ".implode(",",$psUpdateArg). " WHERE ps_id_fk='".$panchyatData[$data['block_code']]."'";
+                 }
+                
+                $Query[] = " update prd_dise_admin SET ".implode(",",$UpdateArg). " WHERE block_code='".$data['block_code']."'";                                         
+          }
+        $Query = implode(";",$Query);
+        $psQuery = implode(";",$psQuery); 
+        //print_r($psQuery); exit;
+        $psupdate = $db->update($psQuery);
+        $updateSet = $db->update($Query);  
+        echo "All Done";       
+       // print_r($psQuery);
+
+                 
+       } 
+      function GetAllPanchyatSamiti()
+       {
+         global $db;
+         $Query ="SELECT ps_id_pk, ps_name, ps_code from prd_location_master_panchayat_samiti";
+         $allPanchyats = $db->fetch_table($Query);
+         $panchyatData = array();
+
+         foreach($allPanchyats as $panchyat)
+         {
+            $panchyatData[$panchyat['ps_code']] = $panchyat['ps_id_pk'];
+         }
+         return $panchyatData;
+       }
+   	  function saveBlock()
+   	    {
+   	    	global $db;
+   	    	$post = $_POST;
+   	    	$Query = array();
+   	    	$psQuery = array();
+   	    	foreach($post['block_code'] as $key=>$block_code)
+   	    	{
+   	    		$UpdateArg = array(
+   	    			                "ddo_code ='".$post['ddo_code'][$key]."'",
+   	    			                "operator_code_pf='".$post['operator_code_pf'][$key]."'",
+   	    			                "t_code_pf='".$post['t_code_pf'][$key]."'",
+   	    			                "hoo_code='".$post['hoo_code'][$key]."'"
+
+   	    		                  );
+   	    	    $psUpdateArg = array(
+   	    			                "pl_code_pf ='".$post['pl_code_pf'][$key]."'",
+   	    			                "treasury_code='".$post['treasury_code'][$key]."'",
+   	    			                "hoo_code='".$post['pshoo_code'][$key]."'"
+   	    		                  );
+   	    	    $psQuery[] = " update psemp_ps_profile SET ".implode(",",$psUpdateArg). " WHERE ps_id_fk='".$post['ps_id_pk'][$key]."'";;
+   	    		
+   	    		$Query[] = " update prd_dise_admin SET ".implode(",",$UpdateArg). " WHERE block_code='".$block_code."'";
+   	    	}
+   	    	$Query = implode(";",$Query);
+   	    	$psQuery = implode(";",$psQuery);
+   	    	//print_r($psQuery); exit;
+   	    	$psupdate = $db->update($psQuery);
+   	    	$updateSet = $db->update($Query);
+   	    	$msg = ($updateSet)?'Updated Successfully':'Update Failed';
+   	    	header('Location:https://priemp.wbprd.gov.in/subikar/bdohoo.php?dis='.$post['district'].'&msg='.$msg);
+   	    }
+   	  function showBlockHoo()
+   	   {
+   	   	  $dis = isset($_GET['dis'])?$_GET['dis']:0;
+   	   	  ($dis>0)?$this->getBlockDetails($dis):NULL;
+   	   	  require_once('template/block.php');
+   	   }
+   	  function getBlockDetails($dis)
+   	   {
+   	   	  global $db;
+   	   	  $Query = "SELECT block_name,block_code, ngipf_status, salary_status, prev_year_sal,ngipf_sal from prd_location_master_block 
+   	   	            WHERE district_id_fk = ".$dis;
+   	   	  
+          $blockInfo = $db->fetch_table($Query);
+
+          $Query = "SELECT plmps.ps_id_pk, plmps.ps_name,plmps.ps_code, plmps.ngipf_status,plmps.salary_status, plmps.ngipf_sal, ppp.* from prd_location_master_panchayat_samiti as plmps
+                    LEFT JOIN psemp_ps_profile as ppp ON plmps.ps_id_pk=ppp.ps_id_fk
+   	   	            WHERE plmps.district_id_fk = ".$dis;
+   	   	  
+          $psInfo = $db->fetch_table($Query);
+          $psInfoQuery = array();
+          foreach($psInfo as $pitem)
+          {
+          	$psInfoQuery[$pitem['ps_code']] = $pitem;
+          }
+          $this->psInfo = $psInfoQuery;
+          //print_r($psInfoQuery); exit;
+
+          $BlockInfoQuery = array();
+          $BlockName = array();
+          $BlockNgipfStatus = array();
+          $BlockSalaryStatus = array();
+          $BlockPrevSalaryStatus = array();
+          $psPfSubscriptionStatus = array();
+          foreach($blockInfo as $block)
+          {
+          	$BlockInfoQuery[] = "'".$block['block_code']."'";
+            $BlockName[$block['block_code']] = $block['block_name'];
+            $BlockNgipfStatus[$block['block_code']] = $block['ngipf_status'];
+          	$BlockSalaryStatus[$block['block_code']] = $block['salary_status'];
+            $BlockPrevSalaryStatus[$block['block_code']] = $block['prev_year_sal'];
+            $psPfSubscriptionStatus[$block['block_code']] = $psInfoQuery[$block['block_code']]['ngipf_sal'];
+            $gpPfSubscriptionStatus[$block['block_code']] = $block['ngipf_sal'];
+          }
+          //print_r($psPfSubscriptionStatus); exit;
+            $this->BlockName = $BlockName;
+            $this->BlockNgipfStatus = $BlockNgipfStatus;
+            $this->BlockSalaryStatus = $BlockSalaryStatus;
+            $this->BlockPrevSalaryStatus = $BlockPrevSalaryStatus;
+            $this->psPfSubscriptionStatus = $psPfSubscriptionStatus;
+            $this->gpPfSubscriptionStatus = $gpPfSubscriptionStatus;
+            $BlockInfoQuery = implode(',',$BlockInfoQuery);
+            $Query = "SELECT * from prd_dise_admin WHERE block_code IN (".$BlockInfoQuery.")";
+            $this->bdoblockInfo = $db->fetch_table($Query);
+           // print_r($this->bdoblockInfo);  exit;
+          //$this->blockInfo = $db->fetch_table($Query);
+   	   }
+   	  function GetReports($role,$roleText)
+   	    {
+   	    	global $db;
+
+   	    	$allDistricts = $this->district;
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.role_id_pk='".$role."') AND forw.emp_id_const='".$roleText."' AND forw.application_id != ''";
+   	    	$AllApplications = $db->fetch_table($Query);
+            //print_r($AllApplications);
+           // echo "<br />";
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.role_id_pk='".$role."') AND forw.for_app_rej='A' AND forw.application_id != ''";
+   	    	$ApprovedApplications = $db->fetch_table($Query);  
+
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.role_id_pk='".$role."') AND forw.for_app_rej='R' AND forw.application_id != ''";
+   	    	$RejectedApplications = $db->fetch_table($Query);  
+
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.role_id_pk='".$role."') AND forw.status='1' AND forw.application_id != '' ";
+   	    	$PendingApplications = $db->fetch_table($Query);  	    	
+   	    	//print_r($PendingApplications);
+   	    	$ReportApplications = '';
+   	    	foreach($allDistricts as $district)
+   	    		 {
+   	    		 	$Applications = array();
+   	    		 	foreach($AllApplications as $application)
+   	    		 	{
+   	    		 		if($district['district_id_pk'] == $application['district_id_fk'])
+   	    		 		   $Applications[] = $application['application_id'];
+   	    		 	}
+   	    		 	$countofApplication = count($Applications);
+                    $ApprovApp = array();
+                    $desgApprov = array();
+   	    		 	foreach($ApprovedApplications as $application)
+   	    		 	{
+   	    		 		if($district['district_id_pk'] == $application['district_id_fk'])
+   	    		 		  { 
+   	    		 		  	$ApprovApp[] = $application['application_id'];
+   	    		 		  	$desgApprov[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	$countofApprovApplication = count($ApprovApp); 
+   	    		 	$approvedBy = '';
+   	    		 	if($countofApprovApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgApprov as $dsa)
+	   	    		 	  {
+	                            $approvedBy[] = count($dsa).' Approved from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $approvedBy = implode(', ',$approvedBy);
+	   	    		  }	  
+
+
+                    $RejectApp = array();
+                    $desgReject = array();
+   	    		 	foreach($RejectedApplications as $application)
+   	    		 	{
+   	    		 		if($district['district_id_pk'] == $application['district_id_fk'])
+   	    		 		  { 
+   	    		 		  	$RejectApp[] = $application['application_id'];
+   	    		 		  	$desgReject[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	$countofRejectApplication = count($RejectApp); 
+   	    		 	$RejectBy = '';
+   	    		 	if($countofRejectApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgReject as $dsa)
+	   	    		 	  {
+	                            $RejectBy[] = count($dsa).' Rejected from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $RejectBy = implode(', ',$RejectBy);
+	   	    		  }	
+
+                    $PendingApp = array();
+                    $desgPending = array();
+   	    		 	foreach($PendingApplications as $application)
+   	    		 	{
+   	    		 		if($district['district_id_pk'] == $application['district_id_fk'])
+   	    		 		  { 
+   	    		 		  	$PendingApp[] = $application['application_id'];
+   	    		 		  	$desgPending[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	if($district['district_id_pk'] == 14)
+   	    		 	{
+   	    		 		//print_r($desgPending); exit;
+   	    		 	}
+   	    		 	$countofPendingApplication = count($PendingApp); 
+   	    		 	$PendingBy = '';
+   	    		 	if($countofPendingApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgPending as $dsa)
+	   	    		 	  {
+	                            $PendingBy[] = count($dsa).' Pending from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $PendingBy = implode(', ',$PendingBy);
+	   	    		  }		   	    		  
+
+   	    		    $ReportApplications[$district['district_id_pk']] = array(
+   	    		    	                                                                'district_id'=>$district['district_id_pk'],
+   	    		    	                                                                'district_name'=>$district['district_name'],
+   	    		    	                                                                'applications'=>$countofApplication,
+   	    		    	                                                                'approveapp'=>$countofApprovApplication,
+   	    		    	                                                                'approvedby'=>$approvedBy,
+   	    		    	                                                                'rejectapp'=>$countofRejectApplication,
+   	    		    	                                                                'rejectedby'=>$RejectBy,
+   	    		    	                                                                'pendingapp'=>$countofPendingApplication,
+   	    		    	                                                                'pendingby'=>$PendingBy
+   	    		    	                                                    );
+                    //$InterDistrictApplications[] 
+   	    		 }
+   	    	return $ReportApplications;   	    	
+   	    }
+   	  function getDistrict()
+   	    {
+   	    	global $db;
+   	    	$Query = "Select district_id_pk, district_name, district_code from prd_location_master_district WHERE district_name != 'TEST DISTRICT' order by district_id_pk asc";
+   	    	$allDistricts = $db->fetch_table($Query);
+   	    	return $allDistricts;
+   	    	//print_r($allDistricts);
+
+
+   	    }
+   	  function getDistrictBlocks()
+   	    {
+   	    	global $db;
+   	    	$Query = "Select district_id_pk, district_name from prd_location_master_district WHERE district_name != 'TEST DISTRICT' order by district_id_pk asc";
+   	    	$allDistricts = $db->fetch_table($Query);
+   	    	foreach($allDistricts as $key=>$District)
+   	    	{
+   	    		$Query ="Select block_id_pk, block_name from prd_location_master_block WHERE district_id_fk=".$District['district_id_pk'];
+   	    		//print_r($Query); exit;
+   	    		$AllBlock = $db->fetch_table($Query);
+   	    		$allDistricts[$key]['blocks'] = $AllBlock;
+   	    		
+
+   	    	}
+
+            return $allDistricts;
+
+
+
+   	    }
+      function getAllGps()
+        {
+        	global $db;
+            $Query = "SELECT gp_id_pk, block_id_fk FROM prd_location_master_gp";
+            $AllGps = $db->fetch_table($Query);
+            $Gps = array();
+            foreach($AllGps as $gp)
+            {
+            	$Gps[$gp['gp_id_pk']] = $gp['block_id_fk'];
+            }
+
+            return $Gps;
+        }
+      function getblockzp($AllApplications)
+        {
+           foreach($AllApplications as $key=>$application)
+   	    	{
+   	    		if($application['gp_id_fk'] != 0)
+   	    		{
+   	    		   $AllApplications[$key]['zp_id'] =0;
+                   $AllApplications[$key]['block_id'] = $this->gps[$application['gp_id_fk']];
+   	    		}
+   	    		elseif($application['ps_id_fk'] != 0)
+   	    		{
+   	    			$AllApplications[$key]['zp_id'] =0;
+   	    			$AllApplications[$key]['block_id'] = $application['ps_id_fk'];
+   	    		}
+   	    		elseif($application['zp_id_fk'] != 0)
+   	    		{   
+   	    			$AllApplications[$key]['block_id'] = 0;
+   	    			$AllApplications[$key]['zp_id'] = $application['district_id_fk'];
+   	    		}
+   	    		else
+   	    		{
+   	    			unset($AllApplications[$key]);
+   	    		}
+
+   	    	}
+   	    	return $AllApplications;
+        }
+   	  function GetReportsCompasanate($role,$roleText)
+   	    {
+   	    	global $db;
+
+   	    	$allDistricts = $this->districtblocks;
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_cg_profile_master as ipcpm ON forw.application_id = ipcpm.application_id
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.role_id_pk='".$role."') AND forw.for_app_rej='".$roleText."' AND forw.application_id != ''";
+   	    	$AllApplications = $db->fetch_table($Query);
+   	    	$AllApplications = $this->getblockzp($AllApplications);
+   	    	//print_r($AllApplications);
+
+            //print_r($AllApplications);
+           // echo "<br />";
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          LEFT JOIN intra_pri_cg_profile_master as ipcpm ON forw.application_id = ipcpm.application_id
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.role_id_pk='".$role."') AND forw.for_app_rej='A' AND forw.application_id != ''";
+
+   	    	$ApprovedApplications = $db->fetch_table($Query);  
+   	    	$ApprovedApplications = $this->getblockzp($ApprovedApplications);
+            //print_r($ApprovedApplications); exit;
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          LEFT JOIN intra_pri_cg_profile_master as ipcpm ON forw.application_id = ipcpm.application_id
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.role_id_pk='".$role."') AND forw.for_app_rej='R' AND forw.application_id != ''";
+   	    	$RejectedApplications = $db->fetch_table($Query);  
+            $RejectedApplications = $this->getblockzp($RejectedApplications);
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          LEFT JOIN intra_pri_cg_profile_master as ipcpm ON forw.application_id = ipcpm.application_id
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.role_id_pk='".$role."') AND forw.status='1' AND forw.application_id != '' ";
+   	    	$PendingApplications = $db->fetch_table($Query);  	
+   	    	$PendingApplications = $this->getblockzp($PendingApplications);    	
+   	    	//print_r($PendingApplications); exit;
+   	    	$ReportApplications = '';
+   	    	foreach($allDistricts as $district)
+   	    		 {
+   	    		 	//print_r($district['blocks']); exit;
+   	    		 	$BlockApplications = array();
+   	    		 	foreach($district['blocks'] as $block)
+   	    		 	{
+			   	    		 	$Applications = array();
+			   	    		 	foreach($AllApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		   $Applications[] = $application['application_id'];
+			   	    		 	}
+			   	    		 	$countofApplication = count($Applications);
+			   	    		    if($countofApplication != 0) {	
+			                    $ApprovApp = array();
+			                    $desgApprov = array();
+			   	    		 	foreach($ApprovedApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$ApprovApp[] = $application['application_id'];
+			   	    		 		  	$desgApprov[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	$countofApprovApplication = count($ApprovApp); 
+			   	    		 	$approvedBy = '';
+			   	    		 	if($countofApprovApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgApprov as $dsa)
+				   	    		 	  {
+				                            $approvedBy[] = count($dsa).' Approved from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $approvedBy = implode(', ',$approvedBy);
+				   	    		  }	  
+
+
+			                    $RejectApp = array();
+			                    $desgReject = array();
+			   	    		 	foreach($RejectedApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$RejectApp[] = $application['application_id'];
+			   	    		 		  	$desgReject[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	$countofRejectApplication = count($RejectApp); 
+			   	    		 	$RejectBy = '';
+			   	    		 	if($countofRejectApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgReject as $dsa)
+				   	    		 	  {
+				                            $RejectBy[] = count($dsa).' Rejected from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $RejectBy = implode(', ',$RejectBy);
+				   	    		  }	
+
+			                    $PendingApp = array();
+			                    $desgPending = array();
+			   	    		 	foreach($PendingApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$PendingApp[] = $application['application_id'];
+			   	    		 		  	$desgPending[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	if($district['district_id_pk'] == 14)
+			   	    		 	{
+			   	    		 		//print_r($desgPending); exit;
+			   	    		 	}
+			   	    		 	$countofPendingApplication = count($PendingApp); 
+			   	    		 	$PendingBy = '';
+			   	    		 	if($countofPendingApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgPending as $dsa)
+				   	    		 	  {
+				                            $PendingBy[] = count($dsa).' Pending from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $PendingBy = implode(', ',$PendingBy);
+				   	    		  }		   	    		  
+
+				   	    		    $BlockApplications[$block['block_id_pk']] = array(
+		    		    	                                                            'block_id'=>$block['block_id_pk'],
+				    	                                                                'block_name'=>$block['block_name'],
+				    	                                                                'applications'=>$countofApplication,
+				    	                                                                'approveapp'=>$countofApprovApplication,
+				    	                                                                'approvedby'=>$approvedBy,
+				    	                                                                'rejectapp'=>$countofRejectApplication,
+				    	                                                                'rejectedby'=>$RejectBy,
+				    	                                                                'pendingapp'=>$countofPendingApplication,
+				    	                                                                'pendingby'=>$PendingBy
+				   	    		    	                                              );
+				   	    	    }
+			   	    }
+
+			   	    // For ZP Start
+   	    		 	$Applications = array();
+   	    		 	$ZpApplications = array();
+   	    		 	foreach($AllApplications as $application)
+   	    		 	{
+   	    		 		if($application['zp_id'] != 0 && $district['district_id_pk'] == $application['zp_id'])
+   	    		 		   $Applications[] = $application['application_id'];
+   	    		 	}
+
+   	    		 	$countofApplication = count($Applications);
+
+   	    		    if($countofApplication > 0) {	
+                    $ApprovApp = array();
+                    $desgApprov = array();
+   	    		 	foreach($ApprovedApplications as $application)
+   	    		 	{
+   	    		 		if($application['zp_id'] != 0 && $district['district_id_pk'] == $application['zp_id'])
+   	    		 		  { 
+   	    		 		  	$ApprovApp[] = $application['application_id'];
+   	    		 		  	$desgApprov[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	$countofApprovApplication = count($ApprovApp); 
+   	    		 	$approvedBy = '';
+   	    		 	if($countofApprovApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgApprov as $dsa)
+	   	    		 	  {
+	                            $approvedBy[] = count($dsa).' Approved from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $approvedBy = implode(', ',$approvedBy);
+	   	    		  }	  
+
+
+                    $RejectApp = array();
+                    $desgReject = array();
+   	    		 	foreach($RejectedApplications as $application)
+   	    		 	{
+   	    		 		if($application['zp_id'] != 0 && $district['district_id_pk'] == $application['zp_id'])
+   	    		 		  { 
+   	    		 		  	$RejectApp[] = $application['application_id'];
+   	    		 		  	$desgReject[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	$countofRejectApplication = count($RejectApp); 
+   	    		 	$RejectBy = '';
+   	    		 	if($countofRejectApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgReject as $dsa)
+	   	    		 	  {
+	                            $RejectBy[] = count($dsa).' Rejected from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $RejectBy = implode(', ',$RejectBy);
+	   	    		  }	
+
+                    $PendingApp = array();
+                    $desgPending = array();
+   	    		 	foreach($PendingApplications as $application)
+   	    		 	{
+   	    		 		if($application['zp_id'] != 0 && $district['district_id_pk'] == $application['zp_id'])
+   	    		 		  { 
+   	    		 		  	$PendingApp[] = $application['application_id'];
+   	    		 		  	$desgPending[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	if($district['district_id_pk'] == 9)
+   	    		 	{
+   	    		 		//print_r($desgPending); exit;
+   	    		 	}
+   	    		 	$countofPendingApplication = count($PendingApp); 
+   	    		 	$PendingBy = '';
+   	    		 	if($countofPendingApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgPending as $dsa)
+	   	    		 	  {
+	                            $PendingBy[] = count($dsa).' Pending from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $PendingBy = implode(', ',$PendingBy);
+	   	    		  }		   	    		  
+
+	   	    		    $ZpApplications = array(
+                                                    'block_id'=>$district['district_id_pk'],
+                                                    'block_name'=>$district['district_name'],
+                                                    'applications'=>$countofApplication,
+                                                    'approveapp'=>$countofApprovApplication,
+                                                    'approvedby'=>$approvedBy,
+                                                    'rejectapp'=>$countofRejectApplication,
+                                                    'rejectedby'=>$RejectBy,
+                                                    'pendingapp'=>$countofPendingApplication,
+                                                    'pendingby'=>$PendingBy
+	   	    		    	                    );
+	   	    	    }
+
+			   	    // For ZP END
+
+                    //$InterDistrictApplications[] 
+                    $ReportApplications[$district['district_id_pk']] = array(
+                                                                'district_id'=>$district['district_id_pk'],
+                                                                'district_name'=>$district['district_name'],
+                                                                'blocks'=>$BlockApplications,
+                                                                'zp'=>$ZpApplications
+                                                            );
+   	    		 }
+   	    		 //print_r($ReportApplications); exit;
+   	    	return $ReportApplications;   	    	
+   	    }
+      function GetNewReportsOverAge()
+        {
+             
+        }
+  	  function GetReportsOverAge($role,$roleText,$jointable)
+   	    {
+   	    	global $db;
+
+   	    	$allDistricts = $this->districtblocks;
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN ".$jointable." as ipcpm ON forw.application_id = ipcpm.application_id
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.sub_menu='".$role."') AND forw.for_app_rej='".$roleText."' AND forw.application_id != ''";
+   	    	$AllApplications = $db->fetch_table($Query);
+   	    	$AllApplications = $this->getblockzp($AllApplications);
+   	    	//print_r($Query); exit;
+
+            //print_r($Query); exit;
+           // echo "<br />";
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          LEFT JOIN ".$jointable." as ipcpm ON forw.application_id = ipcpm.application_id
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.sub_menu='".$role."') AND forw.for_app_rej='A' AND forw.application_id != ''";
+
+   	    	$ApprovedApplications = $db->fetch_table($Query);  
+   	    	$ApprovedApplications = $this->getblockzp($ApprovedApplications);
+            //print_r($ApprovedApplications); exit;
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          LEFT JOIN ".$jointable." as ipcpm ON forw.application_id = ipcpm.application_id
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.sub_menu='".$role."') AND forw.for_app_rej='R' AND forw.application_id != ''";
+   	    	$RejectedApplications = $db->fetch_table($Query);  
+            $RejectedApplications = $this->getblockzp($RejectedApplications);
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipdm.designation, ipm.stake_level_code, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM intra_pri_forwarding as forw 
+   	    	          LEFT JOIN intra_pri_role_assigment as role ON forw.sub_menu = role.sub_menu 
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          LEFT JOIN ".$jointable." as ipcpm ON forw.application_id = ipcpm.application_id
+   	    	          WHERE (forw.status = 1 OR forw.status = 2) AND (role.sub_menu='".$role."') AND forw.status='1' AND forw.application_id != '' ";
+   	    	$PendingApplications = $db->fetch_table($Query);  	
+   	    	$PendingApplications = $this->getblockzp($PendingApplications);    	
+   	    	//print_r($PendingApplications); exit;
+   	    	$ReportApplications = '';
+   	    	foreach($allDistricts as $district)
+   	    		 {
+   	    		 	//print_r($district['blocks']); exit;
+   	    		 	$BlockApplications = '';
+   	    		 	foreach($district['blocks'] as $block)
+   	    		 	{
+			   	    		 	$Applications = array();
+			   	    		 	foreach($AllApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		   $Applications[] = $application['application_id'];
+			   	    		 	}
+			   	    		 	$countofApplication = count($Applications);
+			   	    		    if($countofApplication != 0) {	
+			                    $ApprovApp = array();
+			                    $desgApprov = array();
+			   	    		 	foreach($ApprovedApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$ApprovApp[] = $application['application_id'];
+			   	    		 		  	$desgApprov[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	$countofApprovApplication = count($ApprovApp); 
+			   	    		 	$approvedBy = '';
+			   	    		 	if($countofApprovApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgApprov as $dsa)
+				   	    		 	  {
+				                            $approvedBy[] = count($dsa).' Approved from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $approvedBy = implode(', ',$approvedBy);
+				   	    		  }	  
+
+
+			                    $RejectApp = array();
+			                    $desgReject = array();
+			   	    		 	foreach($RejectedApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$RejectApp[] = $application['application_id'];
+			   	    		 		  	$desgReject[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	$countofRejectApplication = count($RejectApp); 
+			   	    		 	$RejectBy = '';
+			   	    		 	if($countofRejectApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgReject as $dsa)
+				   	    		 	  {
+				                            $RejectBy[] = count($dsa).' Rejected from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $RejectBy = implode(', ',$RejectBy);
+				   	    		  }	
+
+			                    $PendingApp = array();
+			                    $desgPending = array();
+			   	    		 	foreach($PendingApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$PendingApp[] = $application['application_id'];
+			   	    		 		  	$desgPending[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	if($district['district_id_pk'] == 14)
+			   	    		 	{
+			   	    		 		//print_r($desgPending); exit;
+			   	    		 	}
+			   	    		 	$countofPendingApplication = count($PendingApp); 
+			   	    		 	$PendingBy = '';
+			   	    		 	if($countofPendingApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgPending as $dsa)
+				   	    		 	  {
+				                            $PendingBy[] = count($dsa).' Pending from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $PendingBy = implode(', ',$PendingBy);
+				   	    		  }		   	    		  
+
+				   	    		    $BlockApplications[$block['block_id_pk']] = array(
+		    		    	                                                            'block_id'=>$block['block_id_pk'],
+				    	                                                                'block_name'=>$block['block_name'],
+				    	                                                                'applications'=>$countofApplication,
+				    	                                                                'approveapp'=>$countofApprovApplication,
+				    	                                                                'approvedby'=>$approvedBy,
+				    	                                                                'rejectapp'=>$countofRejectApplication,
+				    	                                                                'rejectedby'=>$RejectBy,
+				    	                                                                'pendingapp'=>$countofPendingApplication,
+				    	                                                                'pendingby'=>$PendingBy
+				   	    		    	                                              );
+				   	    	    }
+			   	    }
+
+			   	    // For ZP Start
+   	    		 	
+			   	    // For ZP END
+
+                    //$InterDistrictApplications[] 
+                    $ReportApplications[$district['district_id_pk']] = array(
+                                                                'district_id'=>$district['district_id_pk'],
+                                                                'district_name'=>$district['district_name'],
+                                                                'blocks'=>$BlockApplications
+                                                                
+                                                            );
+   	    		 }
+   	    		 //print_r($ReportApplications); exit;
+   	    	return $ReportApplications;   	    	
+   	    }
+       function GetReportsTransfer($role,$roleText,$jointable)
+         {
+           global $db;
+           $PageTitle = $roleText.' District Transfer Report';
+           $allDistricts = $this->district;
+           $district = array();
+           foreach($allDistricts as $item)
+           {
+              $district[$item['district_code']] = $item['district_name'];
+           }
+           $transferQuery = "SELECT stack_user,count(app_id) as appCount from ".$jointable." WHERE  district_level='".$roleText."' AND application_id != '' GROUP BY stack_user";
+           $AllApplications = $db->fetch_table($transferQuery);
+           $districtApplication = array();
+           foreach($AllApplications as $item)
+           {
+              $stackUser = (int) $item['stack_user'];
+              $stackUser = substr($stackUser, 0,4);
+              $districtApplication[$stackUser] = array(
+                                                         'district_name'=>$district[$stackUser],
+                                                         'count'=>isset($districtApplication[$stackUser]['count'])?$districtApplication[$stackUser]['count']+$item['appcount']:$item['appcount']
+                                                      );
+           }
+           //print_r($districtApplication); exit;
+           require_once('template/transfer.php');
+
+         }
+   	   function GetReportsNewApplication($role,$roleText,$jointable)
+   	    {
+   	    	global $db;
+
+   	    	$allDistricts = $this->districtblocks;
+   	    	$Query = "SELECT DISTINCT(forw.application_id),ipm.district_id_fk, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk FROM 
+   	    	          ".$jointable." as ipcpm  
+   	    	          LEFT JOIN  intra_pri_forwarding as forw ON forw.application_id = ipcpm.application_id
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          WHERE forw.application_id !='';
+   	    	          ";
+   	    	$AllApplications = $db->fetch_table($Query);
+   	    	//print_r($AllApplications); exit;
+   	    	$AllApplications = $this->getblockzp($AllApplications);
+   	    	//print_r($AllApplications); exit;
+
+            //print_r($Query); exit;
+           // echo "<br />";
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk, ipdm.designation, ipm.stake_level_code FROM 
+   	    	          ".$jointable." as ipcpm  
+   	    	          LEFT JOIN  intra_pri_forwarding as forw ON forw.application_id = ipcpm.application_id
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          WHERE forw.application_id !='' AND forw.for_app_rej='A' AND forw.application_id != ''";
+
+   	    	$ApprovedApplications = $db->fetch_table($Query);  
+   	    	$ApprovedApplications = $this->getblockzp($ApprovedApplications);
+            //print_r($ApprovedApplications); exit;
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk, ipdm.designation, ipm.stake_level_code FROM 
+   	    	          ".$jointable." as ipcpm  
+   	    	          LEFT JOIN  intra_pri_forwarding as forw ON forw.application_id = ipcpm.application_id
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          WHERE forw.for_app_rej='R' AND forw.application_id != ''";
+   	    	$RejectedApplications = $db->fetch_table($Query);  
+            $RejectedApplications = $this->getblockzp($RejectedApplications);
+
+   	    	$Query = "SELECT forw.application_id,ipm.district_id_fk, ipcpm.gp_id_fk, ipcpm.ps_id_fk, ipcpm.zp_id_fk, ipdm.designation, ipm.stake_level_code FROM 
+   	    	          ".$jointable." as ipcpm  
+   	    	          LEFT JOIN  intra_pri_forwarding as forw ON forw.application_id = ipcpm.application_id
+   	    	          LEFT JOIN intra_pri_master as ipm ON forw.from_officer_id_const = ipm.officer_id_const
+   	    	          LEFT JOIN intra_pri_designation_master as ipdm ON ipm.stake_level_code = ipdm.designation_code
+   	    	          WHERE forw.status='1' AND forw.application_id != '' ";
+   	    	$PendingApplications = $db->fetch_table($Query);  	
+   	    	$PendingApplications = $this->getblockzp($PendingApplications);    	
+   	    	//print_r($PendingApplications); exit;
+   	    	$ReportApplications = '';
+   	    	foreach($allDistricts as $district)
+   	    		 {
+   	    		 	//print_r($district['blocks']); exit;
+   	    		 	$BlockApplications = '';
+   	    		 	foreach($district['blocks'] as $block)
+   	    		 	{
+			   	    		 	$Applications = array();
+			   	    		 	foreach($AllApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		   $Applications[] = $application['application_id'];
+			   	    		 	}
+			   	    		 	$countofApplication = count($Applications);
+			   	    		    if($countofApplication != 0) {	
+			                    $ApprovApp = array();
+			                    $desgApprov = array();
+			   	    		 	foreach($ApprovedApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$ApprovApp[] = $application['application_id'];
+			   	    		 		  	$desgApprov[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	$countofApprovApplication = count($ApprovApp); 
+			   	    		 	$approvedBy = '';
+			   	    		 	if($countofApprovApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgApprov as $dsa)
+				   	    		 	  {
+				                            $approvedBy[] = count($dsa).' Approved from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $approvedBy = implode(', ',$approvedBy);
+				   	    		  }	  
+
+
+			                    $RejectApp = array();
+			                    $desgReject = array();
+			   	    		 	foreach($RejectedApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$RejectApp[] = $application['application_id'];
+			   	    		 		  	$desgReject[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	$countofRejectApplication = count($RejectApp); 
+			   	    		 	$RejectBy = '';
+			   	    		 	if($countofRejectApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgReject as $dsa)
+				   	    		 	  {
+				                            $RejectBy[] = count($dsa).' Rejected from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $RejectBy = implode(', ',$RejectBy);
+				   	    		  }	
+
+			                    $PendingApp = array();
+			                    $desgPending = array();
+			   	    		 	foreach($PendingApplications as $application)
+			   	    		 	{
+			   	    		 		if($application['block_id'] != 0 && $block['block_id_pk'] == $application['block_id'])
+			   	    		 		  { 
+			   	    		 		  	$PendingApp[] = $application['application_id'];
+			   	    		 		  	$desgPending[$application['stake_level_code']][] = $application['designation']; 
+			   	    		 		  }
+			   	    		 	}
+			   	    		 	if($district['district_id_pk'] == 14)
+			   	    		 	{
+			   	    		 		//print_r($desgPending); exit;
+			   	    		 	}
+			   	    		 	$countofPendingApplication = count($PendingApp); 
+			   	    		 	$PendingBy = '';
+			   	    		 	if($countofPendingApplication > 0)
+				   	    		  {
+				   	    		  	
+				   	    		 	foreach($desgPending as $dsa)
+				   	    		 	  {
+				                            $PendingBy[] = count($dsa).' Pending from '.$dsa[0];
+				   	    		 	  }  
+				   	    		 	  $PendingBy = implode(', ',$PendingBy);
+				   	    		  }		   	    		  
+
+				   	    		    $BlockApplications[$block['block_id_pk']] = array(
+		    		    	                                                            'block_id'=>$block['block_id_pk'],
+				    	                                                                'block_name'=>$block['block_name'],
+				    	                                                                'applications'=>$countofApplication,
+				    	                                                                'approveapp'=>$countofApprovApplication,
+				    	                                                                'approvedby'=>$approvedBy,
+				    	                                                                'rejectapp'=>$countofRejectApplication,
+				    	                                                                'rejectedby'=>$RejectBy,
+				    	                                                                'pendingapp'=>$countofPendingApplication,
+				    	                                                                'pendingby'=>$PendingBy
+				   	    		    	                                              );
+				   	    	    }
+			   	    }
+
+			   	    // For ZP Start
+   	    		 	$Applications = array();
+   	    		 	$ZpApplications = array();
+   	    		 	foreach($AllApplications as $application)
+   	    		 	{
+   	    		 		if($application['zp_id'] != 0 && $district['district_id_pk'] == $application['zp_id'])
+   	    		 		   $Applications[] = $application['application_id'];
+   	    		 	}
+
+   	    		 	$countofApplication = count($Applications);
+
+   	    		    if($countofApplication > 0) {	
+                    $ApprovApp = array();
+                    $desgApprov = array();
+   	    		 	foreach($ApprovedApplications as $application)
+   	    		 	{
+   	    		 		if($application['zp_id'] != 0 && $district['district_id_pk'] == $application['zp_id'])
+   	    		 		  { 
+   	    		 		  	$ApprovApp[] = $application['application_id'];
+   	    		 		  	$desgApprov[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	$countofApprovApplication = count($ApprovApp); 
+   	    		 	$approvedBy = '';
+   	    		 	if($countofApprovApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgApprov as $dsa)
+	   	    		 	  {
+	                            $approvedBy[] = count($dsa).' Approved from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $approvedBy = implode(', ',$approvedBy);
+	   	    		  }	  
+
+
+                    $RejectApp = array();
+                    $desgReject = array();
+   	    		 	foreach($RejectedApplications as $application)
+   	    		 	{
+   	    		 		if($application['zp_id'] != 0 && $district['district_id_pk'] == $application['zp_id'])
+   	    		 		  { 
+   	    		 		  	$RejectApp[] = $application['application_id'];
+   	    		 		  	$desgReject[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	$countofRejectApplication = count($RejectApp); 
+   	    		 	$RejectBy = '';
+   	    		 	if($countofRejectApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgReject as $dsa)
+	   	    		 	  {
+	                            $RejectBy[] = count($dsa).' Rejected from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $RejectBy = implode(', ',$RejectBy);
+	   	    		  }	
+
+                    $PendingApp = array();
+                    $desgPending = array();
+   	    		 	foreach($PendingApplications as $application)
+   	    		 	{
+   	    		 		if($application['zp_id'] != 0 && $district['district_id_pk'] == $application['zp_id'])
+   	    		 		  { 
+   	    		 		  	$PendingApp[] = $application['application_id'];
+   	    		 		  	$desgPending[$application['stake_level_code']][] = $application['designation']; 
+   	    		 		  }
+   	    		 	}
+   	    		 	if($district['district_id_pk'] == 6)
+   	    		 	{  
+   	    		 		//print_r($PendingApplications); 
+   	    		 		//print_r($district);
+   	    		 		//print_r($desgPending); exit;
+   	    		 	}
+   	    		 	$countofPendingApplication = count($PendingApp); 
+   	    		 	$PendingBy = '';
+   	    		 	if($countofPendingApplication > 0)
+	   	    		  {
+	   	    		  	
+	   	    		 	foreach($desgPending as $dsa)
+	   	    		 	  {
+	                            $PendingBy[] = count($dsa).' Pending from '.$dsa[0];
+	   	    		 	  }  
+	   	    		 	  $PendingBy = implode(', ',$PendingBy);
+	   	    		  }		   	    		  
+
+	   	    		    $ZpApplications = array(
+                                                    'block_id'=>$district['district_id_pk'],
+                                                    'block_name'=>$district['district_name'],
+                                                    'applications'=>$countofApplication,
+                                                    'approveapp'=>$countofApprovApplication,
+                                                    'approvedby'=>$approvedBy,
+                                                    'rejectapp'=>$countofRejectApplication,
+                                                    'rejectedby'=>$RejectBy,
+                                                    'pendingapp'=>$countofPendingApplication,
+                                                    'pendingby'=>$PendingBy
+	   	    		    	                    );
+	   	    	    }
+
+  	    		 	
+			   	    // For ZP END
+
+                    //$InterDistrictApplications[] 
+                    $ReportApplications[$district['district_id_pk']] = array(
+                                                                'district_id'=>$district['district_id_pk'],
+                                                                'district_name'=>$district['district_name'],
+                                                                'blocks'=>$BlockApplications,
+                                                                'zp'=>$ZpApplications
+                                                                
+                                                            );
+   	    		 }
+   	    		 //print_r($ReportApplications); exit;
+   	    	return $ReportApplications;   	    	
+   	    }
+   	  function header()
+   	    {
+   	    	include_once('template/header.php');
+   	    }
+
+
+   }
+
+?>

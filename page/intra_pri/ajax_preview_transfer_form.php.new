@@ -1,0 +1,140 @@
+<?php 
+	require_once '../../includes/config/config.php';
+	require_once '../../includes/config/database.config.php';
+	require_once '../../includes/library/database.class.php';
+	require_once '../../includes/library/cryptography.class.php';
+	require_once '../../includes/library/all_function.php';
+	$db=new database();
+	$crypto=new cryptography();
+	$stake_level_district=$crypto->decode($_POST['dis'],4);
+	$app_no = ($stake_level_district =='')?$_POST['app_no']:''; 
+	$user_stack="ADM";
+	$stake_user_code =$_SESSION['user_info']['stake_user_code'];
+	$user_stack=substr($stake_user_code,-3);
+	$user_stack=($user_stack=='')?'D':$user_stack;
+	$districtId = (int) $_SESSION['user_info']['stake_user_code'];
+	$districtId = substr($districtId,0,4);
+	//print_r($districtId);
+	//$check=substr($stake_user_code,0,6);
+	//$c=substr($check,-2);
+	//if($c == 'DP'){$a=substr($stake_user_code,0,4); $id_fk = fun_d($a); }else{$a=substr($stake_user_code,0,7); $id_fk = fun_b($a);}
+	//print($c); exit;
+	$proposal= ($stake_level_district =='ID')?'PROPOSAL FOR GENERAL INTER DISTRICT TRANSFER AND POSTING':'PROPOSAL FOR GENERAL DISTRICT TRANSFER AND POSTING';
+
+	$Query = "SELECT * FROM intra_pri_district_transfer WHERE from_status in('2') and
+	 application_id='".$app_no."' order by emp_id_const";
+  $data = $db->fetch_table($Query);
+	//print_r($data); exit;
+?>
+	<div class="row" id="cont">
+			<div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad">
+					<div class="col-sm-12">
+							<h1 class="heading">Transfer & Posting</h1>
+							<div class="border"></div>
+							</br>
+							<strong style="color:#E93437;margin-left:25%"><noscript>This Form Is Blocked. Enable Javascript In Your Browser To View The Form.</noscript></strong>
+							<div class="school">
+							   <div class="table-responsive">							
+										<div id="form_show">
+													<table id="myTable">
+														<tr>
+															<th>Serial No.</th>
+															<th>Employee ID</th>
+															<th>Employee Name</th>
+															<th>Designation</th>
+															<th>Block Name where posted</th>
+															<th>GP Name where posted</th>
+															<th>PS Name where posted</th>
+															<th>Date of joining in Present Office</th>
+															<th>Transfer TO Block</th>
+															<th>Transfer TO GP</th>
+															<th>Transfer TO PS</th>
+															<th>Reason</th>
+															<th>Document Upload</th>
+					 							      <th>Status</th>
+													    <?php if($user_stack=="DM"){?>
+															<th>Action</th>
+															<?php }?>
+														</tr>
+														<?php foreach($data as $key=>$item):
+                             // print_r($item); exit;
+															?>
+														<tr>
+															<td><?php echo ($key+1); ?></td>
+															<td><?php echo $item['emp_id_const']; ?></td>
+															<td><?php echo $item['emp_first_name'].' '.$item['emp_second_name'].' '.$item['emp_last_name']; ?></td>
+															<td><?php echo fun_master($item['desig']); ?></td>
+															<td><?php echo code_block($item['pre_block_id_fk']); ?></td>
+															<td><?php echo code_gp($item['pre_gp_id_fk']);; ?></td>
+															<td><?php echo code_ps($item['pre_ps_id_fk']); ?></td>
+															<td><?php echo date("d-m-Y",strtotime($item['emp_join_prsnt_post_date'])); ?></td>
+															<td><?php echo ($item['transfer_block_id_fk'] != '')?code_block($item['transfer_block_id_fk']):blockSelect($districtId); ?></td>
+															<td><?php echo ($item['transfer_gp_id_fk'] != '')?code_gp($item['transfer_gp_id_fk']):gpSelect($item['transfer_block_id_fk']); ?></td>
+															<td><?php echo ($item['transfer_ps_id_fk'] != '')?code_block($item['transfer_ps_id_fk']):blockSelect($districtId); ?></td>
+															<td><?php echo transferLevel($item['reason']); ?></td>
+															<td><?php echo getUploadData($item['emp_id_const']); ?></td>
+														</tr>
+													  <?php endforeach;?>
+			                    </table>
+
+										</div>
+								</div>
+						</div>		
+					</div>
+			</div>
+	</div>	
+	<style type="text/css">
+.school table
+	{
+		border-collapse:collapse;
+		background-color: #FFFFFF;
+		font-family: "calibri";
+	}
+.school table, .school td, .school th
+	{
+		/*border:1px solid #fff;*/
+		padding: 4px;
+		text-align:center;
+	}
+	
+.school table th{
+		background-color: #3E9B96;
+		border:1px solid #fff;
+		color: #fff;
+		padding: 6px;
+		text-align:center;
+	}
+.school table{
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		overflow: hidden;
+		font-size: 14px;
+	}
+.school{
+	background-color: #FFFFFF;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	padding: 10px;
+	
+}
+.school .title h2{
+	color: #FFF;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	background-color: #0D8BBD;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+.school .action .ui-widget{
+	font-size: 11px;
+}
+.school .action{
+	text-align: center;
+}
+.school .action .ui-button .ui-button-text{
+	padding: 5px 10px;
+}
+		
+	</style>

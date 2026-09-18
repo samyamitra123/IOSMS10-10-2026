@@ -1,0 +1,234 @@
+<?php
+//echo 88; die;
+//error_reporting(0);
+//---------------------------- LIBRARY INCLUDE ----------------------------
+//copy this two lines to every page
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, max-age=0, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+
+session_start();
+require '../../includes/config/config.php';
+require '../../includes/config/database.config.php';
+require '../../includes/library/database.class.php';
+require_once '../../includes/library/cryptography.class.php';
+//require '../../page_visite.php';
+//require 'includes/library/session.class.php';
+
+//------------------------------- LOGICAL AREA ---------------------------------------------------------------------------------
+//
+//Detect referer page from external domain
+//if(!isset($_SERVER['HTTP_REFERER'])){
+//    header('Location: '. $config['base_url'] . "page/error.php?id=1");
+//    exit("Do not paste URL directly");
+//    
+//} elseif (strpos($_SERVER['HTTP_REFERER'], $config['base_url']) === false) {
+//    // substring is not found in string
+//    header('Location: '. $config['base_url'] . "page/error.php?id=2");
+//    exit("<p style='background-color:#f00;'>Wrong website referer found</p>");
+//}
+//redirect to login page when login session not found
+
+$crypto = new cryptography();
+//$cryptoGraph=new cryptography();
+$db=new database();
+$id = $crypto->decode($_GET['id'],4);
+//var_dump($id); die;
+//print_r($_SESSION['user_info']); exit;
+$pdf_fetch =$db->fetch_table(" SELECT * FROM intra_pri_9008_order WHERE application_id = '".$id."' ");
+$pdf_fetchPri =$db->fetch_table(" SELECT * FROM intra_pri_9008 WHERE application_id = '".$id."' ");
+$pdf_fetchPri = $pdf_fetchPri[0];
+
+
+//print_r($PsDetails); exit;
+$officer_name =$db->fetch_table(" SELECT * FROM intra_pri_master WHERE officer_id_const = '".$_SESSION['user_info']['officer_id_const']."' ");
+$officer_desig =$db->fetch_table(" SELECT * FROM intra_pri_designation_master WHERE designation_code = '".$_SESSION['user_info']['stake_level_code']."' ");
+	   
+//var_dump($overage_pdf_fetch); die;	
+          switch($pdf_fetchPri['sanctioned_post_name'])
+              {
+              	 case '1119':
+                 case '1121':
+              	 $group = 'Group D';
+              	 break;
+                 case '9006':
+                 $group = 'Group C';
+                 break;                 
+              }
+ $emp_name = $pdf_fetch[0]['emp_name'];   
+ $engagged_office = $pdf_fetch[0]['engagged_office'];   
+ $engagged_date = $pdf_fetch[0]['engagged_date'];   
+ $sanctioned_post = $pdf_fetch[0]['sanctioned_post'];   
+ $remuneration = $pdf_fetch[0]['remuneration'];   
+ $work_office = $pdf_fetch[0]['candidate_gppszp'];
+ $block_name = '';
+ switch($engagged_office)
+  {
+  	 case 'GP':
+  	   $HeadOfAcount = '2515-00-101-00-004-31-02-V';
+       $Query = "SELECT block_name FROM prd_location_master_block WHERE block_id_pk = '".$pdf_fetchPri['ps_id_fk']."'";
+       //print($Query); exit;
+       $PsDetails =$db->fetch_table($Query); 
+       //print_r($PsDetails); exit;   
+       $Ps_name = 'under '.$PsDetails[0]['block_name'].' PS';
+       $block_name = $PsDetails[0]['block_name']. ' PS, ';
+  	 break;
+   	 case 'PS':
+   	   $HeadOfAcount = '2515-00-101-00-010-31-02-V';
+       //$PsDetails =$db->fetch_table(" SELECT block_name FROM prd_location_master_block WHERE block_id_pk = '".$pdf_fetchPri['ps_id_fk']."' ");
+       $psblock_name = $work_office.' PS, ';
+       //$PsName = 'under '.$block_name;
+  	 break;
+  	 case 'ZP':
+  	   $HeadOfAcount = '2515-00-101-00-012-31-02-V';
+  	 break;  	  	 
+  }
+ $engagged_office = ($engagged_office == 'GP')?'Gram Panchayat':$engagged_office;
+ $engagged_office = ($engagged_office == 'PS')?'Panchayat Samiti':$engagged_office;
+ $engagged_office = ($engagged_office == 'ZP')?'Zilla Parishad':$engagged_office;
+
+
+
+
+	    //------------------------------------------------------------------------------------------------------	
+	    define("_MPDF_TEMP_PATH", '../../locker/temp/');
+	    include ('../../includes/third-party/mpdf/mpdf.php');
+	    $stylesheet ='';
+	    $mpdf=new mPDF();
+	     
+
+	    $mpdf->WriteHTML($stylesheet,1);
+		
+
+	    //Header and footer
+	    $mpdf->SetFooter('priemp.wbprd.gov.in|'.$_SESSION['user_info']['stake_user'].'|{PAGENO}');
+ 
+	    //PDF header
+	    $mpdf->WriteHTML('
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+        
+</head>
+<body>
+<h1 align="center"><img src="img/Pnrd_logo.png" style="float:center;width:60pt;height:80pt"></h1>
+<h2 align="center" style="margin:0em 0em 0em;">Government of West Bengal</h2>
+<h4 align="center" style="margin:0em 0em 0em;">Panchayats & Rural Development Department</h4>
+<h4 align="center" style="margin:0em 0em 0em;">Joint Administrative Building, HC-7, Sector – III, Bidhan Nagar, Kolkata-700106</h4>
+<hr>
+<table class="layout" style="font-size:10pt;">
+<tr>
+    <td width="370" class="layout"><strong>Memo No. - '.$pdf_fetch[0]['memo_no'].'</strong></td>
+    <td class="layout"></td>
+    <td class="layout" width="160"></td>
+    <td class="layout" align="right">Date: <strong>'.date('d-M-Y',strtotime($pdf_fetch[0]['order_date'])).'</strong></td>
+</tr>
+</table>
+<br>
+
+
+<h4 align="center" style="margin:0em 0em 0em;">ORDER</h4>
+
+<table border="0" width="100%" style="border-collapse: collapse; margin:10pt 0pt 0pt 0pt; font-size:10pt;" > 
+<tr>
+<td align="justify">
+           In pursuance of Finance Department Order No. - 9008-F (P) dated 16-09-2011 read with F.D. Memo No. - 4011-F (P) dated 20-05-2013, No. - 1107-F (P) dated 25-02-2016, No. 1033-F (P2) dated 08-02-2019 and No. 1091-F (P2) dated 01-04-2024 the below noted casual worker who has been working with effect from the date and in the office mentioned there in the District of <span class="style1">'.$pdf_fetch[0]['candidate_zp'].'</span> is hereby entitled to get the benifits of above mentioned Memorendum and subsequent Memos in this regard issued by the Finance Department from time to time. 
+</td>		   
+</tr>
+</table>
+<table align="center" border="1" width="61%" style="border-collapse: collapse; margin:10pt 0pt 0pt 0pt; font-size:8pt;" > 
+<tr>
+<td width="5%" height="35" align="center" valign="middle"><div align="center"><strong><span class="style2">Sl. No.</span></strong></div></td>
+<td width="19%" align="center" valign="middle"><div align="center"><strong><span class="style2">Name Of The Casual Worker</span></strong></div></td>
+<td width="20%" align="center" valign="middle"><div align="center"><strong><span class="style2">Name Of The Office Where Engaged</span></strong></div></td>
+<td width="15%" align="center" valign="middle"><div align="center"><strong><span class="style2">Date Of Engagement</span></strong></div></td>
+<td width="20%" align="center" valign="middle"><div align="center"><strong><span class="style2">Name Of The Sanctioned Post</span></strong></div></td>
+<td width="21%" align="center" valign="middle"><div align="center"><strong><span class="style2">Remuneration w.e.f. the date of issuance of this order</span></strong></div></td>
+</tr>
+<tr>
+<td width="5%" height="19" align="center" valign="middle"><div align="center"><strong><span class="style2">1</span></strong></div></td>
+<td width="19%" align="center" valign="middle"><div align="center"><strong><span class="style2">'.$emp_name.'</span></strong></div></td>
+<td width="20%" align="center" valign="middle"><div align="center"><strong><span class="style2">'.$work_office.' <p>'.$engagged_office.'</p>'.$Ps_name.'</span></strong></div></td>
+<td width="15%" align="center" valign="middle"><div align="center"><strong><span class="style2">'.date('d-m-Y',strtotime($engagged_date)).'</span></strong></div></td>
+<td width="20%" align="center" valign="middle"><div align="center"><strong><span class="style2">'.$sanctioned_post.'<p>'.$group.'</p></span></strong></div></td>
+<td width="21%" align="center" valign="middle"><div align="center"><strong><span class="style2">'.$remuneration.'</span></strong></div></td>
+</tr>
+
+</table>
+<table border="0" width="100%" style="border-collapse: collapse; margin:10pt 0pt 0pt 0pt; font-size:10pt;" > 
+<tr>
+<td align="justify">
+           <p>The enhanced<strong> remuneration will come into effect from the date of issuance of this order and other conditions will be followed
+    as per G.O. in force. The remuneration of the casual workers will be met from the head of  A/C - '.$HeadOfAcount.' (for '.$engagged_office.') </span>.</p>
+    <p>This order issued with approval of the <span class="style3"><strong>Secretary </strong></span>of this department. </p></td>		   
+</tr>
+</table>
+<br />
+<table style="margin-top:4%;font-size:9pt"> 
+<tr>
+<td width="20"></td>
+<td align="center"> </td>
+<td width="400"></td>
+<td align="center">.......................................................................................</td>
+</tr>
+<tr>
+<td width="20"></td>
+<td align="center"><strong></strong></td>
+<td width="400"></td>
+<td align="center">
+  <p>'.$officer_desig[0]['designation'].' to the Govt. of West Bengal <br>
+    Panchayats & Rural Development Department</p></td>
+</tr>
+</table>
+<hr>
+<table class="layout" style="font-size:10pt;">
+<tr>
+    <td width="370" class="layout"></td>
+    <td class="layout"></td>
+    <td class="layout" width="160"></td>
+    <td class="layout" align="right">Date: <strong>'.date('d-M-Y',strtotime($pdf_fetch[0]['order_date'])).'</strong></td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td>Copy forwarded for information and necessary action to:-</td>
+</tr>
+</table>
+<ol style="font-size:14px">
+<li>The Sr. P.A. to the Secretary of this Department</li>
+<li>The D.M, '.$pdf_fetch[0]['candidate_zp'].'</li>
+<li>The Executive Officer, '.$block_name.$psblock_name.$pdf_fetch[0]['candidate_zp'].'</li>
+<li>Head Assistant, PRI cell of this Department.</li>
+<li>'.$emp_name.', Casual '.$sanctioned_post.' of '.$work_office.' '.$engagged_office.', '.$block_name.$pdf_fetch[0]['candidate_zp'].'</li>
+</ol>
+<br />
+<table style="margin:10pt 0pt 0pt 0pt;font-size:9pt"> 
+<tr>
+<td width="20"></td>
+<td align="center"> </td>
+<td width="400"></td>
+<td align="center">.......................................................................................</td>
+</tr>
+<tr>
+<td width="20"></td>
+<td align="center"><strong></strong></td>
+<td width="400"></td>
+<td align="center"><p>'.$officer_desig[0]['designation'].' to the Govt. of West Bengal </p><p>Panchayats & Rural Development Department</p></td>
+</tr>
+</table>
+</body>
+</html>',2);
+
+
+$mpdf->Output(strtolower(str_replace(' ','_',ltrim($emp_name))).'_order_9008'.'.pdf','I');
+
+
+$mpdf->SetWatermarkImage('https://priemp.wbprd.gov.in/page/intra_pri/img/biswa_bangla_1.png',1,'',array(10,65));
+$mpdf->showWatermarkImage = true;
+$mpdf->watermarkImageAlpha = 0.85;
+
+
+
+
+?>

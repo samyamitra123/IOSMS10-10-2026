@@ -1,0 +1,212 @@
+<?
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+/*header("X-Frame-Options: SAMEORIGIN");*/
+/*header("X-Content-Type-Options: nosniff");
+header("X-XSS-Protection: 1; mode=block");*/
+/*header("Content-Security-Policy: default-src 'self' https://code.jequery.com; img-src 'self'; font-src 'self'; 
+connect-src 'self'; 
+form-action 'self'; frame-ancestors 'none'; ");*/
+
+/*header("Strict-Transport-Security: max-age=63072000");*/
+
+if(basename($_SERVER['PHP_SELF'])!='login.php' || basename($_SERVER['PHP_SELF'])!='login_form.php' || basename($_SERVER['PHP_SELF'])!='log_sub.php'){
+	$sess_name = session_name();
+	//if (session_start()) {
+		setcookie($sess_name, session_id(), null, '/', null, null, true);
+	//}
+}
+
+////////////////////Privilege escalation///////////////////////////
+$url = $_SERVER['PHP_SELF'] ;
+//echo $url."<br>" ;
+$url_test = str_replace('/',' ',$url) ;
+//echo $url_test."<br>" ;
+$url=strchr($url_test,'page'); 
+//echo $url."<br>" ;
+$url_test = explode(" ",$url) ;
+//print_r($url_test) ;
+
+
+/*if($url_test['1']=='icons'){
+		header('Location: '. $config['base_url']);
+		exit;
+	}
+if($_SESSION['user_info']['stake_level'] && $url_test['1']=='dashboard.php' ){	
+if($url_test['2']=='gp'){
+	if(($_SESSION['user_info']['stake_level']!=64)){
+		header('Location: '. $config['base_url'] . "page/login.php");
+		exit;
+	}
+}else if($url_test['2']=='block'){
+	if(($_SESSION['user_info']['stake_level']!=35)){
+		header('Location: '. $config['base_url'] . "page/login.php");
+		exit;
+	}
+}else if($url_test['2']=='state'){
+	if(($_SESSION['user_info']['stake_level']!=57)){
+		header('Location: '. $config['base_url'] . "page/login.php");
+		exit;
+	}
+}else if($url_test['2']=='da'){
+    
+	if(($_SESSION['user_info']['stake_level']!=37)){
+		header('Location: '. $config['base_url'] . "page/login.php");
+		exit;
+	}
+}else if($url_test['2']=='eo'){
+ 
+	if(($_SESSION['user_info']['stake_level']!=36)){
+		header('Location: '. $config['base_url'] . "page/login.php");
+		exit;
+	}
+}
+
+}*/
+/*****************sql injection prevention start*********************/
+//$request_arr=$_REQUEST;
+//echo '<pre>';
+//print_r($request_arr);
+//echo '</pre>';
+//	foreach($request_arr as $key_test){
+//		//echo $key_test.'<br>';
+//		if($key_test!=''){
+//			if(preg_match("/[!$%^&*()_+|~`{}\[\]:\";'<>?,.\/]/i", $key_test)){
+//				header('Location: '. $config['base_url'] . "page/errordoc.php");
+//			}
+//		}
+//	}
+	
+	
+
+/******************sql injection prevention end*********************/
+
+header("X-Frame-Options: SAMEORIGIN");
+header("X-Content-Type-Options: nosniff");
+$common['title'] = "P&RD | Govt. of West Bengal ";
+//Meta tag variables
+$common['meta']['keyword'] = 'West Bengal Panchayat and Rural Development Department, P&RD department';
+$common['meta']['description'] = 'West Bengal Panchayat and Rural Development Department, P&RD department';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="referrer" content="origin-when-cross-origin">
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<?php if(isset($common['meta'])){ foreach ($common['meta'] as $key => $value) {?>
+<meta name="<?php echo $key; ?>" content="<?php echo $value; ?>" />
+<?php }} ?>
+<title><?php echo  $common['title']; ?></title>
+
+<link rel="stylesheet" type="text/css" href="<?php echo $config['base_url']; ?>themes/default/bootstrap_v5.1.3/css/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="<?php echo $config['base_url']; ?>themes/default/bootstrap_v5.1.3/css/bootstrap.min.css">
+<script src="<?php echo $config['base_url']; ?>themes/default/js/jquery-3.6.0.min.js"></script>
+<!--<script src="<?php echo $config['base_url']; ?>themes/default/bootstrap_v5.1.3/js/bootstrap.js" type="text/javascript"></script>
+<script src="<?php echo $config['base_url']; ?>themes/default/bootstrap_v5.1.3/js/bootstrap.min.js" type="text/javascript"></script>-->
+<script src="<?php echo $config['base_url']; ?>themes/default/bootstrap_v5.1.3/js/bootstrap.bundle.min.js"></script>
+
+
+
+<link rel="stylesheet" href="<?php echo $config['base_url']; ?>themes/default/css/font-awesome.min.css">
+<link rel="stylesheet" href="<?php echo $config['base_url']; ?>themes/default/css/style.css">
+
+
+<link rel="stylesheet" type="text/css" href="<?php echo $config['base_url']; ?>themes/default/css/dataTables.bootstrap5.css">
+
+<link rel="shortcut icon" href="<?php echo $config['base_url']; ?>themes/default/img/fav_icon.png">
+<!--<link href="<//?php echo $config['base_url']; ?>themes/default/css/allinone_carousel.css" rel="stylesheet" type="text/css">-->
+<link href="<?php echo $config['base_url']; ?>themes/default/css/owl.carousel.min.css" rel="stylesheet" type="text/css">
+<link href="<?php echo $config['base_url']; ?>themes/default/css/owl.theme.default.min.css" rel="stylesheet" type="text/css">
+<!--<link href="<//?php echo $config['base_url']; ?>themes/default/css/dhtmlgoodies_calendar.css" rel="stylesheet" type="text/css">-->
+
+
+<meta name="custom-referer" content="http://172.25.138.175/">
+
+<script src="<?php echo $config['base_url']; ?>themes/default/js/jquery-migrate-3.3.2.min.js" type="text/javascript"></script>
+<!--<script src="<?//php echo $config['base_url']; ?>themes/default/js/jquery-migrate.js" type="text/javascript"></script>-->
+<!--<script src="<?//php echo $config['base_url']; ?>themes/default/js/allinone_carousel.js" type="text/javascript"></script>-->
+<script src="<?php echo $config['base_url']; ?>themes/default/js/owl.carousel.min.js" type="text/javascript"></script>
+<!--<script src="<//?php echo $config['base_url']; ?>themes/default/js/dhtmlgoodies_calendar.js" type="text/javascript"></script>-->
+<script src="<?php echo $config['base_url']; ?>themes/default/js/commonfunc.js" type="text/javascript"></script>
+
+
+<!--<script src="<?php echo $config['base_url']; ?>themes/default/js/jquery.dataTables5.min.js" type="text/javascript"></script>-->
+<script src="<?php echo $config['base_url']; ?>themes/default/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script src="<?php echo $config['base_url']; ?>themes/default/js/dataTables.bootstrap5.js" type="text/javascript"></script>
+
+
+<script src="<?php echo $config['base_url']; ?>themes/default/js/crypto-js.js" type="text/javascript"></script>
+
+<!----- new development-------------------->
+
+
+<script src="<?php echo $config['base_url']; ?>themes/default/js_ui/jquery-ui.min-1.13.0.js" type="text/javascript"></script>
+<script src="<?php echo $config['base_url']; ?>themes/default/js_ui/jquery-ui-1.13.0.js" type="text/javascript"></script>
+<script src="<?php echo $config['base_url']; ?>themes/default/js/jquery.ui.touch-punch.js" type="text/javascript"></script>
+<script src="<?php echo $config['base_url']; ?>themes/default/js/jquery-ui-touch-punch.min.js" type="text/javascript"></script>
+<link href="<?php echo $config['base_url']; ?>themes/default/js_ui/jquery-ui.min-1.13.0.css" rel="stylesheet" type="text/css">
+<link href="<?php echo $config['base_url']; ?>themes/default/js_ui/jquery-ui-1.13.0.css" rel="stylesheet" type="text/css">
+<link href="<?php echo $config['base_url']; ?>themes/default/js_ui/jquery-ui.structure.min-1.13.0.css" rel="stylesheet" type="text/css">
+<link href="<?php echo $config['base_url']; ?>themes/default/js_ui/jquery-ui.structure-1.13.0.css" rel="stylesheet" type="text/css">
+<link href="<?php echo $config['base_url']; ?>themes/default/js_ui/jquery-ui.theme.min-1.13.0.css" rel="stylesheet" type="text/css">
+<link href="<?php echo $config['base_url']; ?>themes/default/js_ui/jquery-ui.theme-1.13.0.css" rel="stylesheet" type="text/css">
+
+
+
+
+
+<script>
+
+
+</script>
+
+		<style>
+        @media screen and (min-width:1200px) {
+        #containingDiv {
+            width: 1002px;
+            margin: 0 auto;
+        }
+        #bottomText {
+            width: 100%;
+            font: 18px 'Lato', sans-serif;
+            color: #333333;
+            border-top: 1px solid #cccccc;
+            padding: 10px 0 0 0;
+            margin-top: 100px;
+            text-align: center;
+        }
+        }
+        
+        @media screen and (max-width:767px) {
+        #containingDiv {
+            width: 100%;
+            margin: 0 auto;
+        }
+        #bottomText {
+            width: 100%;
+            font: 14px 'Lato', sans-serif;
+            color: #333333;
+            border-top: 1px solid #cccccc;
+            padding: 10px 0 0 0;
+            margin-top: 50px;
+            text-align: center;
+        }
+        }
+        </style>
+        
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+</head>
+
+<body>
+<!--<div class="container">-->
+  <div id="main"> 
+    <!-- header -->
+    <div id="header"> <img src="<?php echo $config['base_url']; ?>themes/default/img/header.jpg" class="img-responsive" style="width:100%;"> </div>

@@ -1,0 +1,360 @@
+<?php 
+ob_start();
+session_start();
+
+if($_SERVER['HTTP_REFERER']=='')
+{
+	header("Location:../../dashboard.php");
+}
+
+require '../../../../includes/config/config.php';
+require '../../../../includes/config/database.config.php';
+require '../../../../includes/library/database.class.php';
+require '../../../../includes/library/cryptography.class.php';
+require '../../../../includes/library/myvalidation.class.php';
+
+
+if (
+!isset($_SESSION['user_info']['stake_user'])
+|| !isset($_SESSION['user_info']['stake_level'])
+|| !isset($_SESSION['user_info']['flag'])
+
+){
+header('Location: '. $config['base_url'] . "page/login.php");
+exit;
+}
+
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, max-age=0, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+$cryptoGraph=new cryptography();
+$sec_time_token=$_POST['sec_tok1'];
+$session_token=$_SESSION['security_token1'];
+$enc_session=md5('369'.$session_token);
+
+//  if($_SESSION['location']['district_id']=='15'){
+//	echo $enc_session."/".$sec_time_token."<br>"; 
+//	//echo $enc_session."/".$session_token; die;
+//	}
+ 
+
+if($sec_time_token!=$enc_session)
+{
+   
+ 
+	$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Time Out!..Please Try Again.</strong></div>';
+	header('Location:profile_entry_basic.php');
+			exit(0);
+}
+else
+{
+
+	$retire_date=explode('-',$_POST['emp_date_retirement']);
+	$emp_date_retirement=$retire_date[2].'-'.$retire_date[1].'-'.$retire_date[0];
+	$fname=strtoupper($_POST['tch_fname']);
+	$mname=strtoupper($_POST['tch_mname']);
+	$lname=strtoupper($_POST['tch_lname']);
+	$dob=date("Y-m-d",strtotime($_POST['tch_dob']));
+	$drpSex=$_POST['drpSex'];
+	$drpCast=$_POST['drpCast'];
+	$voter_id=strtoupper($_POST['voter_id']);
+	$aadhar_status=$_POST['aadhar_status'];
+	$aadhaar_no=$_POST['aadhaar_no'];
+	if($_POST['emp_quali']=='')
+	{
+		$emp_quali=0;
+	}
+	else
+	{
+		$emp_quali=$_POST['emp_quali'];
+	}
+	$zp_emp_type=$_POST['emp_type'];
+	$emp_pan_no=strtoupper($_POST['pan_no']);
+	$govt_id=strtoupper($_POST['govt_id']);
+	$emp_id_pk=$_POST['emp_id_pk'];
+	
+	if($validator->blank_select($fname) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter First Name.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($zp_emp_type) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Employee Type.</strong></div>';
+		$emp_id=$cryptoGraph->encode($emp_id_pk,4);
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	/*else if($validator->blank_select($govt_id) == FALSE && $zp_emp_type=='366')
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Government ID.</strong></div>';
+		$emp_id=$cryptoGraph->encode($emp_id_pk,4);
+		include 'profile_entry_basic_form.php';
+		exit;
+	}*/
+	
+	else if($validator->pattern_math_chcarecter($fname) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Only Character in First Name.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($mname) == TRUE && $validator->pattern_math_chcarecter($mname) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Only Character in Middle Name.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($lname) == TRUE && $validator->pattern_math_chcarecter($lname) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Only Character in Last Name.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($dob) == FALSE || $dob == '0001-01-01')
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Valid DOB.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($dob) == TRUE && $validator->valid_age($dob) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Date Of Birth must be greater than 18 year.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($drpSex) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Select Gender.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($drpCast) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Select Caste.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($voter_id) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Voter ID.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($emp_pan_no) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please enter your Permanent Account Number (PAN No.).</strong></div>';
+		$emp_id=$cryptoGraph->encode($emp_id_pk,4);
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if(!empty($emp_pan_no))
+	{
+		if($validator->pan_pattern_match($emp_pan_no) == FALSE)
+		{
+			$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Permanent Account Number (PAN No.) is not valid.</strong></div>';
+			$emp_id=$cryptoGraph->encode($emp_id_pk,4);
+			include 'profile_entry_basic_form.php';
+			exit;
+		}
+	}
+	else if($validator->blank_select($aadhar_status) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Select Whether Aadhaar Card Present or not.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($aadhar_status) == FALSE && $validator->blank_select($aadhaar_no) == TRUE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Select Whether Aadhaar Card Present or not.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($aadhar_status == '1' && $validator->blank_select($aadhaar_no) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Aadhaar No.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	/*else if(!empty($emp_pan_no))
+	{
+		if($validator->pan_pattern_match($pan_no) == FALSE)
+		{
+			$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Permanent Account Number (PAN No.) is not valid.</strong></div>';
+			$emp_id=$cryptoGraph->encode($emp_id_pk,4);
+			include 'profile_entry_basic_form.php';
+			exit;
+		}
+	}*/
+	else if($validator->blank_select($emp_quali) == FALSE && $zp_emp_type=='367' )
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Select Educational Qualification.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->pattern_number(trim($aadhaar_no)) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Valid Aadhar Number.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	else if($validator->blank_select($aadhaar_no) == TRUE && strlen($aadhaar_no) !=12)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Aadhar Number Must be 12 digit long.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	/*-----------------------------------------------Code_Master Checking--------------------------------------------------------------------*/
+	
+	$db = new database();
+	$voterid_check=$db->fetch_table("select emp_voter_id from prd_employee_master");
+	$aadhar_check=$db->fetch_table("select emp_aadhar_no from prd_employee_master");
+	$pan_check=$db->fetch_table("select emp_pan_no from prd_employee_master");
+	$code_data = $db->fetch_table("
+									SELECT code, description
+									FROM prd_dise_code_master;
+									");
+	
+	if($validator->blank_select($voter_id) == TRUE)
+	{ 
+		foreach($voterid_check as $key)
+		{
+			if(strtoupper($voter_id) == strtoupper($key['emp_voter_id']))
+			{
+				$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Voter ID already exists. Please Enter valid Voter ID.</strong></div>';
+				include 'profile_entry_basic_form.php';
+				exit;
+			}
+		}
+	}							
+	
+	if($validator->blank_select($aadhaar_no) == TRUE)
+	{
+		foreach($aadhar_check as $key)
+		{
+			if($aadhaar_no == $key['emp_aadhar_no'])
+			{
+				$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Aadhaar ID already exists. Please Enter valid Aadhaar ID.</strong></div>';
+				include 'profile_entry_basic_form.php';
+				exit;
+			}
+		}
+	}
+	
+	if($validator->blank_select($emp_pan_no) == TRUE)
+	{
+		foreach($pan_check as $key)
+		{
+			if(strtoupper($emp_pan_no) == strtoupper($key['emp_pan_no']))
+			{
+				$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Pan Number already exists. Please Enter valid Pan Number.</strong></div>';
+				include 'profile_entry_basic_form.php';
+				exit;
+			}
+		}
+	}
+	
+	if($validator->code_match($drpCast,$code_data) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Invalid Caste Selection.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	if($validator->code_match($drpSex,$code_data) == FALSE)
+	{
+	  
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Invalid Gender Selection.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+
+	if($validator->blank_select($emp_quali) == TRUE && $validator->code_match($emp_quali,$code_data) == FALSE)
+	{
+	   
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Invalid Educational Qualification Selection.</strong></div>';
+		include 'profile_entry_basic_form.php';
+		exit;
+	}
+	/*--------------------------------------------------END-------------------------------------------------------------------------*/
+	
+	else
+	{ 
+		$db = new database();
+		
+		$arr = $db->fetch_table("select max(empcd) as entry_rec_tchcd from prd_employee_master where ps_id_fk='".$_SESSION['location']['ps_id']."'");
+		if($arr[0]['entry_rec_tchcd']=="")
+		{
+			$empcd="001"; 
+		}
+		else 
+		{
+			$empcd=intval($arr[0]['entry_rec_tchcd'])+1;
+			$empcd=str_pad($empcd,3,0,STR_PAD_LEFT);
+		}
+		
+		
+		$query_insert=$db->insert("INSERT into prd_employee_master
+									(
+										emp_first_name,
+										emp_second_name,   
+										emp_last_name,
+										emp_dob,
+										emp_sex,
+										emp_caste,
+										emp_voter_id,
+										emp_aadhar_no,
+										emp_edu_quali,
+										emp_retirement_date,
+										emp_form_status,
+										emp_status,
+										entry_time,
+										entry_ip,
+										empcd,
+										zp_id_fk,
+										zp_emp_type,
+										emp_pan_no,
+										emp_govt_id,
+										ropa_status
+										
+									)
+									VALUES(
+										'$fname',
+										'$mname',
+										'$lname',
+										'$dob',
+										'$drpSex',
+										'$drpCast',
+										'".strtoupper($voter_id)."',
+										'$aadhaar_no',
+										'$emp_quali',
+										'$emp_date_retirement',
+										'1',
+										'10',
+										'now()',
+										'".$_SERVER['REMOTE_ADDR']."',
+										'".$empcd."',
+										'".$_SESSION['location']['district_id']."',
+										'".$zp_emp_type."',
+										'".$emp_pan_no."',
+										'".$govt_id."',
+										'1'
+										
+									)
+									");
+									
+		
+		if($query_insert)
+		{
+			$sql=$db->fetch_table("SELECT emp_id_pk FROM prd_employee_master WHERE zp_id_fk='".$_SESSION['location']['district_id']."' and emp_pan_no='".$emp_pan_no."' ");
+			$emp_id_pk=$sql[0]['emp_id_pk'];
+			header('Location:profile_entry_prof.php?emp_date_retirement='.$cryptoGraph->encode($emp_date_retirement,4).'&emp_id_pk='.$cryptoGraph->encode($emp_id_pk,4).'&confirm=success');
+			exit(0);
+		}
+		else
+		{
+			header('Location:profile_entry_basic.php?confirm=false');
+			exit(0);
+		}
+	}
+}
+?>

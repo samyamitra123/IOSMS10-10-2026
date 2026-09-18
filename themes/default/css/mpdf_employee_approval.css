@@ -1,0 +1,129 @@
+body {
+	/*font-size: 20px;*
+}
+/*table{
+	border-collapse:collapse;
+}
+table, td, th{
+	/*border:1px solid black;*/
+/*	padding:5px;
+	width:250px;
+}
+table .heading{
+	background-color: #666;
+	color: #FFF;
+	padding:5px;
+}
+.colgray{
+	
+	background-color: #EEE;
+}
+.statusn{
+	color: #F20000;
+	font-size: 18px;
+}
+.statusf{
+	color: green;
+	font-size: 18px;
+}
+.heading{
+	color: #008200;
+	font-size: 24px;
+}
+}*/
+.logo{
+	text-align: center;
+}
+
+/*header*/
+.he1{
+	width: 100px;
+	vertical-align: top;
+
+}
+.he2{
+	text-align: center;
+	width: 480px;
+}
+.he3{
+	width: 100px;
+	vertical-align: top;
+	text-align: right;
+}
+.department{
+	font-size: 11px;
+	margin: 0px;
+	padding:0px;
+}
+.school{
+	color: #008200;
+	font-size: 20px;
+}
+.location{
+	font-size: 12px;
+}
+.segment{
+	
+}
+.segment h4{
+	background-color: #4BB1CF;
+	color: #FFF;
+	text-align: center;
+}
+.segment h5{
+	margin: 0px;
+	padding: 0px;
+	text-transform: uppercase;
+}
+.segment table{
+	font-size: 11px;
+	vertical-align: bottom;
+}
+.segment table .col1{
+	color: #1F6377;
+	width: 225px;
+	font-weight: bold;
+	font-family: "Arial Narrow";
+	text-align: right;
+	font-style: italic;
+	font-size: 14px;
+	line-height: 60px;
+}
+ .segment table .col3{
+	color: #1F6377;
+	width: 156px;
+	font-weight: bold;
+	font-family: "Arial Narrow";
+	text-align: right;
+	font-style: italic;
+	font-size: 14px;
+	line-height: 60px;
+}
+.segment table .col2{
+	width: 225px;
+	font-family: "Arial Narrow";
+	font-size: 14px;
+	line-height: 60px;
+}
+
+/*Color*/
+.bg_red{
+	background-color: #f00;
+}
+.bg_green{
+	background-color: #f00;
+}
+
+.bg_blue{
+	background-color: #f00;
+}
+
+.bg_orange{
+	background-color: #f00;
+}
+
+.bg_gray{
+	background-color: #eee;
+}
+
+

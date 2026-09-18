@@ -1,0 +1,718 @@
+<?php
+//---------------------------- LIBRARY INCLUDE ---------------------------------------------------------------------------------------------
+//copy this two lines to every page
+/*
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, max-age=0, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+*/
+//error_reporting(0);
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+/*header("X-Frame-Options: SAMEORIGIN");
+header("X-Content-Type-Options: nosniff");
+header("X-XSS-Protection: 1; mode=block");
+header("Content-Security-Policy: default-src 'self' https://code.jequery.com; img-src 'self'; font-src 'self'; 
+connect-src 'self'; 
+form-action 'self'; frame-ancestors 'none'; ");
+
+header("Strict-Transport-Security: max-age=63072000");*/
+
+session_start();
+ob_start();
+require_once '../includes/library/session.class.php';  
+
+//session
+$sess = new Session();
+$sess->nic_session_start('../includes/config/config.php');
+
+/*if (session_start()) {*/
+		setcookie($sess_name, session_id(), null, '/', null, null, true);
+		
+//} update 14.5.2019
+
+
+//session
+require '../includes/config/config.php';
+require_once '../includes/config/database.config.php';
+require_once '../includes/library/user_agent.class.php';
+require_once '../includes/library/myvalidation.class.php';
+//require 'page_visite.php';
+//require 'includes/library/session.class.php';
+  $common['title'] = "Wrong input | PRD";
+//$common['meta']['keyword'] = 'West Bengal School Education Department, SED department';
+//$common['meta']['description'] = 'West Bengal School Education Department, SED department';
+//---------------------------------- HEADER ------------------------------------------------------------------------------------------------
+require '../page/layout/header.php';
+//---------------------------------- MENU--------------------------------------------------------------------------------------------------
+require '../page/layout/menu.php';
+//-----------------------------SQL QUERY FUNCTIONS------------------------------------------------------------------------------------------
+$_SESSION['last_login']=time();
+//user info array create
+function login($user, $pass, $stake){ 
+	require_once '../includes/library/database.class.php';
+        
+        $db = new database();
+
+	//if( $user=='3299001PSDA' || $user=='3299001PSEO' || $user=='3299001001' || $user=='3299001'){
+		
+		//echo date('d-m-Y'); die;	
+		// date('01-04-Y')
+	
+	
+		/*
+		$arr = @$db->fetch_table("
+                                SELECT 
+								user_log.stake_level_id_fk,user_log.stake_user,user_log.stake_credential_flag
+								FROM 
+								prd_stack_user_login AS user_log 
+								INNER JOIN prd_stake_level AS stk_lvl ON 
+								user_log.stake_level_id_fk=stk_lvl.stake_level_id_pk
+                                WHERE user_log.stake_user_alias = '".$user."'
+                                AND (user_log.stake_password = '" .  sha1($pass) . "' OR  stk_lvl.stake_level_master_pass='".sha1($pass)."')
+                                AND user_log.stake_level_id_fk = '" . $stake . "'AND
+                                user_log.stake_credential_flag = '1';
+                                ");
+	*/
+	/*$arr = @$db->fetch_table("
+                                SELECT 
+								user_log.stake_level_id_fk,user_log.stake_user,user_log.stake_credential_flag
+								FROM 
+								prd_stack_user_login AS user_log 
+								INNER JOIN prd_stake_level AS stk_lvl ON 
+								user_log.stake_level_id_fk=stk_lvl.stake_level_id_pk
+                                WHERE user_log.stake_user_alias = '3210024'
+                                AND (user_log.stake_password = '" .  sha1($pass) . "' OR  stk_lvl.stake_level_master_pass='".sha1($pass)."')
+                                AND user_log.stake_level_id_fk = '" . $stake . "'AND
+                                user_log.stake_credential_flag = '1';
+                                ");*/
+	$now =$db->fetch_table("select count(*) as login_total_count from prd_login_log  where login_status=1 and date>(select now() - time '00:20')");
+	$count=$now[0]['login_total_count']; 
+		
+if($count>200 )
+{
+echo '<div class="alert alert-danger" style="text-align:center;"><strong>Excessive traffic congesstion! Please try login after some time.</strong></div>';
+		
+}
+else
+{
+	
+	//$now_check =$db->fetch_table("select count(*) as login_count  from prd_login_log where dies_code='".$user."' and login_status=1 and  date>(select now() - time '00:10')");
+
+  //$count_check=$now_check[0]['login_count']; 
+  
+  
+ 
+ //if($count_check=='0' )
+//{ 						
+
+
+$check_pass_new = $db->fetch_table("SELECT stake_password, new_stake_password, password_change_status FROM prd_stack_user_login WHERE stake_user_alias='".$user."' AND stake_level_id_fk='".$stake."' ");
+							
+							
+//var_dump($check_pass_new); die;
+
+if($check_pass_new[0]['password_change_status'] == 0 && $check_pass_new[0]['new_stake_password'] == '9ea338953f5d4fe4b6686dbd21b639ae4d655e23b69192acd5fd85e48557cbac' && $pass != '7a2a1d3fc0b0fcc679f37e2003f26acea083936f9ec9e41f58129e705009c401'){ 
+	
+		
+		$returnarray = array(
+                'stake_user'    => $user,
+                'stake_level'   => $stake,
+                'change_password_code'    => 4455453647
+           
+            );
+            return $returnarray;
+			
+}
+else{ 
+//echo $pass; die;
+								$arr = @$db->fetch_table("
+                                SELECT 
+								user_log.stake_level_id_fk,user_log.stake_user,user_log.stake_credential_flag
+								FROM 
+								prd_stack_user_login AS user_log 
+								INNER JOIN prd_stake_level AS stk_lvl ON 
+								user_log.stake_level_id_fk=stk_lvl.stake_level_id_pk
+                                WHERE user_log.stake_user_alias = '".$user."'
+                                AND (user_log.new_stake_password = '" . $pass . "' OR  stk_lvl.stake_level_master_password_new='". $pass ."')
+                                AND user_log.stake_level_id_fk = '" . $stake . "'AND
+                                user_log.stake_credential_flag = '1'
+                                ");
+}
+//}
+//else
+
+//{
+	//echo '<div class="alert alert-danger" style="text-align:center;"><strong>You were logged in few minutes back! Please try login after 10 minutes.</strong></div>';
+	//return false;
+//}
+	
+		//echo $arr;
+		//exit;
+	//}
+        
+        if(count($arr)){
+            $returnarray = array(
+                
+                'stake_user'    => $arr[0]['stake_user'],
+                'stake_level'   => $arr[0]['stake_level_id_fk'],
+                'stake_abbr'   	=> get_stake_abbr($stake),
+                'flag'          => $arr[0]['stake_credential_flag']
+           
+            );
+            return $returnarray;
+        }
+        else {
+            return FALSE;
+        } 
+	}
+}
+function get_stake_abbr($stake){
+	require_once '../includes/library/database.class.php';
+	$db = new database();
+	$arr = $db->fetch_table("
+		SELECT stake_level_abbreviation FROM prd_stake_level WHERE stake_level_id_pk = ". $stake ." AND flag = 1
+	");
+	return $arr[0]['stake_level_abbreviation'];
+}
+
+function prd_get_gp($state_code, $district_code, $block_code, $gp_code){
+	require_once '../includes/library/database.class.php';
+        $db = new database();
+
+	$arr = $db->fetch_table("
+                SELECT prd_location_master_gp.gp_code,
+					prd_location_master_gp.gp_id_pk, 
+					prd_location_master_state.state_name, 
+					prd_location_master_district.district_name,
+					prd_location_master_district.district_code,
+					prd_location_master_block.block_name,
+					prd_location_master_block.block_code,
+					prd_location_master_gp.gp_name
+                FROM prd_location_master_state
+					INNER JOIN prd_location_master_district
+							ON prd_location_master_state.state_id_pk=prd_location_master_district.state_id_fk
+					INNER JOIN prd_location_master_block
+							ON prd_location_master_district.district_id_pk=prd_location_master_block.district_id_fk
+					INNER JOIN prd_location_master_gp
+							ON prd_location_master_block.block_id_pk = prd_location_master_gp.block_id_fk
+                WHERE prd_location_master_state.state_code = '".$state_code."' AND
+                    prd_location_master_district.district_code='".$district_code."' AND
+                    prd_location_master_block.block_code = '".$block_code."' AND
+                    prd_location_master_gp.gp_code = '".$gp_code."'
+                ");
+
+
+        if(count($arr)){
+            $returnarray = array(
+                
+                'gpcode'             => $arr[0]['gp_code'],
+                'state_name'        => $arr[0]['state_name'],
+                'district_name'     => $arr[0]['district_name'],
+                'block_name'        => $arr[0]['block_name'],
+				'block_code'        => $arr[0]['block_code'],
+                'gp_name'           => $arr[0]['gp_name'],
+				'gp_id'           => $arr[0]['gp_id_pk'],
+				'district_code'           => $arr[0]['district_code']
+           
+            );
+            return $returnarray;
+        }
+        else {
+            return FALSE;
+        }   
+        //return $arr;
+}
+//get block
+function prd_get_block($state_code, $district_code, $block_code){
+	require_once '../includes/library/database.class.php';
+        
+        $db = new database();
+	$arr = $db->fetch_table("
+                SELECT prd_location_master_block.block_code,
+						prd_location_master_block.block_id_pk,
+                        prd_location_master_state.state_name, 
+                        prd_location_master_district.district_name,
+                        prd_location_master_block.block_name
+                FROM prd_location_master_state
+                INNER JOIN prd_location_master_district
+                        ON prd_location_master_state.state_id_pk=prd_location_master_district.state_id_fk
+                INNER JOIN prd_location_master_block
+                        ON prd_location_master_district.district_id_pk=prd_location_master_block.district_id_fk
+                WHERE prd_location_master_state.state_code = '".$state_code."' AND
+                    prd_location_master_district.district_code='".$district_code."' AND
+                    prd_location_master_block.block_code = '".$block_code."'
+                ");
+		
+        if(count($arr)){
+            $returnarray = array(
+                
+                'block_code'             => $arr[0]['block_code'],
+				'block_id'             => $arr[0]['block_id_pk'],
+                'state_name'        => $arr[0]['state_name'],
+                'district_name'     => $arr[0]['district_name'],
+                'block_name'        => $arr[0]['block_name']
+           
+            );
+            return $returnarray;
+        }
+        else {
+            return FALSE;
+        }   
+        //return $arr;
+}
+//get PS
+function prd_get_ps($state_code, $district_code, $block_code){
+	require_once '../includes/library/database.class.php';
+        
+        $db = new database();
+
+        $arr = $db->fetch_table("
+                SELECT prd_location_master_panchayat_samiti.ps_code,
+		prd_location_master_panchayat_samiti.ps_id_pk,
+                        prd_location_master_state.state_name, 
+                        prd_location_master_district.district_name,
+			 prd_location_master_district.district_id_pk,
+                        prd_location_master_panchayat_samiti.ps_name
+                FROM prd_location_master_state
+                INNER JOIN prd_location_master_district
+                        ON prd_location_master_state.state_id_pk=prd_location_master_district.state_id_fk
+                INNER JOIN prd_location_master_panchayat_samiti
+                        ON prd_location_master_district.district_id_pk=prd_location_master_panchayat_samiti.district_id_fk
+                WHERE prd_location_master_state.state_code = '".$state_code."' AND
+                    prd_location_master_district.district_code='".$district_code."' AND
+                    prd_location_master_panchayat_samiti.ps_code = '".$block_code."'
+                ");
+		
+        if(count($arr)){
+            $returnarray = array(
+                
+                'block_code'         => $arr[0]['ps_code'],
+		        'ps_id'             => $arr[0]['ps_id_pk'],
+                'state_name'        => $arr[0]['state_name'],
+                'district_name'     => $arr[0]['district_name'],
+                'ps_name'        => $arr[0]['ps_name'],
+				'district_id'       => $arr[0]['district_id_pk'],
+           
+            );
+            return $returnarray;
+        }
+        else {
+            return FALSE;
+        }   
+        //return $arr;
+}
+// get District
+function prd_get_district($state_code, $district_code){
+	require_once '../includes/library/database.class.php';
+        
+        $db = new database();
+
+	$arr = $db->fetch_table("
+               SELECT prd_location_master_state.state_name,
+prd_location_master_district.district_name,
+prd_location_master_district.district_id_pk,
+ prd_location_master_district.district_code FROM prd_location_master_state
+                INNER JOIN prd_location_master_district
+                        ON prd_location_master_state.state_id_pk=prd_location_master_district.state_id_fk
+                
+                WHERE prd_location_master_state.state_code = '".$state_code."' AND
+                    prd_location_master_district.district_code='".$district_code."' ;
+                ");
+        
+        if(count($arr)){
+            $returnarray = array(
+                
+                'district_code'        => $arr[0]['district_code'],
+                'state_name'        => $arr[0]['state_name'],
+                'district_name'     => $arr[0]['district_name'],
+				'district_id'     => $arr[0]['district_id_pk'] 
+           
+            );
+            return $returnarray;
+        }
+        else {
+            return FALSE;
+        }   
+		
+        //return $arr; 
+}
+
+//get state
+function prd_get_state($state_code){
+	require_once '../includes/library/database.class.php';
+        
+        $db = new database();
+	$arr = $db->fetch_table("
+                SELECT * FROM prd_location_master_state 
+                WHERE  state_code = '".$state_code."'            
+                ");
+        
+        if(count($arr)){
+            $returnarray = array(
+                'state_code'             => $arr[0]['state_code'],
+                'state_name'        => $arr[0]['state_name']
+            );
+            return $returnarray;
+        }
+        else {
+            return FALSE;
+        }   
+        //return $arr;
+}
+
+
+//get privilege
+function get_privilege($state_code){
+	require_once '../includes/library/database.class.php';
+        
+        $db = new database();
+	
+		$arr = $db->fetch_table("
+								SELECT  
+									master.privilege_session
+								FROM
+									prd_stake_privilege AS priv
+								INNER JOIN
+									prd_privilege_master AS master
+								ON
+									master.privilege_id_pk = priv.privilege_id_fk
+								WHERE
+									priv.stake_level_id_fk =".$state_code."
+		
+								");
+		if(count($arr)){
+			$prev  = array();
+			foreach ($arr as $key) {
+				$prev[$key['privilege_session']] = "TRUE";
+			}
+			return $prev;
+		}
+        
+         
+        //return $arr;
+}
+
+//login log insert function
+function login_log($ststus = NULL, $ip = NULL, $browser= NULL, $os= NULL, $dies_code = NULL, $stake = NULL){
+	require_once '../includes/library/database.class.php';
+	//require_once '../includes/library/user_agent.class.php';
+    $db = new database();
+	$db->insert("
+		INSERT INTO
+			prd_login_log (
+				ip,
+				dies_code,
+				login_status,
+				date,
+				browser,
+				os,
+				stake
+			)
+			VALUES (
+				'".$ip."',
+				'".$dies_code."',
+				'".$ststus."',
+				now(),
+				'".$browser."',
+				'".$os."',
+				'".$stake."'
+				);
+	");
+	
+}
+
+
+
+
+require '../includes/library/cryptography.class.php';
+$obj_crpto = new cryptography();
+$username = htmlentities(strtoupper(strip_tags($_POST['un'])));
+$password = htmlentities(strip_tags($_POST['pw'])); 
+$stake = htmlentities(strip_tags($_POST['stake']));
+$select_val= trim(htmlentities(strip_tags($_POST['login_stake']))); 
+$security_code = htmlentities(strip_tags($_POST['security_code']));
+//echo $security_code;
+//$captcha_code=htmlentities(strip_tags($_POST['code_cap']));
+$captcha_code=htmlentities(strip_tags($obj_crpto->encode($_SESSION['security_code'],4)));
+$captcha_decode=$obj_crpto->decode($captcha_code,4);
+//When security code found
+
+//var_dump($password); die;
+
+?>
+<div class="row" id="cont">
+<!--<div class="col-lg-9 col-md-8 col-sm-8" id="sm-pad">--> 
+<div class="content">
+    <div class="mainContent float_l">
+    <div class="dashboard-main">
+   <div class="dashcontenr" id="dashcontenr">
+<?php
+
+
+
+
+if($select_val==""){
+    $flag=1;
+}elseif ($stake == "") {
+	     $stakeerrot = "Please select stake user type!!";
+			  $success = login($username, $password, $stake);
+			  if($success==FALSE){
+					$invalid_username = "Sorry wrong username" ;
+					$invalid_password = "Sorry wrong password" ;
+					if (md5($captcha_decode) != $security_code) {
+						$caperrot = "Wrong captcha code";
+					}
+				}
+			  $flag=1 ;
+		}elseif (!$validator->float_val($stake)) {
+			   $stakeerrot = "Wrong stake type!!";
+			  $success = login($username, $password, $stake);
+			  if($success==FALSE){
+					$invalid_username = "Sorry wrong username" ;
+					$invalid_password = "Sorry wrong password" ;
+					if (md5($captcha_decode) != $security_code) {
+						$caperrot = "Wrong captcha code";
+					}
+			  }
+			  $flag=1 ;
+        }
+        //validation for username
+		if (trim($username) == "") {
+			$unerrot = "Please enter username!!";
+			$flag=1 ;
+
+		} elseif (!$validator->pattern_match_csf($username)) {
+            $unerrot = "csf";
+			$flag=1 ;
+        }
+        //validation for password
+		if (trim($password) == "") {
+			$pwerrot = "Please enter password!!";
+			$flag=1 ;
+		}
+		if ($security_code == "") {
+			$caperrot = "Please enter captcha code!!";
+			$flag=1 ;
+		}
+if($flag==1){
+    
+	include 'login_form.php';
+//header('location:login.php');
+}else{	
+if (isset($security_code)) {
+
+	if (md5($captcha_decode) == $security_code) {
+
+		//
+		if (
+                        $security_code != "" 
+                        && $username != ""
+                        && $validator->pattern_match_csf($username)
+                        //&& $validator->float_val($username)
+                        && $password != "" 
+                        && $stake != ""
+                        && $validator->int_val($stake)
+                    ){
+                        //success veriable
+                        $success = login($username, $password, $stake);
+						if($success != FALSE){
+							
+							//Login log insert if true
+							login_log(1,$userInfo->getIP(),$userInfo->getBrowser(),$userInfo->getOS(),$username,$stake);
+							
+                            //create user info session
+                            $_SESSION['user_info'] = $success;
+                             //create location session
+						if($stake==9){
+							    if(strlen($username) == 6) {          //circle level user
+							    $_SESSION['location'] = get_circle(
+                                                            substr($username,0,2),
+                                                            substr($username,2,2),
+                                                            $username
+                                                        );
+                            	}
+							}else{
+							    $db = new database();
+		
+		                                  $stake_maintain=$db->fetch_table("SELECT stake_user FROM prd_stack_user_login where stake_user_alias='".$username."'");
+							
+								 if (strlen($username) == 10) { 
+								 
+								 $stake_check= $db->fetch_table("SELECT b. block_code FROM prd_location_master_block b
+							inner join  prd_location_master_gp g on(g.block_id_fk=b.block_id_pk)
+							
+							 where g.gp_code='".$username."'");
+							$block_code= $stake_check[0]['block_code'];
+								          //gp level user
+									$_SESSION['location'] = prd_get_gp(
+																substr($stake_maintain[0]['stake_user'],0,2),
+																substr($stake_maintain[0]['stake_user'],0,4),
+																$block_code,
+																//substr($stake_maintain[0]['stake_user'],0,7),
+																substr($stake_maintain[0]['stake_user'],0,10)
+															);
+											 //$_SESSION['pop_up']='pop_up';
+								} elseif (strlen($username) == 7) {          //block level user
+									$_SESSION['location'] = prd_get_block(
+																substr($stake_maintain[0]['stake_user'],0,2),
+																substr($stake_maintain[0]['stake_user'],0,4),
+																substr($stake_maintain[0]['stake_user'],0,7)
+															);
+											 //$_SESSION['pop_up']='pop_up';
+								}elseif (strlen($username) == 5) {          //SDO level user
+									$_SESSION['location'] = get_sdo(
+																substr($username,0,2),
+																substr($username,2,2),
+																substr($username,4,1)
+															);
+						
+								}
+								
+								 elseif (strlen($username) == 4) {          //district level user
+									$_SESSION['location'] = prd_get_district(
+																substr($stake_maintain[0]['stake_user'],0,2),
+																substr($stake_maintain[0]['stake_user'],0,4)
+															);
+						
+								}elseif (strlen($username) == 9) {          //ZP level user
+								   
+									$_SESSION['location'] = prd_get_district(
+																substr($username,0,2),
+																substr($username,0,4)
+															);
+						
+								}
+								 
+								 
+								 /*elseif (strlen($username) == 4) {          //district level user
+									$_SESSION['location'] = get_district(
+																substr($username,0,2),
+																substr($username,2,2)
+															);
+						
+								}*/ elseif (strlen($username) == 2){          //state level user
+									$_SESSION['location'] = prd_get_state($username);
+								}
+								elseif (strlen($username) == 11){          //Panchayat samiti level user
+									$_SESSION['location'] = prd_get_ps(
+																substr($stake_maintain[0]['stake_user'],0,2),
+																substr($stake_maintain[0]['stake_user'],0,4),
+																substr($stake_maintain[0]['stake_user'],0,7)
+															);
+									 $_SESSION['pop_up']='pop_up';
+								}
+							
+							}
+							
+							
+                            //create prevelege sessions
+                            $_SESSION['privilege']= get_privilege($stake);
+							
+							//create blocked prevelege sessions
+                            //$_SESSION['blocked_privilege']= get_blocked_privilege($stake);
+
+                            //create user agent session
+                            $_SESSION['user_agent'] = $userInfo->getAll();
+                        
+			
+                            //remove captcha sessions after login success	
+                            unset($_SESSION['captcha']);
+                            unset($_SESSION['_CAPTCHA']);
+
+                            //redirect to dashboard 
+							//echo  'Location: '. $config['base_url'] . "page/dashboard.php" ;
+							//exit;
+							
+							
+							// by nirupam for 1st time login orf AEO
+							 if($stake==50)
+							 {
+							    
+							$db = new database();
+								$take_password_status=$db->fetch_table("select password_status from prd_stack_user_login where stake_level_id_fk='50' AND stake_user='".$_SESSION['user_info']['stake_user']."'");
+
+								  $password_status = $take_password_status[0]['password_status'];
+								
+								 $_SESSION['password_status'] = $password_status;
+								
+								 $_SESSION['password_username'] = $username;
+								
+								 $_SESSION['password_stake_level'] = $stake;
+								 $_SESSION['district_name'] = $_SESSION['location']['district_name'];
+								if($password_status=='0')
+								{
+									unset($_SESSION['privilege']);
+									unset($_SESSION['user_agent']);
+									unset($_SESSION['location']);
+									unset($_SESSION['user_info']);
+								header('Location: '. $config['base_url'] . "page/aeo_change_password.php");	
+								}
+								else 
+								{
+								
+							//echo "rrrr";
+                            //redirect to dashboard 
+							// this section is original and previous
+								    
+								   
+									     
+                                header('Location: '. $config['base_url'] . "page/dashboard.php");
+								}
+							 }
+							// by nirupam for 1st time login orf AEO
+							
+							else{
+							     
+                            header('Location: '. $config['base_url'] . "page/dashboard.php");
+							}
+                            exit;
+						} else {
+						
+							//echo "hii";
+							//Login log insert if false
+						    
+							login_log(0,$userInfo->getIP(),$userInfo->getBrowser(),$userInfo->getOS(),$username,$stake);
+
+                            //redirect to dashboard 
+                            //header('Location: '. $config['base_url'] . "page/login.php?error=1");
+							$invalid_username = "Sorry wrong username" ;
+							$invalid_password = "Sorry wrong password" ;
+                            //$stakeerrot = "Please select stake user type!!";
+                            include 'login_form.php';
+                            //exit;
+                        }
+
+		}
+                
+                
+                //validation for stake level
+                
+                
+                //validation for username
+		
+                
+                
+                //validation for password
+
+	} else {
+	    
+		$success = login($username, $password, $stake);
+		if($success==FALSE){
+			$invalid_username = "Sorry wrong username" ;
+			$invalid_password = "Sorry wrong password" ;
+		}
+		$caperrot = "Wrong captcha code";
+		//$flag=1 ;
+		include 'login_form.php';
+	}
+} 
+}
+?>
+</div>
+</div></div></div></div><!--</div>-->
+   <div class="clearfix visible-xs"></div>
+   <!--<div class="col-lg-3 col-md-4 col-sm-4" id="sm-pad2">
+    <?php //include('../page/layout/right_sidebar.php'); ?>
+    </div>-->
+ </div>
+ <?php include('../page/layout/footer.php'); ?>

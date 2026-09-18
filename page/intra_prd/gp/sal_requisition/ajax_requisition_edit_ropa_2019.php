@@ -1,0 +1,3114 @@
+<?php
+ob_start();
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+session_start();
+$str=$_SESSION['location']['gpcode'];
+$state10=substr($str,0,4); 
+require_once '../../../../includes/config/config.php';
+require_once '../../../../includes/config/database.config.php';
+require_once '../../../../includes/library/database.class.php';
+//require '../../../page_visite.php';
+require_once '../../../../includes/library/cryptography.class.php';
+$cryp = new cryptography();
+
+//$empcd=$cryp->decode($id[4],4);
+//$empcd=$cryp->decode($_REQUEST['id'],4);
+ $emp_id_pk=$cryp->decode($_REQUEST['id'],4); 
+$dise=$cryp->decode($_REQUEST['gp_id'],4);
+
+//$dise=$cryp->decode($id[5],4);
+$time_token=time();
+$_SESSION['security_token']=$time_token;
+$enc_token=md5('371371371'.$time_token);
+
+
+
+$db = new database();
+
+$requisition=$db->fetch_table("SELECT code FROM prd_dise_code_master WHERE code_master_id_pk='405'");
+$requisition_type=$requisition[0]['code'];
+/*
+function func_gradepay($val)
+{
+	$db = new database();
+	$arr = $db->fetch_table("select grade_amount from prd_dise_gradepay_master where grade_code='$val'");
+	return $arr[0]['grade_amount'];
+}
+*/
+function salaryType($sal_type)
+{
+	$db = new database();
+	$arr = $db->fetch_table("select salary_type from prd_salary_type where type_id='$sal_type'");
+	return $arr[0]['salary_type'];
+}
+
+function getEmpAmount($type,$dise,$emp_id_pk)
+{
+	$db = new database();
+	if($type == 'pay_in_pay_band')
+	{
+		
+		$arr = $db->fetch_table("select emp_pay_in_payband from prd_employee_master where emp_id_pk='".$emp_id_pk."' 
+		AND gp_id_fk='".$dise."' AND ropa_status = '1'");
+		if($arr[0]['emp_pay_in_payband'])
+		{
+			return $arr[0]['emp_pay_in_payband'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+		/////////////////////////////----Gread Pay----////////////////////////
+	if($type == 'grade_pay')
+	{
+		$arr = $db->fetch_table("select emp_grade_pay,grade_amount from prd_employee_master as emp
+								INNER JOIN prd_dise_gradepay_master as gd 
+								ON trim(emp.emp_grade_pay)=gd.grade_code
+								where emp_id_pk='".$emp_id_pk."' AND gp_id_fk='".$dise."'");
+		if($arr[0]['grade_amount'])
+		{
+			return $arr[0]['grade_amount'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	
+}
+
+function getEmpConsolidated($type,$dise,$emp_id_pk)
+{
+	//echo "select emp_cosolidated_pay from prd_employee_master where empcd='".$empcd."' AND gp_id_fk='".$dise."'";exit;
+	$db = new database();
+	if($type == 'consolidated_pay')
+	{
+		$arr = $db->fetch_table("select emp_cosolidated_pay from prd_employee_master where emp_id_pk='".$emp_id_pk."' AND gp_id_fk='".$dise."'");
+		if($arr[0]['emp_cosolidated_pay'])
+		{
+			return $arr[0]['emp_cosolidated_pay'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+}
+
+function getAmount($dise,$emp_id_pk,$type,$basic,$requisition_type)
+{
+	//echo $emp_id_pk;
+	$db = new database();
+	
+	if($type=='cpf')
+	{
+		$arr = $db->fetch_table("select cpf from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='$emp_id_pk' AND salary_monthyear='".date('Ym')."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' AND ropa_status='1'");
+		if($arr[0]['cpf'])
+		{
+			return $arr[0]['cpf'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	if($type=='gpf')
+	{
+		$arr = $db->fetch_table("select gpf from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='$emp_id_pk' AND salary_monthyear='".date('Ym')."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' AND ropa_status='1'");
+		if($arr[0]['gpf'])
+		{
+			return $arr[0]['gpf'];
+		}
+		else
+		{
+			
+			$arr_emp = $db->fetch_table("select ropa_9_emp_pay_in_payband, emp_grade_pay, emp_pay_in_payband from prd_employee_master where ropa_status=1  AND emp_id_pk='".$emp_id_pk."' AND gp_id_fk='".$dise."'  AND ropa_status='1'");
+				
+				$grade_pay=getEmpAmount('grade_pay',$dise,$emp_id_pk);
+				//$full_basic=$arr_emp[0]['ropa_9_emp_pay_in_payband']+$grade_pay;
+				$full_basic=$arr_emp[0]['emp_pay_in_payband'];
+			    $gpf_amt = ($full_basic/100)*6;
+			//$gpf_amt = ($basic/100)*6;
+			return round($gpf_amt);
+			
+		/*	$arr = $db->fetch_table("select basic from prd_employee_salary_save where status_flag in('3','4') 
+			and salary_monthyear between '".date("Y03", strtotime("-1 year"))."' and '".date("Y12", strtotime("-1 year"))."'
+			and is_saved='1' and salary_type='1' and delete_status='1' AND requisition_type='".$requisition_type."'  
+			AND emp_id_fk='$emp_id_pk' order by salary_monthyear DESC LIMIT 1 ");
+			
+			$basic_gpf=$arr[0]['basic']; 
+			$gpf_amt = ($basic_gpf/100)*6;
+			return round($gpf_amt); */
+			//$gpf_amt = ($basic/100)*6;
+			//return round($gpf_amt);
+		}
+	}
+	
+	if($type=='pfl')
+	{
+		$arr = $db->fetch_table("select pf_loan from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='$emp_id_pk' AND salary_monthyear='".date('Ym')."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' AND ropa_status='1'");
+		if($arr[0]['pf_loan'])
+		{
+			return $arr[0]['pf_loan'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	if($type=='itax')
+	{
+		$arr = $db->fetch_table("select i_tax from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='$emp_id_pk' AND salary_monthyear='".date('Ym')."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' AND ropa_status='1'");
+		if($arr[0]['i_tax'])
+		{
+			return $arr[0]['i_tax'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	if($type=='ovd')
+	{
+		$arr = $db->fetch_table("select overdrawn from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='$emp_id_pk' AND salary_monthyear='".date('Ym')."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' AND ropa_status='1'");
+		if($arr[0]['overdrawn'])
+		{
+			return $arr[0]['overdrawn'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	if($type=='gsli')
+	{
+		$arr = $db->fetch_table("select gsli from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='$emp_id_pk' AND salary_monthyear='".date('Ym')."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' AND ropa_status='1'");
+		if($arr[0]['gsli'])
+		{
+			return $arr[0]['gsli'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	
+	if($type=='conv')
+	{
+		$arr = $db->fetch_table("select conv_allow from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='$emp_id_pk' AND salary_monthyear='".date('Ym')."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' AND ropa_status='1'");
+		if($arr[0]['conv_allow'])
+		{
+			return $arr[0]['conv_allow'];
+		}
+		else
+		{
+			return 0;
+		}
+	}
+}
+
+function festival_adv_recovery($emp_id_pk)
+{
+	// for festival advance by nd on 04072017	
+	$db = new database();
+	$Query = "select festival_loan from prd_employee_salary_save where status_flag=1 AND delete_status=1 AND salary_monthyear='".date('Ym')."' AND emp_id_fk = '".$emp_id_pk."' AND ropa_status='1'";
+	$arr = $db->fetch_table($Query); 
+	//print_r($Query); exit;
+	if(count($arr) > 0){
+		return $arr[0]['festival_loan'];
+	}else{
+		$Query ="SELECT b.festival_advance_instalment_amount,b.festival_advance_instalment_last_amount,
+									b.deduction_counter,b.festival_advance_instalment_no 
+									FROM prd_festival_advance_employee_details a
+									INNER JOIN prd_festival_advance_entry_sal b
+									ON a.festival_advance_id_pk=b.festival_advance_id_fk
+									WHERE 
+									a.festival_advance_status in ('5') AND a.emp_id_fk = '".$emp_id_pk."'  
+									AND b.deduction_start_monthyear <= '".date("Ym")."'";
+		//print_r($Query); exit;
+		$fa_deduction_data = $db->fetch_table($Query);
+									
+	$festival_advance_instalment_no_chk=$fa_deduction_data[0]['festival_advance_instalment_no']-1;
+	
+	if($fa_deduction_data[0]['deduction_counter']==$festival_advance_instalment_no_chk)
+	{
+		$fa_instlmnt_amt=$fa_deduction_data[0]['festival_advance_instalment_last_amount'];
+	}
+	else
+	{
+		$fa_instlmnt_amt=$fa_deduction_data[0]['festival_advance_instalment_amount'];
+	}
+									
+	if($fa_instlmnt_amt > 0)
+	{
+		return $fa_instlmnt_amt;
+	}
+	else
+	{
+		return 0;	
+	}
+  }
+	//end of for festival advance by nd on 04072017	
+}
+               
+function empPtax($amount)
+{
+	$db = new database();
+	$arr = $db->fetch_table("select ptax_amount from prd_ptax_deduction as amnt inner join prd_ptax_order_file as file on amnt.ptax_order_id_fk=file.ptax_orderfile_pk where amnt.mn_amount <= '$amount' and amnt.mx_amount >= '$amount' AND file.active_status='1'");
+	return $arr[0]['ptax_amount'];
+}
+
+$tch = $db->fetch_table("SELECT 
+							tch.emp_id_pk,
+							tch.emp_first_name,
+							tch.emp_second_name,
+							tch.emp_last_name,
+							tch.emp_system_code,
+							tch.emp_pay_in_payband,
+							tch.emp_grade_pay,
+							tch.emp_pay_band,
+							tch.emp_spouse_hra,
+							tch.emp_diff_able,
+							tch.emp_spouse_res,
+							tch.emp_bank_name,
+							tch.emp_acc_no,
+							tch.emp_ifsc_no,
+							tch.emp_retirement_date,
+							tch.emp_id_pk,
+							tch.empcd,
+							tch.gp_id_fk,
+							tch.emp_desig,
+							tch.emp_cosolidated_pay,
+							tch.emp_spouse_hra,
+							tch.emp_pan_no,
+							tch.emp_first_join_date,
+							tch.interim_relief,
+							tch.spouse_medical_allowance,
+							tch.conv_allow_status,
+							tch.ropa_level,
+							tch.ropa_status,
+							tch.ropa_9_emp_pay_in_payband
+						FROM
+							prd_employee_master as tch
+						WHERE
+								tch.gp_id_fk = '".$_SESSION['location']['gp_id']."'
+								AND tch.emp_id_pk = '".$emp_id_pk."'
+								AND (tch.emp_status='1' OR tch.emp_status='9')
+								AND (tch.ropa_status = '1' OR tch.emp_cosolidated_pay!='0')		
+								");
+							
+							
+						
+$paychange = $db->fetch_table("
+							SELECT paychange_id_pk, paychange_ip, paychange_fromdate, paychange_todate, 
+									entrydate, paychange_da, paychange_hra, paychange_ma, paychange_cpf, 
+									paychange_ptax, paychange_pdf, flag, order_file_name,conveyance_allowance,hill_allowance
+									FROM prd_admin_paychange
+									WHERE flag = 't' AND ropa_year = '2019'
+									");
+
+
+$da_per = $paychange[0]['paychange_da']; 
+$max_ma = $paychange[0]['paychange_ma'];
+$hra_per = $paychange[0]['paychange_hra'];
+$cpf_per = $paychange[0]['paychange_cpf'];
+$conveyance_allowance_max = $paychange[0]['conveyance_allowance'];
+//$hill_allowance_per = $paychange[0]['hill_allowance'];
+$hill_allowance_per = 12;
+//Pay and allowance part
+$tchname =$tch[0]['emp_first_name'].' '. $tch[0]['emp_second_name'].' '. $tch[0]['emp_last_name'] ;
+$empcd = $tch[0]['empcd'];
+$emp_id_pk=$tch[0]['emp_id_pk'];
+$ropa_level=$tch[0]['ropa_level'];
+			
+//print($emp_id_pk); exit;         
+				
+$sal_chk= $db->fetch_table("select slno, latestupdate_time, latestupdate_ip_address, gp_id_fk, empcd, 
+							bankname, accountno, basic, da,interim_relief, hra, ma, cpf, pf_loan, p_tax, 
+							i_tax, net, bank_ifsc, sal_source, spl_pay, pf_deduct, code, 
+							emp_salary_id_pk, spl_alo, status_flag, salary_monthyear, 
+							category_id, block_code, emp_id_fk, pay_payband, tch_grade_pay, 
+							hill_allowance, gpf, cpf_deduct, gross_salary, is_saved, conv_allow, 
+							overdrawn, salary_type, cause,gp_code, part_day,gsli,consolidated_pay,festival_loan,festival_loan_cause 
+							FROM prd_employee_salary_save 
+							WHERE status_flag=1 AND delete_status=1 AND salary_monthyear='".date('Ym')."' AND ropa_status = '1' 
+							AND emp_id_fk='$emp_id_pk' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."'");
+	   
+	   
+//---------- Start Gpf=0 before retirement--------------------
+$retirement_date=$tch[0]['emp_retirement_date'];
+// $retirement_date_str=(explode ('-',$retirement_date)); 
+// $retirement_date_str_final=$retirement_date_str[0].$retirement_date_str[1]; 
+//$current_date=date("Ym");
+// $date=date("Ym", strtotime("+2 months"));
+$date=date('Y-m-d', strtotime('-6 month',strtotime($retirement_date))); 	
+
+$emp_first_join_date=$tch[0]['emp_first_join_date'];
+$emp_first_join_match_date=date('Y-m-30', strtotime('+11 month',strtotime($emp_first_join_date)));	
+//----------- End Gpf=0 before retirement ---------------------
+			
+if($sal_chk[0]['gp_id_fk'] && $sal_chk[0]['emp_id_fk'] && ($sal_chk[0]['salary_type']=='1' || $sal_chk[0]['salary_type']=='2'))
+	{
+
+
+		
+		// This condition for return full salary of employee and display saved salary of employee in edit mode
+		//print_r($tch);
+		if($tch[0]['emp_desig']=='1120' || $tch[0]['emp_desig']=='1124' || $tch[0]['emp_desig']=='1125')
+		{
+			$pay_in_band = $sal_chk[0]['pay_payband'];
+			$full_consolidated_pay=getEmpConsolidated('consolidated_pay',$dise,$emp_id_pk);
+			$consolidated_pay=$sal_chk[0]['consolidated_pay'];
+			$grade_pay = $sal_chk[0]['tch_grade_pay'];
+			$basic = $sal_chk[0]['basic'];
+			 $da = $sal_chk[0]['da']; 
+			//28.12.2018 $interim_relief = $sal_chk[0]['interim_relief'];
+			$interim_relief=0;
+			$hra = $sal_chk[0]['hra'];
+			$ma = $sal_chk[0]['ma'];
+			$conveyance_allowance = $sal_chk[0]['conv_allow'];
+			$hill_allowance = $sal_chk[0]['hill_allowance'];
+			$cpf = $sal_chk[0]['cpf'];
+			$gross_salary = $sal_chk[0]['gross_salary'];
+			$gpf = $sal_chk[0]['gpf'];
+			$pfl = $sal_chk[0]['pf_loan'];
+			$cpf_deduct = $sal_chk[0]['cpf_deduct'];
+			$ptax = $sal_chk[0]['p_tax'];
+			$itax = $sal_chk[0]['i_tax'];
+			$gsli = $sal_chk[0]['gsli'];
+			$overdrawn = $sal_chk[0]['overdrawn'];
+			//$other_deduction = $sal_chk[0]['other_deduction'];
+			//$cooperative_loan = $sal_chk[0]['cooperative_loan'];
+			//	$hbl_loan = $sal_chk[0]['hbl_loan'];
+			$festival_loan = $sal_chk[0]['festival_loan'];
+			$net_salary = $sal_chk[0]['net'];	
+			//$cooperative_loan_cause = $sal_chk[0]['cooperative_loan_cause'];
+			//$hbl_loan_cause = $sal_chk[0]['hbl_loan_cause'];
+			$festival_loan_cause = $sal_chk[0]['festival_loan_cause'];
+		}
+		else
+		{
+			
+			foreach ($tch as $key) 
+			{
+				$promotion_data_cal = $db->fetch_table("SELECT emp_grade_pay,
+															emp_id_fk,
+															increment_type,
+															dop_doi,
+															effective_date,
+															emp_desig,
+															emp_pay_scale,
+															annual_increment_date,
+															emp_pay_band,
+															emp_pay_in_payband,
+															increment_amount,
+															pre_emp_pay_in_payband,
+															pre_emp_grade_pay,
+															ropa_level
+															FROM prd_employee_promotion_details
+															WHERE emp_id_fk ='".$emp_id_pk."'
+															AND promotion_effective_status in('1') 
+															AND approval_status in(5,6)");
+				//print_r($promotion_data_cal); 
+			if(count($promotion_data_cal) > 0){	
+				$emp_id_for_promotion_part = $promotion_data_cal[0]['emp_id_fk'];									
+				$pre_emp_pay_band_for_promotion_cal = $promotion_data_cal[0]['pre_emp_pay_in_payband'];
+				//$pre_emp_grade_pay_for_promotion_cal = (func_gradepay($promotion_data_cal[0]['pre_emp_grade_pay']));
+				$emp_effective_date_for_promotion_cal =  $promotion_data_cal[0]['effective_date'];
+				$emp_pay_band_for_promotion_cal =  $promotion_data_cal[0]['emp_pay_in_payband'];
+				//$emp_grade_pay_for_promotion_cal =  (func_gradepay($promotion_data_cal[0]['emp_grade_pay']));
+				$emp_effective_day_for_promotion_cal = substr ($emp_effective_date_for_promotion_cal, -2);
+				$emp_effective_year=substr ($emp_effective_date_for_promotion_cal,0,4);
+				$emp_effective_month=substr ($emp_effective_date_for_promotion_cal,5,2);
+				$max_days_of_current_month = date("t");
+				$dop_doi = $promotion_data_cal[0]['dop_doi'];
+				$promotion_eff_date = explode("-",$promotion_data_cal[0]['effective_date']);
+				$promotion_eff_yr_mnth = $promotion_eff_date[0].$promotion_eff_date[1];
+			}
+			else{
+				$emp_id_for_promotion_part = "";									
+				$pre_emp_pay_band_for_promotion_cal = "";
+				//$pre_emp_grade_pay_for_promotion_cal = "";
+				$emp_effective_date_for_promotion_cal =  "";
+				$emp_pay_band_for_promotion_cal =  "";
+				//$emp_grade_pay_for_promotion_cal =  "";
+				$emp_effective_day_for_promotion_cal = "";
+				$emp_effective_year="";
+				$emp_effective_month="";
+				$max_days_of_current_month = "";
+				$dop_doi = "";
+				$promotion_eff_date = "";
+				$promotion_eff_yr_mnth = "";
+			}
+			
+				if($emp_effective_day_for_promotion_cal != 01 && $emp_id_for_promotion_part != "" && $dop_doi == 3 && $promotion_eff_yr_mnth == date("Ym"))
+				{
+					$count_days_pre_part_sal = (($emp_effective_day_for_promotion_cal)-'1');
+					$count_days_post_part_sal = ($max_days_of_current_month - $count_days_pre_part_sal);
+					
+					
+					//$full_grade_pay = $part_grade_pay_for_pre_days + $part_grade_pay_for_post_days;
+					$full_pay_band = $key['emp_pay_in_payband'];
+					$full_basic = $full_pay_band;
+					$full_da = round(($full_basic/100)*$da_per);// 03.12.2020
+					//$full_interim_relief = $key['interim_relief'];
+				}
+				else if($emp_effective_day_for_promotion_cal != 01 && $emp_id_for_promotion_part != "" && ($dop_doi == 4 || $dop_doi == 5)   && $promotion_eff_yr_mnth == date("Ym"))
+				{ 
+					$count_days_pre_part_sal = (($emp_effective_day_for_promotion_cal)-'1');
+					$count_days_post_part_sal = ($max_days_of_current_month - $count_days_pre_part_sal);
+					
+					$part_pay_in_pay_band_for_pre_days = round(($pre_emp_pay_band_for_promotion_cal/$max_days_of_current_month)*$count_days_pre_part_sal);
+					
+					$part_pay_in_pay_band_for_post_days = round(($emp_pay_band_for_promotion_cal/$max_days_of_current_month)*$count_days_post_part_sal);
+					
+					//$full_grade_pay = $part_grade_pay_for_pre_days + $part_grade_pay_for_post_days;
+					$full_pay_band = $part_pay_in_pay_band_for_pre_days + $part_pay_in_pay_band_for_post_days;
+					$full_basic = $full_pay_band;
+					$full_da = round(($full_basic/100)*$da_per);//03.12.2020
+					//28.12.2018 $full_interim_relief = $key['interim_relief'];
+					$full_interim_relief=0;
+				}
+				else
+				{
+					$emp_suspend=$db->fetch_table("
+													SELECT 
+													sus.slno,
+													sus.suspend_effect_date,
+													sus.suspend_withdrawn_date,
+													sus.pencentage_basic,
+													sus.suspend_start_date
+													FROM
+													prd_suspend_dts as sus
+													INNER JOIN prd_employee_master   em1 on sus.emp_id_fk=em1.emp_id_pk
+													WHERE sus.gp_id_fk = '".$_SESSION['location']['gp_id']."' 
+													AND sus.emp_id_fk='$emp_id_pk' AND em1.emp_status='9' AND sus.delete_status='0'
+									");
+					
+					$suspend_effect_date=$emp_suspend[0]['suspend_effect_date']; 
+					
+					if(strtotime($suspend_effect_date)<=strtotime(date('Y-m-d')) && strtotime($suspend_effect_date)>0)
+					{
+						$pencentage_basic=$emp_suspend[0]['pencentage_basic']; 
+						$full_pay_in_band_sus = getEmpAmount('pay_in_pay_band',$dise,$emp_id_pk);
+						$full_pay_band = round(($full_pay_in_band_sus*$pencentage_basic)/100);
+						//$full_grade_pay_sus = getEmpAmount('grade_pay',$dise,$emp_id_pk);
+						//$full_grade_pay=round(($full_grade_pay_sus*$pencentage_basic)/100);
+						$full_basic = round($full_pay_in_band_sus);
+						$full_basic_sus = round($full_pay_band);
+						$full_da_sus = round(($full_basic/100)*$da_per);//03.12.2020
+						$full_da = round(($full_basic_sus/100)*$da_per);
+						$full_interim_relief =0;
+					}
+					else
+					{
+						// $full_pay_band=$sal_chk[0]['pay_payband'];
+						   
+						$full_pay_band = getEmpAmount('pay_in_pay_band',$dise,$emp_id_pk); 
+						//$full_grade_pay = getEmpAmount('grade_pay',$dise,$emp_id_pk);
+						$full_basic = $full_pay_band;
+						$full_da = round(($full_basic/100)*$da_per);//03.12.2020
+						//28.12.2018 $full_interim_relief = $tch[0]['interim_relief'];
+						$full_interim_relief=0;
+						// $full_interim_relief =$sal_chk[0]['interim_relief'];
+						/*	if($sal_chk[0]['interim_relief']!='')
+						{
+						$full_interim_relief =$sal_chk[0]['interim_relief'];
+						}
+						else{
+						$full_interim_relief = $key['interim_relief'];
+						}*/
+					}
+					
+				}
+				
+				//$full_pay_band = getEmpAmount('pay_in_pay_band',$dise,$emp_id_pk);
+				//  $full_grade_pay = getEmpAmount('grade_pay',$dise,$emp_id_pk);
+				// $full_basic = $full_pay_band+$full_grade_pay;
+				$consolidated_pay=0;
+				// $full_gpf = getAmount($dise,$tch[0]['emp_id_pk'],'gpf',$basic);
+				/* $full_cooperative_loan = $sal_chk[0]['cooperative_loan'];
+				$full_hbl_loan = $sal_chk[0]['hbl_loan'];
+				$full_festival_loan = $sal_chk[0]['festival_loan'];*/
+				//$full_da = ($full_basic/100)*$da_per;
+				//$full_interim_relief =$sal_chk[0]['interim_relief'];
+				
+				
+				///////////////////////////// HRA CALCULATION START /////////////////////////////////////
+				//print($tch[0]['emp_spouse_res']); exit;
+				if($tch[0]['emp_spouse_res']=='251')
+				{
+					$full_hra = 0; 		//If obtain any govt. housing scheme.
+				}
+				else
+				{
+					if($tch[0]['emp_spouse_hra']=='0' || $tch[0]['emp_spouse_hra']=='' || !$tch[0]['emp_spouse_hra'])
+					{
+
+						$hra_emp = ($full_basic/100)*$hra_per;
+						if($hra_emp > 12000)
+						{
+							$full_hra = 12000;
+						}
+						else
+						{
+							$full_hra = round($hra_emp);
+						}
+
+					}
+					else if($tch[0]['emp_spouse_hra'] >= 12000)
+					{
+						$full_hra = 0;
+					}
+					else if($tch[0]['emp_spouse_hra'] < 12000)
+					{ //spouse HRA < 6000
+						$hra_emp = ($full_basic/100)*$hra_per;
+						//echo $hra_emp;
+						if($hra_emp >= 12000)
+						{
+							$valid_hra  = (12000-$tch[0]['emp_spouse_hra']);
+							$full_hra = round($valid_hra);
+						}
+						else
+						{
+							$mix_hra = $hra_emp+$tch[0]['emp_spouse_hra'];
+							if($mix_hra > 12000)
+							{
+								if($tch[0]['emp_spouse_hra'] > $hra_emp)
+								{
+									$valid_hra = 12000-$tch[0]['emp_spouse_hra'];
+									if($valid_hra>$hra_emp)
+									{
+										$valid_hra = $hra_emp;
+									}
+									$full_hra = round($valid_hra);
+								}
+								else if($tch[0]['emp_spouse_hra'] <= $hra_emp)
+								{
+									//$valid_hra = $hra_emp-$tch[0]['spouse_hra'];
+									$valid_hra = 12000-$tch[0]['emp_spouse_hra'];
+									if($valid_hra>$hra_emp)
+									{
+										$valid_hra=$hra_emp;
+									}
+									$full_hra = round($valid_hra);
+								}
+							}
+							else
+							{
+								$full_hra = round($hra_emp);
+							}
+						}
+					}
+				}
+				//print($full_hra); exit;
+				///////////////////////////// HRA CALCULATION END /////////////////////////////////////
+
+
+				///////////////////////////// MEDICAL ALLOWANCE START /////////////////////////////////////
+
+				if($tch[0]['spouse_medical_allowance']=='1')
+				{
+					$full_ma = 0;
+				}
+				else
+				{
+					$full_ma = $max_ma;
+				}
+
+
+				///////////////////////////// MEDICAL ALLOWANCE END /////////////////////////////////////
+
+
+				///////////////////////////// CONVIENCE ALLOWANCE START /////////////////////////////////////
+
+
+				if($tch[0]['emp_diff_able']=='1')
+				{
+					if($tch[0]['conv_allow_status']==1)
+					{
+						
+						$cal_ma=round(($full_basic*5)/100); 
+						if($cal_ma>=400)
+						{
+							 $full_conveyance_allowance = $conveyance_allowance_max; 
+						}
+						else
+						{
+							
+							$full_conveyance_allowance=round($cal_ma);
+						}
+					}
+					else
+					{
+						
+						$full_conveyance_allowance=0;
+						$conveyance_allowance = 0;
+					}
+				}
+				else
+				{
+					$full_conveyance_allowance = 0;
+				}
+
+				///////////////////////////// CONVIENCE ALLOWANCE END /////////////////////////////////////
+
+
+				///////////////////////////// HILL ALLOWANCE START /////////////////////////////////////
+
+				
+				if($state10=='3219' || $state10=='3223' || $state10=='3299')
+				{
+					$hill_p = ($full_pay_band/100)*$hill_allowance_per;
+					//$hill_g = ($full_grade_pay/100)*$hill_allowance_per;
+					$full_hill_allowance_amt=($full_basic/100)*$hill_allowance_per;
+					//$full_hill_allowance_amt = $hill_p+$hill_g;
+					if($full_hill_allowance_amt > 2000)
+					{
+						$full_hill_allowance = 2000; 
+					}
+					else
+					{
+						$full_hill_allowance = $full_hill_allowance_amt; 
+					}
+				}
+				else
+				{
+					$full_hill_allowance = 0;
+				}
+
+
+				///////////////////////////// HILL ALLOWANCE END /////////////////////////////////////
+
+
+				$pay_in_band =$full_pay_band;
+				//$grade_pay =$full_grade_pay;
+				$basic=$full_basic;
+				
+				
+				
+				 $da=round($full_da); 
+				$interim_relief=round($full_interim_relief);
+				$hill_allowance = round($full_hill_allowance); 
+				$hra=round($full_hra);
+				//print($hra); exit;
+				$ma=round($full_ma);
+				
+				$conveyance_allowance=$full_conveyance_allowance;
+				//$hill_allowance = $sal_chk[0]['hill_allowance'];
+				$full_gross_salary =round($pay_in_band+$da+$interim_relief+$hill_allowance+$hra+$ma+$conveyance_allowance);
+				
+
+				///////////////////////////// GPF DEDUCTION START /////////////////////////////////////
+				
+				
+				if(strtotime($emp_first_join_match_date)>=strtotime(date('Y-m-d')) && strtotime($emp_first_join_match_date)>0)
+				{
+					$full_gpf=0;
+				}	
+				else if(strtotime($date)<=strtotime(date('Y-m-d')) && strtotime($date)>0)
+				{
+					$full_gpf=0;
+				}
+				else
+				{
+					if($sal_chk[0]['gpf']!=0)
+					{
+						$full_gpf = $sal_chk[0]['gpf']; 
+					}
+					else
+					{
+						$full_gpf = getAmount($dise,$emp_id_pk,'gpf',$full_basic,$requisition_type);
+					}
+				}
+				
+				//$full_gpf = getAmount($dise,$empcd,'gpf',$full_basic); 
+				/* if($sal_chk[0]['gpf']!='')
+				{
+				$full_gpf = $sal_chk[0]['gpf']; 
+				}
+				else
+				{
+				
+				$full_gpf = getAmount($dise,$empcd,'gpf',$full_basic); 
+				
+				}*/
+
+
+				///////////////////////////// GPF DEDUCTION END /////////////////////////////////////
+
+
+				///////////////////////////// PTAX DEDUCTION START /////////////////////////////////////
+				
+				
+				if($key['emp_diff_able']=='1')
+				{
+					// $full_ptax = empPtax($full_gross_salary);
+					$full_ptax = 0;
+				}
+				else
+				{
+					if(strtotime($suspend_effect_date)<=strtotime(date('Y-m-d')) && strtotime($suspend_effect_date)>0)
+					{
+						$full_gross_salary_sus =round($full_pay_in_band_sus+$interim_relief+$hra+$ma+$conveyance_allowance);
+						$full_ptax = empPtax($full_gross_salary_sus);
+					}
+					else
+					{
+						$full_ptax = empPtax($full_gross_salary);
+					}
+					//$full_ptax = 0;
+				}
+
+				///////////////////////////// PTAX DEDUCTION END /////////////////////////////////////
+
+				///////////////////////////// ITAX DEDUCTION START /////////////////////////////////////
+				
+				if($sal_chk[0]['i_tax'])
+				{
+					$full_itax=$sal_chk[0]['i_tax'].'';
+				}
+				else
+				{
+					$full_itax = getAmount($dise,$empcd,'itax','',$requisition_type).'';
+					//$full_itax = $sal_chk[0]['i_tax'];
+				}
+
+				///////////////////////////// ITAX DEDUCTION START /////////////////////////////////////
+
+				
+				$gpf=$full_gpf;
+				$ptax=$full_ptax;
+				//$itax = $sal_chk[0]['i_tax'];
+				$gross_salary=$full_gross_salary;
+				$itax=$full_itax;
+				$gsli = $sal_chk[0]['gsli'];
+				$pfl = $sal_chk[0]['pf_loan'];
+				$overdrawn = $sal_chk[0]['overdrawn'];
+				//$cooperative_loan = $sal_chk[0]['cooperative_loan'];
+				//$hbl_loan = $sal_chk[0]['hbl_loan'];
+				$festival_loan = $sal_chk[0]['festival_loan']; 
+				
+				//$total_deduct = $gpf+$pfl+$ptax+$itax+$gsli+$overdrawn+$cooperative_loan+$hbl_loan+$festival_loan;
+				//$full_net_salary = $full_gross_salary-$total_deduct;
+				
+				$total_deduct = $gpf+$pfl+$ptax+$itax+$gsli+$overdrawn+$festival_loan;
+				$full_net_salary = $full_gross_salary-$total_deduct;
+				$net_salary=$full_net_salary;
+				//print($sal_chk[0]['hra']); exit;
+				if($sal_chk[0]['salary_type']=='2')
+				{
+					$pay_in_band = $sal_chk[0]['pay_payband'];
+					$consolidated_pay=0;
+					$grade_pay = $sal_chk[0]['tch_grade_pay'];
+					$basic = $sal_chk[0]['basic'];
+					$da = $sal_chk[0]['da'];
+					//28.12.2018 $interim_relief = $sal_chk[0]['interim_relief'];
+					$interim_relief=0;
+					$hra = $sal_chk[0]['hra'];
+					$ma = $sal_chk[0]['ma'];
+					$conveyance_allowance = $sal_chk[0]['conv_allow'];
+					$hill_allowance = $sal_chk[0]['hill_allowance'];
+					$cpf = $sal_chk[0]['cpf'];
+					$gross_salary = $sal_chk[0]['gross_salary'];
+					$gpf = $sal_chk[0]['gpf'];
+					$pfl = $sal_chk[0]['pf_loan'];
+					$cpf_deduct = $sal_chk[0]['cpf_deduct'];
+					$ptax = $sal_chk[0]['p_tax'];
+					$itax = $sal_chk[0]['i_tax'];
+					$gsli = $sal_chk[0]['gsli'];
+					$overdrawn = $sal_chk[0]['overdrawn']; 
+					//$cooperative_loan = $sal_chk[0]['cooperative_loan'];
+					//$hbl_loan = $sal_chk[0]['hbl_loan'];
+					$festival_loan = $sal_chk[0]['festival_loan'];
+					$net_salary = $sal_chk[0]['net'];
+				}
+			}
+		}
+		//echo $pay_in_band;
+	}
+else if($sal_chk[0]['salary_type']=='8')
+{
+	//This condition for return full salary of employee zero salary and display saved salary of employee in edit mode
+	
+	/*$full_pay_band = getEmpAmount('pay_in_pay_band',$dise,$emp_id_pk);
+	$full_grade_pay = getEmpAmount('grade_pay',$dise,$emp_id_pk);
+	$full_basic = $full_pay_band+$full_grade_pay;
+	$full_da = ($full_basic/100)*$da_per;*/
+	
+	$pay_in_band = getEmpAmount('pay_in_pay_band',$dise,$emp_id_pk);
+	$consolidated_pay=0;
+	//$grade_pay = getEmpAmount('grade_pay',$dise,$emp_id_pk);
+	$basic = $pay_in_band;
+	$da = round($basic/100)*$da_per;
+	//28.2012.2018 $interim_relief = $sal_chk[0]['interim_relief'];
+	$interim_relief=0;
+	
+	$full_basic=$basic;
+
+			///////////////////////////// HRA CALCULATION START /////////////////////////////////////
+
+	
+	if($tch[0]['emp_spouse_res']=='251')
+	{
+		$full_hra = 0; 		//If obtain any govt. housing scheme.
+	}
+	else
+	{
+		if($tch[0]['emp_spouse_hra']=='0' || $tch[0]['emp_spouse_hra']=='' || !$tch[0]['emp_spouse_hra'])
+		{
+			$hra_emp = ($full_basic/100)*$hra_per;
+			if($hra_emp > 12000)
+			{
+				$full_hra = 12000;
+			}
+			else
+			{
+				$full_hra = round($hra_emp);
+			}
+		}
+		else if($tch[0]['emp_spouse_hra'] >= 12000)
+		{
+			$full_hra = 0;
+		}
+		else if($tch[0]['emp_spouse_hra'] < 12000)
+		{ //spouse HRA < 6000
+			$hra_emp = ($full_basic/100)*$hra_per;
+			if($hra_emp >= 12000)
+			{
+				$valid_hra  = (12000-$tch[0]['emp_spouse_hra']);
+				$full_hra = round($valid_hra);
+			}
+			else
+			{
+				$mix_hra = $hra_emp+$tch[0]['emp_spouse_hra'];
+				if($mix_hra > 12000)
+				{
+					if($tch[0]['emp_spouse_hra'] > $hra_emp)
+					{
+						$valid_hra = 12000-$tch[0]['emp_spouse_hra'];
+						if($valid_hra>$hra_emp)
+						{
+							$valid_hra = $hra_emp;
+						}
+						$full_hra = round($valid_hra);
+					}
+					else if($tch[0]['emp_spouse_hra'] <= $hra_emp)
+					{
+						//$valid_hra = $hra_emp-$tch[0]['spouse_hra'];
+						$valid_hra = 12000-$tch[0]['emp_spouse_hra'];
+						if($valid_hra>$hra_emp)
+						{
+							$valid_hra=$hra_emp;
+						}
+						$full_hra = round($valid_hra);
+					}
+				}
+				else
+				{
+					$full_hra = round($hra_emp);
+				}
+			}
+		}
+	}
+	
+	$hra=$full_hra;
+	
+			///////////////////////////// HRA CALCULATION END /////////////////////////////////////
+
+	
+			///////////////////////////// MEDICAL ALLOWANCE START /////////////////////////////////////
+
+	
+	if($tch[0]['spouse_medical_allowance']=='1')
+	{
+		$ma = 0;
+	}
+	else
+	{
+		$ma = $max_ma;
+	}
+
+			///////////////////////////// MEDICAL ALLOWANCE END /////////////////////////////////////
+
+
+			///////////////////////////// CONVIENCE ALLOWANCE START /////////////////////////////////////
+	
+	
+	if($tch[0]['emp_diff_able']=='1')
+	{
+		if($tch[0]['conv_allow_status']==1)
+		{
+			$conveyance_allowance = $conveyance_allowance_max;
+		}
+		else
+		{
+			$conveyance_allowance = 0;
+		}
+	}
+	else
+	{
+		$conveyance_allowance = 0;
+	}
+	
+			///////////////////////////// CONVIENCE ALLOWANCE END /////////////////////////////////////
+	
+
+			///////////////////////////// HILL ALLOWANCE START /////////////////////////////////////
+
+
+	if($state10=='3219' || $state10=='3223' || $state10=='3299')
+	{
+		$hill_p = ($pay_in_band/100)*$hill_allowance_per;
+		$hill_g = ($pay_in_band/100)*$hill_allowance_per;
+		$hill_allowance_amt = $hill_p+$hill_g;
+		if($hill_allowance_amt > 2000)
+		{
+			$hill_allowance = 2000;
+		}
+		else
+		{
+			$hill_allowance = $hill_allowance_amt;
+		}
+	}else
+	{
+		$hill_allowance = 0;
+	}
+	
+
+			///////////////////////////// HILL ALLOWANCE END /////////////////////////////////////
+	
+	
+	$cpf = getAmount($dise,$tch[0]['emp_id_pk'],'cpf','',$requisition_type);
+	
+	$gross_salary = round($basic+$da+$interim_relief+$hra+$ma+$conveyance_allowance+$cpf+$hill_allowance);
+	
+	
+	//Deduction part
+	//$gpf_amt = ($basic/100)*6;
+	$gpf = getAmount($dise,$tch[0]['emp_id_pk'],'gpf',$basic,$requisition_type);
+	$pfl = getAmount($dise,$tch[0]['emp_id_pk'],'pfl','',$requisition_type);
+	$cpf_deduct = $cpf*2;
+	if($tch[0]['emp_diff_able']=='1')
+	{
+		$ptax = 0;
+	}
+	else
+	{
+		$ptax = empPtax($gross_salary);
+	}
+	$itax = getAmount($dise,$tch[0]['emp_id_pk'],'itax','',$requisition_type);
+	$gsli = getAmount($dise,$tch[0]['emp_id_pk'],'gsli','',$requisition_type);
+	$overdrawn = getAmount($dise,$tch[0]['emp_id_pk'],'ovd','',$requisition_type);
+	
+	$total_deduct = $gpf+$pfl+$cpf_deduct+$ptax+$itax+$gsli+$overdrawn;
+	$net_salary = $gross_salary-$total_deduct;
+}
+else
+{	
+  
+
+			$sal_save=	$db->fetch_table("SELECT slno, latestupdate_time, latestupdate_ip_address, gp_id_fk, empcd, 
+											bankname, accountno, basic, da,interim_relief, hra, ma, cpf, pf_loan, p_tax, 
+											i_tax, net, bank_ifsc, sal_source, spl_pay, pf_deduct, code, 
+											emp_salary_id_pk, spl_alo, status_flag, salary_monthyear, 
+											category_id, block_code, emp_id_fk, pay_payband, tch_grade_pay, 
+											hill_allowance, gpf, cpf_deduct, gross_salary, is_saved, conv_allow, 
+											overdrawn, salary_type, cause,gp_code, part_day,gsli,consolidated_pay,festival_loan,festival_loan_cause 
+											from prd_employee_salary_save 
+											where status_flag=3 AND delete_status=1 AND salary_monthyear='".date('Ym',strtotime('-1 month'))."'  
+											AND emp_id_fk='$emp_id_pk' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' 
+											AND ropa_status='1'");
+			   
+				//Added New Start
+			$promotion_data_cal = $db->fetch_table("SELECT emp_grade_pay,
+													emp_id_fk,
+													increment_type,
+													dop_doi,
+													effective_date,
+													emp_desig,
+													emp_pay_scale,
+													annual_increment_date,
+													emp_pay_band,
+													emp_pay_in_payband,
+													increment_amount,
+													pre_emp_pay_in_payband,
+													pre_emp_grade_pay
+													FROM prd_employee_promotion_details
+													WHERE emp_id_fk ='".$emp_id_pk."'
+													AND promotion_effective_status in('1') 
+													AND approval_status in(5,6)");
+			if(count($promotion_data_cal) > 0){											
+							$emp_id_for_promotion_part = $promotion_data_cal[0]['emp_id_fk'];									
+							$pre_emp_pay_band_for_promotion_cal = $promotion_data_cal[0]['pre_emp_pay_in_payband'];
+							//$pre_emp_grade_pay_for_promotion_cal = (func_gradepay($promotion_data_cal[0]['pre_emp_grade_pay']));
+							
+							$emp_effective_date_for_promotion_cal =  $promotion_data_cal[0]['effective_date'];
+							$emp_pay_band_for_promotion_cal =  $promotion_data_cal[0]['emp_pay_in_payband'];
+							//$emp_grade_pay_for_promotion_cal =  (func_gradepay($promotion_data_cal[0]['emp_grade_pay']));
+							$emp_effective_day_for_promotion_cal = substr ($emp_effective_date_for_promotion_cal, -2);
+							$max_days_of_current_month = date("t");
+							$dop_doi = $promotion_data_cal[0]['dop_doi'];
+							$promotion_eff_date = explode("-",$promotion_data_cal[0]['effective_date']);
+							$promotion_eff_yr_mnth = $promotion_eff_date[0].$promotion_eff_date[1];
+			}
+			else{
+							$emp_id_for_promotion_part = "";									
+							$pre_emp_pay_band_for_promotion_cal = "";
+							//$pre_emp_grade_pay_for_promotion_cal = "";
+							$emp_effective_date_for_promotion_cal =  "";
+							$emp_pay_band_for_promotion_cal =  "";
+							//$emp_grade_pay_for_promotion_cal =  "";
+							$emp_effective_day_for_promotion_cal = "";
+							$max_days_of_current_month = "";
+							$dop_doi = "";
+							$promotion_eff_date = "";
+							$promotion_eff_yr_mnth = "";
+						}
+						
+			if($emp_effective_day_for_promotion_cal != 01 && $emp_id_for_promotion_part != "" && $dop_doi == 3 && $promotion_eff_yr_mnth == date("Ym"))
+			{
+				$count_days_pre_part_sal = (($emp_effective_day_for_promotion_cal)-'1');
+				$count_days_post_part_sal = ($max_days_of_current_month - $count_days_pre_part_sal);
+				
+				
+				//$count_days_total_grade_pay_for_promotion = $part_grade_pay_for_pre_days + $part_grade_pay_for_post_days;
+				$count_days_total_pay_pay_band_for_promotion = $tch[0]['emp_pay_in_payband'];
+			}
+			else if($emp_effective_day_for_promotion_cal != 01 && $emp_id_for_promotion_part != "" && ($dop_doi == 4 || $dop_doi == 5) && $promotion_eff_yr_mnth == date("Ym"))
+			{
+				$count_days_pre_part_sal = (($emp_effective_day_for_promotion_cal)-'1');
+				$count_days_post_part_sal = ($max_days_of_current_month - $count_days_pre_part_sal);
+				
+				$part_pay_in_pay_band_for_pre_days = round(($pre_emp_pay_band_for_promotion_cal/$max_days_of_current_month)*$count_days_pre_part_sal);
+				
+				$part_pay_in_pay_band_for_post_days = round(($emp_pay_band_for_promotion_cal/$max_days_of_current_month)*$count_days_post_part_sal);
+				//$count_days_total_grade_pay_for_promotion = $part_grade_pay_for_pre_days + $part_grade_pay_for_post_days;
+				$count_days_total_pay_pay_band_for_promotion = $part_pay_in_pay_band_for_pre_days + $part_pay_in_pay_band_for_post_days;
+			}
+			else
+			{
+				$count_days_total_pay_pay_band_for_promotion = $tch[0]['emp_pay_in_payband'];
+				//$count_days_total_grade_pay_for_promotion = func_gradepay($tch[0]['emp_grade_pay']);
+			}
+				//Added New End
+				
+				
+			$emp_suspend=$db->fetch_table("
+										SELECT 
+												sus.slno,
+												sus.suspend_effect_date,
+												sus.suspend_withdrawn_date,
+												sus.pencentage_basic,
+												sus.suspend_start_date
+												
+											FROM
+												prd_suspend_dts as sus
+												INNER JOIN prd_employee_master em1 on sus.emp_id_fk=em1.emp_id_pk
+											WHERE
+												sus.gp_id_fk = '".$dise."' and sus.emp_id_fk='".$cryp->decode($_REQUEST['id'],4)."' 
+												and em1.emp_status='9' and sus.delete_status='0'
+				                      ");
+									  
+			$suspend_effect_date=$emp_suspend[0]['suspend_effect_date']; 
+			   
+			if(strtotime($suspend_effect_date)<=strtotime(date('Y-m-d')) && strtotime($suspend_effect_date)>0)
+			{
+			
+				$pencentage_basic=$emp_suspend[0]['pencentage_basic']; 
+				//$pay_in_band_sus =  $tch[0]['emp_pay_in_payband'];
+				$pay_in_band_sus = $count_days_total_pay_pay_band_for_promotion;
+				$pay_in_band = round(($pay_in_band_sus*$pencentage_basic)/100);
+				//$grade_pay_sus = getEmpAmount('grade_pay',$dise,$emp_id_pk);
+				//$grade_pay_sus = $count_days_total_grade_pay_for_promotion;
+				//$grade_pay=round(($grade_pay_sus*$pencentage_basic)/100);
+				$basic = round($pay_in_band_sus);
+				$basic_sus = $pay_in_band;
+				$da_sus=$da = round(($basic/100)*$da_per);
+				$da = round(($basic_sus/100)*$da_per);//03.12.2020
+				$interim_relief =0;
+			}
+			else
+			{
+				
+				//$pay_in_band =  $tch[0]['emp_pay_in_payband'];
+				$pay_in_band = $count_days_total_pay_pay_band_for_promotion;
+				//$grade_pay = getEmpAmount('grade_pay',$dise,$emp_id_pk);
+				//$grade_pay = $count_days_total_grade_pay_for_promotion;
+				$basic = $pay_in_band;
+				$da = round(($basic/100)*$da_per);//03.12.2020
+				//28.12.2018 $interim_relief = $tch[0]['interim_relief'];
+				$interim_relief=0;
+				
+			}
+			$consolidated_pay=0;
+			
+			
+			///////////////////////////////////////////////////////////////// HRA /////////////////////////////////////////////////////				
+			
+			if($tch[0]['emp_spouse_res']=='251')
+			{
+				$hra = 0; 
+			}
+			else
+			{
+				if($tch[0]['emp_spouse_hra']=='0' ||$tch[0]['emp_spouse_hra']=='' || !$tch[0]['emp_spouse_hra'])
+				{
+					$hra_emp = ($basic/100)*$hra_per;
+					if($hra_emp > 12000)
+					{
+						$hra = 12000;
+					}
+					else
+					{
+						$hra = round($hra_emp);
+					}
+				}
+				else if($tch[0]['emp_spouse_hra'] >= 12000)
+				{
+					$hra = 0;
+				}
+				else if($tch[0]['emp_spouse_hra'] < 12000)
+				{ //spouse HRA < 6000
+					$hra_emp = ($basic/100)*$hra_per;
+					if($hra_emp >= 12000)
+					{
+						$valid_hra  = (12000-$tch[0]['emp_spouse_hra']);
+						$hra = round($valid_hra);
+					}/*else{
+					$hra_emp = (($basic/100)*$hra_per)+$tch[0]['emp_spouse_hra'];
+					if($hra_emp > 6000){
+					$valid_hra  = (6000-$tch[0]['emp_spouse_hra']);
+					$hra = round($valid_hra);
+					}
+					*/							
+					else
+					{
+						$mix_hra = $hra_emp+$tch[0]['emp_spouse_hra'];
+						if($mix_hra > 12000)
+						{
+							if($tch[0]['emp_spouse_hra'] > $hra_emp)
+							{
+								//$valid_hra = $key['spouse_hra']-$hra_emp;
+								$valid_hra = 12000-$tch[0]['emp_spouse_hra'];
+								if($valid_hra>$hra_emp)
+								{
+									$valid_hra=$hra_emp;
+								}
+								$hra = round($valid_hra);
+							}else if($tch[0]['emp_spouse_hra'] <= $hra_emp)
+							{
+								$valid_hra = 12000-$tch[0]['emp_spouse_hra'];
+								if($valid_hra>$hra_emp)
+								{
+									$valid_hra=$hra_emp;
+								}
+								$hra = round($valid_hra);
+							}
+						}
+						else
+						{
+							$hra = round($hra_emp);
+						}
+					}
+				}
+			}
+			
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			///////////////////////////////////////////////////////////////// MA /////////////////////////////////////////////////////////
+			
+									
+			if($tch[0]['spouse_medical_allowance']=='1')
+			{
+				$ma = 0;
+			}
+			else
+			{
+				$ma = $max_ma;
+			}
+			
+			//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			////////////////////////////////////////////////////////// CONV ALLOW ////////////////////////////////////////////////////////
+							
+			/*if($tch[0]['emp_diff_able']=='1'){
+			if($sal_save[0]['conv_allow']!=''){
+			$conveyance_allowance = $sal_save[0]['conv_allow'];	
+			}else{
+			$conveyance_allowance = $conveyance_allowance_max;
+			}
+			}else{
+			$conveyance_allowance = 0;
+			}*/
+			if($tch[0]['emp_diff_able']=='1')
+			{
+				if($tch[0]['conv_allow_status']==1)
+				{
+					$cal_ma=round(($basic*5)/100);
+					if($cal_ma>=400)
+					{
+						$conveyance_allowance = $conveyance_allowance_max;
+					}
+					else
+					{
+						$conveyance_allowance=round($cal_ma);
+					}
+				}
+				else
+				{
+					$conveyance_allowance = 0;
+				}
+			}
+			else
+			{
+				$conveyance_allowance = 0;
+			}
+			
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		//////////////////////////////////////////////////////////// HILL ALLOW	////////////////////////////////////////////////////////////////
+
+			if($state10=='3219' || $state10=='3223' || $state10=='3299')
+			{
+				$hill_p = ($pay_in_band/100)*$hill_allowance_per;
+				//$hill_g = ($grade_pay/100)*$hill_allowance_per;
+				$hill_allowance_amt =($basic/100)*$hill_allowance_per;
+				//$hill_allowance_amt = $hill_p+$hill_g;
+				if($hill_allowance_amt > 2000)
+				{
+					$hill_allowance = 2000;
+				}
+				else
+				{
+					$hill_allowance = $hill_allowance_amt;
+				}
+			}
+			else
+			{
+				$hill_allowance = 0;
+			}
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+			//$cpf = ($basic/100)*$cpf_per;
+			//$cpf = getAmount($dise,$tch[0]['tchcd'],'cpf','');
+			//$da='0';
+			$gross_salary = round($pay_in_band+$da+$interim_relief+$hra+$ma+$conveyance_allowance+$hill_allowance);
+			//Deduction part
+			//$gpf_amt = ($basic/100)*6;
+			
+			/*$gpf = getAmount($dise,$tch[0]['tchcd'],'gpf',$basic);
+			if($gpf!=0){
+			if($sal_save[0]['gpf']){
+			$gpf=$sal_save[0]['gpf'];
+			}else{
+			$gpf = getAmount($dise,$tch[0]['tchcd'],'gpf',$basic);
+			}
+			}*/
+			
+			//  $check_gpf=$db->fetch_table("select tch_first_joining from ehrms_dise_teacher_primary where status=1  AND tchcd='$tchcd' AND schcd='".$dise."'");
+			//$join=$check_gpf[0]['tch_first_joining'];
+			//$next_dt =date("Y-m-d", strtotime("+1 years", strtotime($join)));
+			/*if(strtotime($next_dt)>=strtotime(date('Y-m-d'))){
+			$gpf=0;
+			}else*/ 
+			if(strtotime($emp_first_join_match_date)>=strtotime(date('Y-m-d')) && strtotime($emp_first_join_match_date)>0)
+			{
+				$gpf=0;
+			}	
+			else if(strtotime($date)<=strtotime(date('Y-m-d')) && strtotime($date)>0)
+			{
+				$gpf=0;
+			}
+			else
+			{
+				if($sal_save[0]['gpf']!=0)
+				{
+					$gpf=$sal_save[0]['gpf'];	
+				}
+				else
+				{
+					$gpf = getAmount($dise,$emp_id_pk,'gpf',$basic,$requisition_type);
+				}
+			}
+			if($sal_save[0]['pf_loan'])
+			{
+				$pfl=$sal_save[0]['pf_loan'];
+			}
+			else
+			{
+				$pfl = getAmount($dise,$empcd,'pfl','',$requisition_type);
+			}
+
+		//$cpf_deduct = $cpf*2;
+
+			/*if($key['emp_diff_able']=='1')
+			{
+				$ptax = 0;
+			}
+			*/
+			if($tch[0]['emp_diff_able']=='1')
+			{
+				$ptax = 0;
+			}
+			else
+			{
+				if(strtotime($suspend_effect_date)<=strtotime(date('Y-m-d')) && strtotime($suspend_effect_date)>0)
+				{
+					$gross_salary_sus=round($pay_in_band_sus+$da_sus+$interim_relief+$hra+$ma+$conveyance_allowance+$cpf+$hill_allowance);
+					//$ptax = empPtax($gross_salary_sus);
+					$ptax = empPtax($gross_salary);
+				}
+				else
+				{
+					$ptax = empPtax($gross_salary);
+				}
+			}
+
+		// $max_ptax = empPtax($gross_salary);
+			if($sal_save[0]['i_tax'])
+			{
+				$itax=$sal_save[0]['i_tax'];
+			}
+			else
+			{
+				$itax = getAmount($dise,$empcd,'itax','',$requisition_type);
+			}
+
+			if($sal_save[0]['gsli'])
+			{
+				$gsli=$sal_save[0]['gsli'];
+			}
+			else
+			{
+				$gsli = getAmount($dise,$empcd,'gsli','',$requisition_type);
+			}
+			/*if($sal_save[0]['overdrawn']){
+			$overdrawn=$sal_save[0]['overdrawn'];
+			}else{
+			$overdrawn = getAmount($dise,$tch[0]['tchcd'],'ovd','');
+			}*/
+			$festival_loan = festival_adv_recovery($emp_id_pk);	//05_06_2018
+			$overdrawn=0;
+			$total_deduct = $gpf+$pfl+$ptax+$itax+$gsli+$festival_loan; 
+			$net_salary = $gross_salary-$total_deduct;
+
+			if($tch[0]['emp_desig']=='1120' || $tch[0]['emp_desig']=='1124' || $tch[0]['emp_desig']=='1125' )
+			{
+				$consolidated_pay=$tch[0]['emp_cosolidated_pay'];	
+				$pay_in_band = 0;
+				$grade_pay = 0;
+				$basic = 0;
+				$bas=$consolidated_pay;
+				$da = 0;
+				$interim_relief=0;
+				$hra = 0;
+				$ma = 0;
+				$conveyance_allowance = 0;
+				$hill_allowance = 0;
+				$cpf = 0;
+				//$gross_salary = round($basic+$da+$hra+$ma+$conveyance_allowance+$cpf);
+				$gpf = 0;
+				$pfl = 0;
+				$cpf_deduct = 0;
+				$gross_salary = round($bas+$da+$interim_relief+$hra+$ma+$conveyance_allowance+$cpf+$hill_allowance);
+				if($tch[0]['emp_diff_able']=='1')
+				{
+					$ptax = 0;
+				}
+				else
+				{
+					$ptax = empPtax($gross_salary);
+				}
+				$max_ptax = empPtax($gross_salary);
+				$itax = 0;
+				$gsli =0;
+				$overdrawn = getAmount($dise,$tch[0]['emp_id_pk'],'ovd','',$requisition_type);
+				//$other_deduction=0;
+				//$cooperative_loan = 0;
+				//$hbl_loan = 0;
+				//$festival_loan =0; 
+				$festival_loan = festival_adv_recovery($emp_id_pk);	//05_06_2018
+				$total_deduct = $gpf+$pfl+$cpf_deduct+$ptax+$itax+$gsli+$overdrawn+$festival_loan;
+				$net_salary = $gross_salary-$total_deduct;
+			}
+}
+    	
+?>
+
+<style>
+input[type="checkbox"] {
+	display:inline !important;
+}
+</style>
+
+<script type="application/javascript" src="<?php echo $config['base_url'] ?>themes/default/js/commonfunc.js"></script>
+
+
+    
+<script>
+	<?php if($tch[0]['emp_desig']=='1120' || $tch[0]['emp_desig']=='1124' || $tch[0]['emp_desig']=='1125' ){?>
+		$('#pf_loan').attr('readonly','readonly');
+		$('#pf_loan').css('background-color','#EEE');
+		$('#i_tax').attr('readonly','readonly');
+		$('#i_tax').css('background-color','#EEE');
+		$('#gsli').attr('readonly','readonly');
+		$('#gsli').css('background-color','#EEE');
+	<?php } ?>
+</script>
+
+<script>
+	
+	
+
+	$(document).ready(function (e1) 
+	{
+	
+		if($('#reduction').val()=="no_ovd1")
+		{
+			$("#reduction_type").hide();
+		}  
+		
+		
+		var value1 = $("#net").val();
+		//var read1=$('#reduct1').val()
+		// var read2=$('#reduct2').val()
+		var read3=$('#reduct3').val();             
+		
+		$("#reduction").change(function () 
+		{
+			if($('#salary_type').val()!='8')
+			{ 
+				if ($(this).val() == "yes_ovd1" )
+				{
+					$("#reduction_type").show();
+				}
+				
+			} 
+			else
+			{
+				// $('#net').val(addition);
+				$('#reduct1').val(0);
+				$("#reduction_type1").hide();
+				//	$('#reduct1').attr('readonly','readonly');
+				//$('#reduct1').css('background-color','#EEE');
+				//$('#reduct2').val(0);
+				//	$('#reduct2').attr('readonly','readonly');
+				//$('#reduct2').css('background-color','#EEE');
+				$('#reduct3').val(0);
+				$('#reduct3').attr('readonly','readonly');
+				$('#reduct3').css('background-color','#EEE');
+			}
+
+			if ($(this).val() == "no_ovd1")
+			{
+				// var reduct1 = $('#reduct1').val();
+				//var reduct2 = $('#reduct2').val();
+				var reduct3 = $('#reduct3').val();
+				var net = $('#net').val();
+				var addition =  parseInt(reduct3)+parseInt(net);
+				//var addition = parseInt(reduct1)+ parseInt(reduct2)+ parseInt(reduct3)+parseInt(net);
+				$('#net').val(addition);
+				//$('#net').val();
+				// $("#reduction_type1").prop("checked", false);
+				//$("#reduction_type2").prop("checked", false);
+				$("#reduction_type3").prop("checked", false);
+				//$('#reduct').removeAttr('writeonly');
+				//$('#reduct').val(0);
+				//   $('#reduct1').val(0);
+				//	$('#reduct2').val(0);
+				$('#reduct3').val(0);
+				$("#reduction_type").hide();
+				//$('#overdrawn').attr('readonly');
+				//	$('#reduct1').attr('readonly','readonly');
+				//   $('#reduct1').css('background-color','#EEE');
+				//	$('#reduct2').attr('readonly','readonly');
+				//  $('#reduct2').css('background-color','#EEE');
+				$('#reduct3').attr('readonly','readonly');
+				$('#reduct3').css('background-color','#EEE');
+				//$('#reduct').removeAttr('writeonly');
+				//var value = $( this ).val();
+				//var value1 = $("#net").val();
+				//var c=value1-value;
+				//$( "#net" ).val( c );
+			}
+			
+			
+		});
+	});
+	
+	$(document).ready(function(e) 
+	{
+		//$( "#working_days" ).removeClass( "input[type=text]" );
+		
+		$('#is_overdrawn').change(function(e) 
+		{
+			if($('#is_overdrawn').val()=='no_ovd')
+			{
+				var overdrawn = $('#overdrawn').val();
+				var net = $('#net').val();
+				var addition = parseInt(overdrawn)+parseInt(net);
+				$('#net').val(addition);
+				$('#cause_holder').hide();
+				$('#cause_msg').val('');
+				/*if($('#salary_type').val()=='2' || $('#salary_type').val()=='8'){
+				$('#cause_holder').show();
+				} else {
+				$('#cause_holder').hide();
+				}*/
+				$('#overdrawn').val(0);
+				$('#overdrawn').attr('readonly','readonly');
+				$('#overdrawn').css('background-color','#EEE');
+				
+				//$('#part_day_holder').hide();
+				//$('#working_days').val('');
+			}
+			if($('#is_overdrawn').val()=='yes_ovd' )
+			{
+				var cause=$('#cause_holder').val();
+				var overdrawn = $('#overdrawn').val();
+				var net = $('#net').val();
+				var addition = parseInt(overdrawn)+parseInt(net);
+				$('#net').val(addition);
+				$('#cause_holder').show();
+				$('#cause_msg').show();
+				/*if($('#cause_msg').val()!=''){
+				$('#overdrawn').removeAttr('readonly');
+				$('#overdrawn').css('background-color','#FFF');
+				}*/
+				//$('#part_day_holder').hide();
+				//$('#working_days').val('');
+			}
+		});		
+		
+		$('#salary_type').change(function(e) 
+		{
+			var id=$(this).val();
+			if($('#is_overdrawn').val()=='no_ovd')
+			{
+				var overdrawn = $('#overdrawn').val();
+				var net = $('#net').val();
+				var addition = parseInt(overdrawn)+parseInt(net);
+				$('#net').val(addition);
+				$('#cause_holder').hide();
+				$('#cause_msg').hide();
+				$('#overdrawn').val(0);
+				$('#overdrawn').attr('readonly','readonly');
+				$('#overdrawn').css('background-color','#EEE');
+				$('#part_day_holder').hide();
+				$('#working_days').val('');
+			}
+			if($('#is_overdrawn').val()=='yes_ovd')
+			{
+				$('#cause_msg').show();
+				
+				var cause=$('#cause_holder').val();
+				var overdrawn = $('#overdrawn').val();
+				var net = $('#net').val();
+				var addition = parseInt(overdrawn)+parseInt(net);
+				$('#net').val(addition);
+				$('#cause_holder').show();
+				$('#overdrawn').removeAttr('readonly');
+				$('#overdrawn').css('background-color','#FFF');
+				$('#part_day_holder').hide();
+				$('#working_days').val('');
+			}
+			if(id == '8')
+			{
+				var a=$('#no_ovd').val();				
+				var b=$('#no_ovd1').val();
+				$('#reduction').val(b);
+				$('#reduction_type').hide();
+				$('#overdrawn').attr('readonly','readonly');
+				$('#overdrawn').css('background-color','#EEE');
+				$('#reduct1').attr('readonly','readonly');
+				$('#reduct1').css('background-color','#EEE');
+				$('#reduct2').attr('readonly','readonly');
+				$('#reduct2').css('background-color','#EEE');
+				$('#reduct3').attr('readonly','readonly');
+				$('#reduct3').css('background-color','#EEE');
+				document.getElementById("is_overdrawn").disabled = true;
+				document.getElementById("reduction").disabled = true;
+			}
+			else
+			{
+				$('#ovd_is').show();
+				$('#is_overdrawn').show();	
+				document.getElementById("is_overdrawn").disabled = false;
+				document.getElementById("reduction").disabled = false;
+			}
+			if($('#exist_part_day').val()!='')
+			{
+				if(id == '1')
+				{
+					//$('#reduct').val(0);
+					var desig=<?=$tch[0]['emp_desig']?>;
+					$('#part_salary_cause_holder').hide();
+					$('#part_salary_cause_msg').val('');
+					$('#no_salary_cause_holder').hide();
+					$('#no_salary_cause_msg').val('');
+					$('#is_reduct').show();
+					$('#ovd_is').show();
+					$('#is_overdrawn').show();
+					//$('#conv_allow').removeAttr('readonly');
+					//$('#conv_allow').css('background-color','#FFF');
+					$('#cpf').removeAttr('readonly');
+					$('#cpf').css('background-color','#FFF');
+					
+					$('#pf_loan').removeAttr('readonly');
+					$('#pf_loan').css('background-color','#FFF');
+					$('#gsli').removeAttr('readonly');
+					$('#gsli').css('background-color','#FFF');
+					//$('#p_tax').removeAttr('readonly');
+					//$('#p_tax').css('background-color','#FFF');
+					$('#i_tax').removeAttr('readonly');
+					$('#i_tax').css('background-color','#FFF');
+					if(desig!='1120' && desig!='1124' && desig!='1125')
+					{
+						$('#pay_in_band').val('<?php echo $full_pay_band; ?>');
+						
+						$('#consolidated_pay').val(0);
+						$('#grade_pay').val('<?php echo 0; ?>');
+						var basic = parseInt($('#pay_in_band').val());
+						$('#basic').val(basic);
+						$('#da').val('<?php echo 0; ?>');
+						$('#interim_relief').val('<?php echo $full_interim_relief; ?>');
+						$('#hra').val('<?php echo $full_hra; ?>');
+						$('#ma').val('<?php echo $full_ma; ?>');
+						$('#conv_allow').val('<?php echo $full_conveyance_allowance; ?>');
+						$('#hill_allow').val('<?php echo $full_hill_allowance; ?>');
+						$('#gsli').val('<?php echo $gsli; ?>');
+						$('#gpf').val('<?php echo $full_gpf; ?>');
+						$('#i_tax').val('<?php echo $full_itax; ?>');
+						$('#gross').val('<?php echo $full_gross_salary; ?>');
+						$('#p_tax').val('<?php echo $full_ptax; ?>');
+						$('#net').val('<?php echo $full_net_salary; ?>');
+						
+						// $full_cooperative_loan = $sal_chk[0]['cooperative_loan'];
+						// $full_hbl_loan = $sal_chk[0]['hbl_loan'];
+						//  $full_festival_loan = $sal_chk[0]['festival_loan'];
+						<?php $full_festival_loan = $sal_chk[0]['festival_loan']; ?>
+						$('#reduct3').val('<?php echo $full_festival_loan; ?>');
+					} 
+					else 
+					{
+						$('#pay_in_band').val(0);
+						$('#consolidated_pay').val(<?php if(isset($full_consolidated_pay)){echo $full_consolidated_pay;} ?>);
+						$('#grade_pay').val(0);
+						var basic = parseInt($('#consolidated_pay').val());
+						$('#basic').val(basic);
+						$('#da').val(0);
+						$('#interim_relief').val(0);
+						$('#hra').val(0);
+						$('#ma').val(0);
+						$('#conv_allow').val(0);
+						$('#gsli').val(0)
+					}
+					
+					var pay_band = $('#pay_in_band').val();
+					var grade_pay = $('#grade_pay').val();
+					var da = $('#da').val();
+					var interim_relief = $('#interim_relief').val();
+					var hra = $('#hra').val();
+					var ma = $('#ma').val();
+					var conv_allow = $('#conv_allow').val();
+					var cpf = $('#cpf').val();
+					var consolidated_pay=$('#consolidated_pay').val();
+					if(desig!='1120' && desig!='1124' && desig!='1125' )
+					{
+						if($('#retirement_gpf').val()==1)
+						{ 
+							$('#gpf').attr('readonly','readonly');
+							$('#gpf').css('background-color','#EEE');
+						}
+						else if($('#emp_first_join_date').val()==1)
+						{ 
+							$('#gpf').attr('readonly','readonly');
+							$('#gpf').css('background-color','#EEE');
+						}
+						else
+						{
+							$('#gpf').removeAttr('readonly');
+							$('#gpf').css('background-color','#FFF');
+							var min_gpf_amt = ((parseInt(pay_band))/100)*6;
+							var min_gpf = Math.round(min_gpf_amt);
+							var max_gpf = (parseInt(pay_band));
+							//var gpf = $('#gpff').val();
+							$('#gpf').val(min_gpf);
+						}
+						
+					} 
+					else 
+					{
+						$('#gpf').val(0);
+					}
+					var gross = parseInt(pay_band)+parseInt(da)+parseInt(interim_relief)+parseInt(hra)+parseInt(ma)+parseInt(conv_allow)+parseInt(consolidated_pay);
+					$('#gross').val(gross);
+					
+					
+					var gpf = $('#gpf').val();
+					var pfl = $('#pf_loan').val();
+					var cpfd = $('#cpf_deduct').val();
+					var ptax = $('#p_tax').val();
+					var itax = $('#i_tax').val();
+					var overdrawn = $('#overdrawn').val();
+					var gsli=$('#gsli').val();
+					/*var reduct1=$('#reduct1').val();
+					var reduct2=$('#reduct2').val();*/
+					var reduct3=$('#reduct3').val();
+					var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(gsli)+parseInt(ptax)+parseInt(itax)+parseInt(overdrawn)+parseInt(reduct3);
+					var net = parseInt(gross)-parseInt(deduct);	
+					$('#net').val(net);
+					if(desig=='1120' || desig=='1124' || desig=='1125' )
+					{
+						$('#pay_in_band,#consolidated_pay,#grade_pay,#da,#interim_relief,#hra,#ma,#conv_allow,#gross,#gpf,#pf_loan,#p_tax,#i_tax,#gsli').attr('readonly','readonly').css('background-color','#EEE;');
+					}
+				}
+				if(id == '2')
+				{				
+					var desig=<?=$tch[0]['emp_desig']?>;
+					$('#part_day_holder').show();
+					$('#cause_holder').show();
+					$('#part_salary_cause_holder').show();
+					$('#cause_msg').val('');
+					$('#limit').text(500);
+					//$('#conv_allow').removeAttr('readonly');
+					//$('#conv_allow').css('background-color','#FFF');
+					$('#cpf').removeAttr('readonly');
+					$('#cpf').css('background-color','#FFF');
+					var retirement_gpf=$('#retirement_gpf').val();
+					if($('#retirement_gpf').val()==1)
+					{ 
+						$('#gpf').attr('readonly','readonly');
+						$('#gpf').css('background-color','#EEE');
+					}
+					else if($('#emp_first_join_date').val()==1)
+					{ 
+						$('#gpf').attr('readonly','readonly');
+						$('#gpf').css('background-color','#EEE');
+					}
+					else
+					{
+						$('#gpf').removeAttr('readonly');
+						$('#gpf').css('background-color','#FFF');
+					}
+					$('#pf_loan').removeAttr('readonly');
+					$('#pf_loan').css('background-color','#FFF');
+					$('#gsli').removeAttr('readonly');
+					$('#gsli').css('background-color','#FFF');
+					//$('#p_tax').removeAttr('readonly');
+					//$('#p_tax').css('background-color','#FFF');
+					$('#i_tax').removeAttr('readonly');
+					$('#i_tax').css('background-color','#FFF');
+					var months_full_day = $('#month_last_date').val();
+					var exist_part_day = $('#exist_part_day').val();
+					if(desig!='1120' && desig!='1124' && desig!='1125' )
+					{
+						$('#pay_in_band').val('<?php echo $full_pay_band; ?>');
+						$('#consolidated_pay').val(0);
+						$('#grade_pay').val('<?php echo 0; ?>');
+						var basic = parseInt($('#pay_in_band').val());
+						$('#basic').val(basic);
+						$('#da').val('<?php echo 0; ?>');
+						$('#interim_relief').val('<?php echo $full_interim_relief; ?>');
+						$('#hra').val('<?php echo $full_hra; ?>');
+						$('#ma').val('<?php echo $full_ma; ?>');
+						$('#conv_allow').val('<?php echo $full_conveyance_allowance; ?>');
+						$('#hill_allow').val('<?php echo $full_hill_allowance; ?>');
+						$('#gsli').val('<?php echo $gsli; ?>');
+						$('#gpf').val('<?php echo $full_gpf; ?>');
+						$('#i_tax').val('<?php echo $full_itax; ?>');
+						$('#gross').val('<?php echo $full_gross_salary; ?>');
+						$('#p_tax').val('<?php echo $full_ptax; ?>');
+						$('#net').val('<?php echo $full_net_salary; ?>');
+						
+						// $full_cooperative_loan = $sal_chk[0]['cooperative_loan'];
+						// $full_hbl_loan = $sal_chk[0]['hbl_loan'];
+						// $full_festival_loan = $sal_chk[0]['festival_loan'];
+						<?php $full_festival_loan = $sal_chk[0]['festival_loan']; ?>
+						$('#reduct3').val('<?php echo $full_festival_loan; ?>');
+					} 
+					else 
+					{
+						$('#pay_in_band').val(0);
+						$('#consolidated_pay').val(<?php if(isset($full_consolidated_pay)){ echo $full_consolidated_pay; }?>);
+						$('#grade_pay').val(0);
+						var basic = parseInt($('#consolidated_pay').val());
+						$('#basic').val(basic);
+						$('#da').val(0);
+						$('#interim_relief').val(0);
+						$('#hra').val(0);
+						$('#ma').val(0);
+						$('#conv_allow').val(0);
+						$('#p_tax').val(<?php echo $ptax; ?>);
+					}
+					var pay_band = $('#pay_in_band').val();
+					var consolidated_pay=$('#consolidated_pay').val();
+					var grade_pay = $('#grade_pay').val();
+					var da = $('#da').val();
+					var interim_relief = $('#interim_relief').val();
+					var hra = $('#hra').val();
+					var ma = $('#ma').val();
+					var conv_allow = $('#conv_allow').val();
+					var hill_allow = $('#hill_allow').val();
+					/*var reduct1=$('#reduct1').val();
+					var reduct2=$('#reduct2').val();*/
+					var reduct3=$('#reduct3').val();	
+					//var cpf = $('#cpf').val();
+					var gross = parseInt(pay_band)+parseInt(consolidated_pay)+parseInt(da)+parseInt(interim_relief)+parseInt(hra)+parseInt(ma)+parseInt(conv_allow);
+					$('#gross').val(gross);
+					
+					if(desig!='1120' && desig!='1124' && desig!='1125' )
+					{
+						var min_gpf_amt = ((parseInt(pay_band))/100)*6;
+						var min_gpf = Math.round(min_gpf_amt);
+						var max_gpf = (parseInt(pay_band));
+						//var gpf = $('#gpf').val();
+						$('#gpf').val(min_gpf);
+					} 
+					else 
+					{
+						$('#gpf').val(0);
+					}
+					
+					var gpf = $('#gpf').val();
+					var pfl = $('#pf_loan').val();
+					//var cpfd = $('#cpf_deduct').val();
+					var ptax = $('#p_tax').val();
+					var itax = $('#i_tax').val();
+					var overdrawn = $('#overdrawn').val();
+					var reduct = $('#reduct').val();
+					var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(ptax)+parseInt(itax)+parseInt(overdrawn)+parseInt(reduct3);
+					var net = parseInt(gross)-parseInt(deduct);	
+					$('#net').val(net);
+					//$('#overdrawn').val(0);
+					//alert($('#pay_in_band').val());
+					if(desig=='1120' || desig=='1124' || desig=='1125' )
+					{
+						$('#pay_in_band,#consolidated_pay,#grade_pay,#da,#interim_relief,#hra,#ma,#conv_allow,#gross,#gpf,#pf_loan,#p_tax,#i_tax,#gsli').attr('readonly','readonly').css('background-color','#EEE;');
+					}
+				}
+				if(id == '8')
+				{
+					$('#pay_in_band,#consolidated_pay,#grade_pay,#da,#interim_relief,#hra,#ma,#conv_allow,#gross,#gpf,#pf_loan,#p_tax,#i_tax,#gsli').attr('readonly','readonly').css('background-color','#EEE;');
+					
+					$('#part_salary_cause_holder').hide();
+					$('#part_salary_cause_msg').val('');
+					
+					$('#ovd_is').hide();
+					$('#is_overdrawn').hide();
+					$('#is_overdrawn').val('no_ovd');
+					$('#cause_holder').hide();
+					$('#cause_msg').val('');
+					
+					$('#no_salary_cause_holder').show();
+					$('#is_reduct').hide();
+					
+					/*$('#cause_holder').show(0);
+					$('#consolidated_pay').val(0);*/
+					/*$('#gsli').attr('readonly','readonly');
+					$('#gsli').css('background-color','#EEE');
+					//$('#cause_msg').val('');
+					//('#limit').text(500);
+					$('#conv_allow').attr('readonly','readonly');
+					$('#conv_allow').css('background-color','#EEE');
+					$('#gpf').attr('readonly','readonly');
+					$('#gpf').css('background-color','#EEE');
+					$('#pf_loan').attr('readonly','readonly');
+					$('#pf_loan').css('background-color','#EEE');
+					$('#p_tax').attr('readonly','readonly');
+					$('#p_tax').css('background-color','#EEE');
+					$('#i_tax').attr('readonly','readonly');
+					$('#i_tax').css('background-color','#EEE');
+					$('#overdrawn').attr('readonly','readonly');
+					$('#overdrawn').css('background-color','#EEE');*/
+					$('#part_salary_cause_holder').hide();
+					$('#pay_in_band').val(0);
+					$('#consolidated_pay').val(0);
+					$('#grade_pay').val(0);
+					$('#da').val(0);
+					$('#interim_relief').val(0);
+					$('#hra').val(0);
+					$('#ma').val(0);
+					$('#conv_allow').val(0);
+					$('#hill_allow').val(0);
+					$('#cpf').val(0);
+					$('#gross').val(0);
+					$('#gpf').val(0);
+					$('#pf_loan').val(0);
+					$('#p_tax').val(0);
+					$('#i_tax').val(0);
+					$('#overdrawn').val(0);
+					$('#net').val(0);
+					$('#gsli').val(0);
+					$('#basic').val(0);
+					$('#reduct').val(0);
+				}
+			}
+			if($('#exist_part_day').val()=='')
+			{
+				if(id == '1')
+				{
+				
+				    // document.getElementById('yes_ovd1').style.visibility='visible';
+					$('#ovd_is').show();
+					$('#is_overdrawn').show();
+					//$('#reduct').val(0);
+					$('#net').val();
+					$('#part_salary_cause_holder').hide();
+					$('#part_salary_cause_msg').val('');
+					$('#no_salary_cause_holder').hide();
+					$('#no_salary_cause_msg').val('');
+					$('#is_reduct').show();
+					
+					/////// Code has been done by Anannya on 07-06-2018 ////////
+
+					var f_loan='<?php echo $festival_loan; ?>';
+					if(f_loan>0)
+					{
+						$('#reduction').val('yes_ovd1');
+						$('#reduction_type').show();
+						$('#reduction_type3').attr('checked','checked');
+						$('#reduct3').val(f_loan);
+					}
+					
+					/////// Code has been done by Anannya on 07-06-2018 ////////
+					
+					//$('#reduct').val();
+					var desig=<?=$tch[0]['emp_desig']?>;
+					
+					$('#conv_allow').attr('readonly','readonly');
+					$('#conv_allow').css('background-color','#EEE');
+					$('#cpf').removeAttr('readonly');
+					$('#cpf').css('background-color','#FFF');
+					//var retirement_gpf=$('#retirement_gpf').val();
+					if($('#retirement_gpf').val()==1)
+					{ 
+						$('#gpf').attr('readonly','readonly');
+						$('#gpf').css('background-color','#EEE');
+					}
+					else if($('#emp_first_join_date').val()==1)
+					{ 
+						$('#gpf').attr('readonly','readonly');
+						$('#gpf').css('background-color','#EEE');
+					}
+					else
+					{
+						$('#gpf').removeAttr('readonly');
+						$('#gpf').css('background-color','#FFF');
+					}
+					
+					$('#pf_loan').removeAttr('readonly');
+					$('#pf_loan').css('background-color','#FFF');
+					$('#gsli').removeAttr('readonly');
+					$('#gsli').css('background-color','#FFF');
+					$('#p_tax').attr('readonly','readonly');
+					$('#p_tax').css('background-color','#EEE');
+					$('#i_tax').removeAttr('readonly');
+					$('#i_tax').css('background-color','#FFF');
+					$('#pay_in_band').val('<?php echo $pay_in_band; ?>');
+					
+					$('#consolidated_pay').val('<?php echo $consolidated_pay; ?>');
+					$('#grade_pay').val('<?php echo $grade_pay; ?>');
+					$('#basic').val('<?php echo $basic; ?>');
+					
+					$('#da').val('<?php echo $da; ?>');
+					$('#interim_relief').val('<?php echo $interim_relief; ?>');
+					$('#hra').val('<?php echo $hra; ?>');
+					$('#ma').val('<?php echo $ma; ?>');
+					$('#conv_allow').val('<?php echo $conveyance_allowance; ?>');
+					$('#hill_allow').val('<?php echo $hill_allowance; ?>');
+					$('#cpf').val('<?php if(isset($cpf)){ echo $cpf; } ?>');
+					$('#gross').val('<?php echo $gross_salary; ?>');
+					$('#gpf').val('<?php echo $gpf; ?>');
+					$('#pf_loan').val('<?php echo $pfl; ?>');
+					$('#cpf_deduct').val('<?php if(isset($cpf_deduct)){ echo $cpf_deduct; } ?>');
+					$('#p_tax').val('<?php echo $ptax; ?>');
+					$('#i_tax').val('<?php echo $itax; ?>');
+					$('#overdrawn').val('<?php echo $overdrawn; ?>');
+					$('#reduct').val('<?php if(isset($full_other_deduction)!=0){echo $full_other_deduction;}else {echo "0";} ?>');
+					
+					$('#net').val('<?php echo $net_salary; ?>');
+					/*if(desig=='1120'){
+					$('#gpf').attr('readonly','readonly');
+					$('#gpf').css('background-color','#EEE');
+					$('#pf_loan').attr('readonly','readonly');
+					$('#pf_loan').css('background-color','#EEE');
+					$('#i_tax').attr('readonly','readonly');
+					$('#i_tax').css('background-color','#EEE');
+					}*/
+					if(desig=='1120' || desig=='1124' || desig=='1125' )
+					{
+						$('#pay_in_band,#consolidated_pay,#grade_pay,#da,#interim_relief,#hra,#ma,#conv_allow,#gross,#gpf,#pf_loan,#p_tax,#i_tax,#gsli').attr('readonly','readonly')
+						.css('background-color','#EEE');
+					}
+				}
+				if(id == '2')
+				{
+					$('#reduct').val(0);
+					$('#net').val();
+					
+					var desig=<?=$tch[0]['emp_desig']?>;
+					
+					/*if(desig=='1120'){
+					$('#pay_in_band,#consolidated_pay,#grade_pay,#da,#hra,#ma,#conv_allow,#gross,#gpf,#pf_loan,#p_tax,#i_tax,#gsli').attr('readonly','readonly')
+					.css('background-color','#EEE');
+					}*/
+					$('#part_day_holder').show();
+					$('#part_salary_cause_holder').show();
+					
+					$('#no_salary_cause_holder').hide();
+					$('#no_salary_cause_msg').val('');
+					$('#is_reduct').show();
+					$('#ovd_is').show();
+					$('#is_overdrawn').show();
+					
+					/////// Code has been done by Anannya on 07-06-2018 ////////
+					
+					var f_loan='<?php echo $festival_loan; ?>';
+					if(f_loan>0)
+					{
+						$('#reduction').val('yes_ovd1');
+						$('#reduction_type').show();
+						$('#reduction_type3').attr('checked','checked');
+						$('#reduct3').val(f_loan);
+					}
+					
+					/////// Code has been done by Anannya on 07-06-2018 ////////
+
+					
+					/*$('#cause_holder').show();
+					$('#cause_msg').val('');
+					$('#limit').text(500);*/
+					$('#conv_allow').attr('readonly','readonly');
+					$('#conv_allow').css('background-color','#EEE');
+					$('#cpf').removeAttr('readonly');
+					$('#cpf').css('background-color','#FFF');
+					var retirement_gpf=$('#retirement_gpf').val();
+					
+					if($('#retirement_gpf').val()==1)
+					{ 
+						$('#gpf').attr('readonly','readonly');
+						$('#gpf').css('background-color','#EEE');
+					}
+					else if($('#emp_first_join_date').val()==1)
+					{ 
+						$('#gpf').attr('readonly','readonly');
+						$('#gpf').css('background-color','#EEE');
+					}
+					else
+					{
+						$('#gpf').removeAttr('readonly');
+						$('#gpf').css('background-color','#FFF');
+					}
+					$('#pf_loan').removeAttr('readonly');
+					$('#pf_loan').css('background-color','#FFF');
+					$('#gsli').removeAttr('readonly');
+					$('#gsli').css('background-color','#FFF');
+					if($('#conv_allow').val() > 0)
+					{
+						$('#p_tax').removeAttr('readonly');
+						$('#p_tax').css('background-color','#FFF');
+					}
+					$('#i_tax').removeAttr('readonly');
+					$('#i_tax').css('background-color','#FFF');
+					$('#p_tax').attr('readonly','readonly');
+					$('#p_tax').css('background-color','#EEE');
+					$('#pay_in_band').val('<?php echo $pay_in_band; ?>');
+					$('#consolidated_pay').val('<?php echo $consolidated_pay; ?>');
+					$('#grade_pay').val('<?php echo $grade_pay; ?>');
+					$('#basic').val('<?php echo $basic; ?>');
+					$('#da').val('<?php echo $da; ?>');
+					$('#interim_relief').val('<?php echo $interim_relief; ?>');
+					$('#hra').val('<?php echo $hra; ?>');
+					$('#ma').val('<?php echo $ma; ?>');
+					$('#conv_allow').val('<?php echo $conveyance_allowance; ?>');
+					$('#hill_allow').val('<?php echo $hill_allowance; ?>');
+					$('#cpf').val('<?php if(isset($cpf)){ echo $cpf; } ?>');
+					$('#gross').val('<?php echo $gross_salary; ?>');
+					$('#gpf').val('<?php echo $gpf; ?>');
+					$('#pf_loan').val('<?php echo $pfl; ?>');
+					$('#cpf_deduct').val('<?php if(isset($cpf_deduct)){ echo $cpf_deduct; } ?>');
+					$('#p_tax').val('<?php echo $ptax; ?>');
+					$('#i_tax').val('<?php echo $itax; ?>');
+					$('#overdrawn').val('<?php echo $overdrawn; ?>');
+					$('#reduct').val('<?php if(isset($full_other_deduction)!=0){echo $full_other_deduction;}else {echo "0";} ?>');
+					$('#net').val('<?php echo $net_salary; ?>');
+					/*if(desig=='1120'){
+					$('#gpf').attr('readonly','readonly');
+					$('#gpf').css('background-color','#EEE');
+					$('#pf_loan').attr('readonly','readonly');
+					$('#pf_loan').css('background-color','#EEE');
+					$('#i_tax').attr('readonly','readonly');
+					$('#i_tax').css('background-color','#EEE');
+					}*/
+					if(desig=='1120' || desig=='1124' || desig=='1125' )
+					{
+						$('#pay_in_band,#consolidated_pay,#grade_pay,#da,#interim_relief,#hra,#ma,#conv_allow,#gross,#gpf,#pf_loan,#p_tax,#i_tax,#gsli').attr('readonly','readonly')
+						.css('background-color','#EEE');
+					}
+				}
+				if(id == '8')
+				{
+					$('#pay_in_band,#consolidated_pay,#grade_pay,#da,#hra,#ma,#conv_allow,#gross,#gpf,#pf_loan,#p_tax,#i_tax,#gsli').attr('readonly','readonly').css('background-color','#EEE;');
+					
+					$('#part_salary_cause_holder').hide();
+					$('#part_salary_cause_msg').val('');
+					
+					$('#ovd_is').hide();
+					$('#is_overdrawn').hide();
+					$('#is_overdrawn').val('no_ovd');
+					$('#cause_holder').hide();
+					$('#cause_msg').val('');
+					
+					$('#no_salary_cause_holder').show();
+					$('#is_reduct').hide();
+					
+					/*$('#cause_holder').show(0);*/
+					//$('#cause_msg').val('');
+					//('#limit').text(500);
+					/*$('#conv_allow').attr('readonly','readonly');
+					$('#conv_allow').css('background-color','#EEE');
+					$('#cpf').attr('readonly','readonly');
+					$('#cpf').css('background-color','#EEE');
+					$('#gpf').attr('readonly','readonly');
+					$('#gpf').css('background-color','#EEE');
+					$('#pf_loan').attr('readonly','readonly');
+					$('#pf_loan').css('background-color','#EEE');
+					$('#p_tax').attr('readonly','readonly');
+					$('#p_tax').css('background-color','#EEE');
+					$('#i_tax').attr('readonly','readonly');
+					$('#i_tax').css('background-color','#EEE');
+					$('#gsli').attr('readonly','readonly');
+					$('#gsli').css('background-color','#EEE');
+					$('#overdrawn').attr('readonly','readonly');
+					$('#overdrawn').css('background-color','#EEE');*/
+					$('#pay_in_band').val(0);
+					$('#consolidated_pay').val(0);
+					$('#grade_pay').val(0);
+					$('#da').val(0);
+					$('#interim_relief').val(0);
+					$('#hra').val(0);
+					$('#ma').val(0);
+					$('#conv_allow').val(0);
+					$('#hill_allow').val(0);
+					$('#cpf').val(0);
+					$('#gross').val(0);
+					$('#gpf').val(0);
+					$('#pf_loan').val(0);
+					$('#cpf_deduct').val(0);
+					$('#p_tax').val(0);
+					$('#i_tax').val(0);
+					$('#gsli').val(0);
+					$('#overdrawn').val(0);
+					$('#net').val(0);
+					$('#basic').val(0);
+					$('#reduct1').val(0);
+					$('#reduct2').val(0);
+					$('#reduct3').val(0);
+					//$('#reduct1').removeAttr('writeonly');
+					//$('#reduct2').removeAttr('writeonly');
+					$('#reduct3').removeAttr('writeonly');
+					//$("#reduction_type1").prop("checked", false);
+					//$("#reduction_type2").prop("checked", false);
+					$("#reduction_type3").prop("checked", false);
+					$('#reduction_type').hide();
+				}
+				
+				$('#no_ovd').click(function()
+				{
+					if($('#salary_type').val() == '1')
+					{
+						$('#cause_holder').hide();
+						$('#cause_msg').val('');
+						$('#limit').text(500);
+						$('#overdrawn').attr('readonly','readonly');
+						$('#overdrawn').css('background-color','#EEE');
+						var net_amt = parseInt($('#overdrawn').val())+parseInt($('#net').val());
+						$('#net').val(net_amt);
+						$('#overdrawn').val(0);
+					}
+					else
+					{ 
+						$('#overdrawn').attr('readonly','readonly');
+						$('#overdrawn').css('background-color','#EEE');
+					}
+				});
+			}
+		});
+	});
+</script>
+
+<style>
+input[type=text], textarea
+{
+	padding: 2px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border: 1px solid #3E4255;
+}
+</style>
+              
+<input type="hidden" name="pan_no" id="pan_no" value="<?=$tch[0]['emp_pan_no']?>" />
+<form id="form" method="post" action="ajax_rq_submit_ropa_2019.php" enctype="multipart/form-data">
+    <input type="hidden" name="spouse_med_al" id="spouse_med_al" value="<?php echo $tch[0]['spouse_medical_allowance']; ?>" >
+    <input type="hidden" name="ropa_status" id="ropa_status" value="<?php echo $tch[0]['ropa_status']; ?>" >
+    <input type="hidden" name="exist_part_day" id="exist_part_day" value="<?php echo $sal_chk[0]['part_day']; ?>" >
+    <input type="hidden" name="gp_id_fk" id="gp_id_fk" value="<?php echo $dise; ?>" >
+    <div class="school">
+    	<div class="table-responsive">
+            <table>
+                <tr>
+                    <td>Salary Type <span class="star_color">*</span>:</td>
+                    <td>
+						<?php 
+                        $salary_type = $db->fetch_table("
+                        SELECT type_id, salary_type
+                        FROM prd_salary_type WHERE active=1
+                        ORDER BY type_id ASC;
+                        ");
+                        $sal_caus = $db->fetch_table("select overdrawn,salary_type,cause,part_day,cpf,gpf,gsli,part_salary_cause,no_salary_cause from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='".$tch[0]['emp_id_pk']."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."' AND salary_monthyear='".date('Ym')."' AND ropa_status='1'");
+                        
+                        ?>
+                        <select name="salary_type" id="salary_type" class="form-control" style="width:150px;border: 1px solid #3E4255"  >
+                            <!--<option value="">Please Select</option>-->
+                            <?php foreach ($salary_type as $keys) { ?>
+                            <option value="<?php echo $keys['type_id']; ?>" <?php if($keys['type_id']==$sal_caus[0]['salary_type']){ echo 'selected';} ?>><?php echo $keys['salary_type']; ?></option>
+                            <?php } ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="part_salary_cause_holder" <?php if($sal_caus[0]['salary_type']== '2'){ ?><?php }else{ ?> style="display:none;" <?php } ?>>
+                    <td>Part Salary Cause <span class="star_color">*</span>:</td>
+                    <td>
+                        <textarea class="form-control" style="height:75px; width:300px; font-size:13px; font-family:Verdana, Geneva, sans-serif; resize:none;border: 1px solid #3E4255" id="part_salary_cause_msg" name="part_salary_cause_msg" onkeyup="return limiter();" onkeypress="return keyRestrict(event,' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@._-');"> <?php echo $sal_caus[0]['part_salary_cause']; ?></textarea>
+                        <br />
+                        <span id="limit_holder"> <span id="limit" style="font-weight:bold; color:#F00;">500</span><span> <strong>of 500 maximum character.</strong></span></span>
+                        </span>
+                    </td>
+                </tr>
+                <tr id="no_salary_cause_holder" <?php if($sal_caus[0]['salary_type']== '8'){ ?><?php }else{ ?> style="display:none;" <?php } ?>>
+                    <td>No Salary Cause <span class="star_color">*</span>:</td>
+                    <td>
+                        <textarea class="form-control" style="height:75px; width:300px; font-size:13px; font-family:Verdana, Geneva, sans-serif; resize:none;border: 1px solid #3E4255" id="no_salary_cause_msg" name="no_salary_cause_msg" onkeyup="return limiter();" onkeypress="return keyRestrict(event,' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@._-');"><?php echo $sal_caus[0]['no_salary_cause']; ?></textarea>
+                        <br />
+                        <span id="limit_holder"> <span id="limit" style="font-weight:bold; color:#F00;">500</span><span> <strong>of 500 maximum character.</strong></span></span>
+                        </span>
+                    </td>
+                </tr>
+                <tr id="part_day_holder" <?php if($sal_caus[0]['part_day']){ ?>  <?php }else{ ?> style="display:none;" <?php } ?>>
+                    <td>Working Days <span class="star_color">*</span>:</td>
+                    <td>
+                        <input maxlength="2" class="form-control" type="text" id="working_days" name="working_days" value="<?php echo $sal_caus[0]['part_day']; ?>" size="5" onKeyUp="return workingDaysCal();" onkeypress="return keyRestrict(event,'0123456789')" autocomplete="off" style="width:80px" />
+                        <input id="month_last_date" type="hidden" name="month_last_date" value="<?php echo date('t'); ?>">
+                    </td>
+                </tr>
+                <!--<tr>
+                <td>Whether :</td>
+                <td>
+                <input type="radio" name="is_cgpf" id="is_gpf" value="is_gpf" <?php //if(!$sal_caus[0]['gpf'] || $sal_caus[0]['gpf'] > 0){ ?> checked <?php //} ?> > GPF
+                <input type="radio" name="is_cgpf" id="is_cpf" value="is_cpf" <?php //if($sal_caus[0]['cpf'] > 0){ ?> checked <?php //} ?> > CPF
+                </td>
+                </tr>-->
+                <tr id="ovd_is"  <?php if($sal_caus[0]['salary_type'] !='8'){ ?><?php }else{ ?> style="display:none;" <?php } ?>>
+                    <td >Overdrawn :</td>
+                    <td>
+                        <select name="is_overdrawn" id="is_overdrawn" class="form-control" style="width:150px !important;border: 1px solid #3E4255">				
+                            <option id="no_ovd" value="no_ovd" <?php if(!$sal_caus[0]['overdrawn']){ echo "selected"; } 
+                            ?>>NO</option>
+                            <option id="yes_ovd" value="yes_ovd"  <?php if($sal_caus[0]['overdrawn']){ echo "selected"; } ?>>YES</option> 
+                        </select> 	
+                        <!--<input type="radio" name="is_overdrawn" id="no_ovd" value="no_ovd" <?php //if(!$sal_caus[0]['overdrawn']){ ?> checked <?php //} ?> > No
+                        <input type="radio" name="is_overdrawn" id="yes_ovd" value="yes_ovd" <?php //if($sal_caus[0]['overdrawn']){ ?> checked <?php //} ?> > Yes-->
+                    </td>
+                </tr>
+                <tr id="cause_holder" <?php if($sal_caus[0]['overdrawn']>0 && $sal_caus[0]['salary_type']!= '8'){ ?><?php }else{ ?> style="display:none;" <?php } ?>>
+                    <td>Overdran Cause <span class="star_color">*</span>:</td>
+                    <td>
+                        <textarea class="form-control" style="height:75px; width:300px; font-size:13px; font-family:Verdana, Geneva, sans-serif; resize:none;border: 1px solid #3E4255" id="cause_msg" name="cause_msg" onkeyup="return limiter();" onkeypress="return keyRestrict(event,' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@._-');"><?php echo $sal_caus[0]['cause']; ?></textarea>
+                        <br />
+                        <span id="limit_holder"> <span id="limit" style="font-weight:bold; color:#F00;">500</span><span> <strong>of 500 maximum character.</strong></span></span>
+                        </span>
+                    </td>
+                </tr>
+                <tr id="is_reduct"  <?php if($sal_caus[0]['salary_type']!= '8'){ ?><?php }else{ ?> style="display:none;" <?php } ?>>
+                <td>Other Deduction :</td>
+                <td>
+					<?php 
+                    $Query ="select festival_loan_cause, other_deduction_cause from prd_employee_salary_save where status_flag=1 AND delete_status=1  AND emp_id_fk='".$tch[0]['emp_id_pk']."' AND gp_id_fk='".$dise."' AND requisition_type='".$requisition_type."'";
+                   // print_r($Query); exit;
+
+                    $dedact_cause = $db->fetch_table($Query);
+					$festival_loan_n = festival_adv_recovery($emp_id_pk);
+					//print_r($festival_loan_n); exit;	
+                    $str=$dedact_cause[0]['other_deduction_cause'];
+                    $str1=(explode (',',$str)); 
+                    //print_r($str1[2]);  
+                    ?>
+                    
+                    <select name="reduction" id="reduction"  onclick="return false;" class="form-control" style="width:150px;border: 1px solid #3E4255;background-color: #EEE;"> 
+			<?php if($festival_loan_n<=0){ ?>
+                        <option id="no_ovd1" value="no_ovd1" <?php if($str1[0]==0 ){ echo 'selected';} ?>>NO</option>
+			<?php }else{ ?>
+                        <option id="yes_ovd1" value="yes_ovd1" <?php if($dedact_cause[0]['festival_loan_cause']==1 ||  $festival_loan_n>0){ echo 'selected';} ?> >YES</option>   
+			<?php } ?> 
+                    </select>
+                </td>
+                </tr>
+            <tr id="reduction_type" >
+            	<td>Deduction Cause <span class="star_color">*</span>:</td>   
+                <td width="65%" style="text-align:left;">            
+					<p><input type="checkbox" name="n9" id="reduction_type3" style="background-color: #EEE;" class="cls8" onclick="return false;" value="1" <?php  if($dedact_cause[0]['festival_loan_cause']==1 || $festival_loan_n>0) { ?>checked="checked" <?php } ?>>&nbsp;&nbsp;&nbsp;<b>Festival Advance Recovery
+                </b></p>
+                </td>
+            </tr>
+            </table>
+        </div>
+    </div>
+    <div class="school">
+        <div class="table-responsive">
+            <table width="100%">
+                <tr>
+                    <th>&nbsp;</th>
+                    <th colspan="8" align="center"><strong>PAY & ALLOWANCE</strong></th>
+                    <th colspan="1" align="center"></th>
+                    <!--<th>&nbsp;</th>-->
+                    <th colspan="7" align="center"><strong>DEDUCTION</strong></th>
+                    <th>&nbsp;</th>
+                </tr>
+                <tr>
+                    <th>NAME OF EMPLOYEE</th>
+                    <th>CONSOLIDATED<br>PAY</th>
+                    <th>BASIC PAY</th>
+                    <th>LEVEL</th>
+                    <th>D.A(<?php echo $da_per; ?>%)</th>
+                    <th>H.R.A(<?php echo $hra_per; ?>%)</th>
+                    <th>M.A</th>
+                    <th>CONV<br>ALLOW</th>
+                   
+                    <th>HIll AllOW(<?php echo $hill_allowance_per; ?>%)</th>
+                    <th>GROSS<br>SALARY</th>
+                    <th>GPF<br><span  style="font-size:9px;">(min 6%)</span></th>
+                    <th>PF LOAN RECOVERY</th>
+                    <th>P.TAX</th>
+                    <th>I.TAX</th>
+                    <th>GSLI</th>
+                    <th>OVER<br>DRAWN</th>
+                    <th>FESTIVAL ADVANCE RECOVERY</th>
+                    <th>NET SALARY</th>
+                </tr>
+                <tr style="background-color: rgb(221, 247, 255);">
+                    <td>
+                        <b><?php echo $tchname; ?></b>
+                        <?php 
+	
+			/*************************** Changed By ANJAN 21.01.2020 *******************************/	
+			$arr_prv_bas = $db->fetch_table("select basic from prd_employee_salary_save  where  status_flag in('3','4') 
+			and is_saved='1' and salary_type='1' and delete_status='1'  AND emp_id_fk='$emp_id_pk' AND salary_monthyear between '201903' and '201912' 
+			AND requisition_type='".$requisition_type."'  order by salary_monthyear ASC LIMIT 1 ");
+			
+			$prv_bas= round($arr_prv_bas[0]['basic']); ?>
+                    </td>
+                    <td> <input maxlength="5" style='background-color: #EEE;' type="text" id="consolidated_pay" name="consolidated_pay" value="<?php echo round($consolidated_pay); ?>" readonly size="5" />
+                    </td>
+                    <td>
+                    <input type="hidden" id="gpf_cal" name="gpf_cal" value="<?php echo round($gpf); ?>"  />
+                    <input type="hidden" id="prv_bas" name="prv_bas" value="<?php echo round($prv_bas); ?>"  />
+                        <input type="hidden" name="sec_tok" id="sec_tok" value="<?=$enc_token?>" />
+                        <input type="hidden" name="rank" id="rank" value="<?php echo $tch[0]['rank']; ?>" />
+                        <input type="hidden" name="emp_desig" id="emp_desig" value="<?php echo $tch[0]['emp_desig']; ?>" />
+                        <input type="hidden" name="empcd" id="empcd" value="<?php echo $tch[0]['empcd']; ?>" />
+                        <input type="hidden" name="emp_id_pk" id="emp_id_pk" value="<?php echo $tch[0]['emp_id_pk']; ?>" />
+                        <input type="hidden" name="gp_id_fk" id="gp_id_fk" value="<?php echo $dise; ?>" />
+                        <input type="hidden" name="tchname" id="tchname" value="<?php echo $tch[0]['emp_first_name'].' '.$tch[0]['emp_second_name'].' '.$tch[0]['emp_last_name']; ?>" />
+                        <input type="hidden" name="bankname" id="bankname" value="<?php echo $tch[0]['emp_bank_name']; ?>" />
+                        <input type="hidden" name="accountno" id="accountno" value="<?php echo $tch[0]['emp_acc_no']; ?>" />
+                        <input type="hidden" name="bank_ifsc" id="bank_ifsc" value="<?php echo $tch[0]['emp_ifsc_no']; ?>" />
+                        <input type="hidden" name="code" id="code" value="<?php echo $tch[0]['emp_system_code']; ?>" />
+                        <input type="hidden" name="teacher_id_pk" id="teacher_id_pk" value="<?php echo $tch[0]['emp_id_pk']; ?>" />
+                        <input type="hidden" name="basic" id="basic" value="<?php echo $basic; ?>" />
+                        <input maxlength="5" style='background-color: #EEE;' type="text" id="pay_in_band" name="pay_in_band" value="<?php echo round($pay_in_band); ?>" readonly size="5" />
+                               <input maxlength="5" style='background-color: #EEE;' type="hidden" id="pay_in_band_2009" name="pay_in_band_2009" value="<?php echo  $tch[0]['emp_pay_in_payband']; ?>" readonly size="5" />
+                    
+                    <input maxlength="5" style='background-color: #EEE;' type="hidden" id="grade_pay_2009" name="grade_pay_2009" value="<?php echo $grade_pay = getEmpAmount('grade_pay',$dise,$emp_id_pk);   ?>" readonly size="5" />
+                        
+                        
+                        
+                        
+                        
+                        <input type="hidden" id="retirement_gpf" name="retirement_gpf" autocomplete="off" <?php if($gpf==0){ ?> readonly style='background-color: #EEE;' <?php } ?>  <?php if(strtotime($date)<=strtotime(date('Y-m-d')) && strtotime($date)>0){ ?>   value="<?php echo 1; ?>"      <?php } ?>  />
+                        <input  type="hidden" maxlength="5" style='background-color: #EEE;'  id="interim_relief" name="interim_relief" value="<?php echo round($interim_relief); ?>" size="5" readonly='readonly' />
+                        <input type="hidden" id="emp_first_join_date" name="emp_first_join_date" autocomplete="off" <?php if($gpf==0){ ?> readonly style='background-color: #EEE;' <?php } ?>  <?php if(strtotime($emp_first_join_match_date)>=strtotime(date('Y-m-d')) && strtotime($emp_first_join_match_date)>0)
+                        {?>   value="<?php echo 1; ?>"      <?php }?>  />
+                    </td>
+                    
+                    <td><input maxlength="5" style='background-color: #EEE;' type="text" id="grade_pay" name="grade_pay" value="<?php echo $tch[0]['ropa_level']; ?>" readonly size="5" /></td>
+                    <td><input maxlength="5" style='background-color: #EEE;' type="text" id="da" name="da" value="<?php echo round($da); ?>" size="5" readonly='readonly' /></td>
+                    <td><input maxlength="5" style='background-color: #EEE;' type="text" id="hra" name="hra" readonly value="<?php echo round($hra); ?>"size="5" /></td>
+                    <td><input maxlength="5" style='background-color: #EEE;' type="text" id="ma" name="ma" readonly value="<?php echo round($ma); ?>"size="5" /></td>
+                    <td><input maxlength="5" style='background-color: #EEE;' type="text" id="conv_allow" readonly name="conv_allow" value="<?php echo round($conveyance_allowance); ?>"size="5" /></td>
+                    <td><input maxlength="5" style='background-color: #EEE;' type="text" id="hill_allow" readonly name="hill_allow" value="<?php echo round($hill_allowance); ?>"size="5" /></td>
+                    
+                    <td><input readonly maxlength="5" type="text" style='background-color: #EEE;' id="gross" name="gross" value="<?php echo round($gross_salary); ?>"size="4" /></td>
+                    <td><input maxlength="5" type="text" id="gpf" name="gpf" autocomplete="off" <?php if($gpf==0){ ?> readonly style='background-color: #EEE;' <?php } ?> value="<?php echo $gpf; ?>"size="4"  <?php  if((strtotime($date)<=strtotime(date('Y-m-d')) && strtotime($date)>0) || (strtotime($emp_first_join_match_date)>=strtotime(date('Y-m-d')) && strtotime($emp_first_join_match_date)>0)){ ?>  onBlur="return retirement_gpfCal();"     <?php } else{?> onBlur="return gpfCal();" <?php } ?> onkeypress="return keyRestrict(event,'0123456789');" /></td> 
+                    <td><input maxlength="5" type="text" id="pf_loan" name="pf_loan" value="<?php echo $pfl; ?>"size="5" onKeyUp="return pflCal();" onkeypress="return keyRestrict(event,'0123456789');"/></td>
+                    <td><input readonly maxlength="5" style='background-color: #EEE;' type="text" id="p_tax" name="p_tax" onkeypress="return keyRestrict(event,'0123456789');" value="<?php echo $ptax; ?>"size="5"   /></td>
+                    <td><input maxlength="5" type="text" id="i_tax" name="i_tax" value="<?php echo $itax; ?>"size="5" onKeyUp="return itaxCal();" onkeypress="return keyRestrict(event,'0123456789');" /></td>
+                    <td><input maxlength="3" type="text" id="gsli" name="gsli" value="<?php echo $gsli; ?>"size="5" onKeyUp="return gsliCal();" onkeypress="return keyRestrict(event,'0123456789');" autocomplete="off" /></td>
+                    <td><input type="text" <?php if($sal_caus[0]['salary_type'] == '1' || !$sal_caus[0]['salary_type']){ ?> readonly <?php } ?> maxlength="5"  id="overdrawn" name="overdrawn" value="<?php echo $overdrawn; ?>"size="5" onKeyUp="return ovdCal();" <?php if($sal_caus[0]['salary_type'] == '1' || !$sal_caus[0]['salary_type']){ ?> style='background-color:#EEE;' <?php } ?> onkeypress="return keyRestrict(event,'0123456789');" autocomplete="off"/></td>
+                    <td><input maxlength="5" style='background-color: #EEE;' type="text" name="reduct3"  size="5" id="reduct3" value="<?php if($festival_loan==0){echo '0';} else {echo trim($festival_loan);} ?> " size="5" autocomplete="off" onKeyUp="return reduc3(this.value);" onkeypress="return keyRestrict(event,'0123456789');" /></td>
+                    <td><input maxlength="5" type="text" style='background-color: #EEE;' id="net" name="net" value="<?php echo round($net_salary); ?>"size="6" readonly='readonly' /></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <input type="hidden" name="cpf_per" id="cpf_per" value="<?php echo $cpf_per; ?>" >
+    <input type="hidden" name="actual_gross" id="actual_gross" value="<?php echo $gross_salary; ?>" >
+    <input type="hidden" name="actual_net" id="actual_net" value="<?php echo $net_salary; ?>" >
+    <input type="hidden" name="emp_dif" id="emp_dif" value="<?php echo $tch[0]['emp_diff_able']; ?>" >
+    <input type="hidden" name="emp_dif" id="emp_dif" value="<?php echo $tch[0]['conv_allow_status']; ?>" >
+    <br>
+    <center><input type="submit" class="btn btn-info" id="submit" value="Submit" onClick="return checkForm();"></center>
+    <p style="color:#F51102;">
+    <strong>Note :</strong>
+    <ul>
+    <li style="color:#F51102; font-weight:bold;">Dark input field is not editable.</li>
+    
+    <li style="color:#F51102; font-weight:bold;">I-Tax will be disable if employee have no PAN no.</li>
+    <li style="color:#F51102; font-weight:bold;">Overdrawn amount should not be greater than Pay in pay band amount.</li>
+    <li style="color:#F51102; font-weight:bold;">If employee belongs to Govt house scheme than HRA will be zero and non-editable.</li>
+    </ul>
+    </p>
+    </div>
+</form>
+		
+	
+<style>
+.school table
+	{
+		border-collapse:collapse;
+		background-color: #FFFFFF;
+		font-family: "calibri";
+	}
+.school table, .school td, .school th
+	{
+		/*border:1px solid #fff;*/
+		padding: 4px;
+		text-align:center;
+	}
+	
+.school table th{
+		background-color: #3E9B96;
+		border:1px solid #fff;
+		color: #fff;
+		padding: 6px;
+		text-align:center;
+	}
+.school table{
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		overflow: hidden;
+		font-size: 14px;
+	}
+.school{
+	background-color: #FFFFFF;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	padding: 10px;
+	
+}
+.school .title h2{
+	color: #FFF;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	background-color: #0D8BBD;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+.school .action .ui-widget{
+	font-size: 11px;
+}
+.school .action{
+	text-align: center;
+}
+.school .action .ui-button .ui-button-text{
+	padding: 5px 10px;
+}
+
+</style>
+
+<script>
+	$(document).ready(function(e1) 
+	{
+		
+		<?php if($sal_chk[0]['salary_type']=='8') 
+		{ ?>
+			$('#pay_in_band,#consolidated_pay,#grade_pay,#da,#interim_relief,#hra,#ma,#conv_allow,#gross,#gpf,#pf_loan,#p_tax,#i_tax,#gsli,#overdrawn').attr('readonly','readonly').css('background-color','#EEE;');
+		<?php } ?>
+		
+		if($('#salary_type').val()=='8')
+		{
+			$('#pay_in_band').val(0);
+			$('#consolidated_pay').val(0);
+			$('#grade_pay').val(0);
+			$('#da').val(0);
+			$('#interim_relief').val(0);
+			$('#hra').val(0);
+			$('#ma').val(0);
+			$('#conv_allow').val(0);
+			$('#hill_allow').val(0);
+			$('#cpf').val(0);
+			$('#gross').val(0);
+			$('#gpf').val(0);
+			$('#pf_loan').val(0);
+			$('#cpf_deduct').val(0);
+			$('#p_tax').val(0);
+			$('#i_tax').val(0);
+			$('#overdrawn').val(0);
+			$('#net').val(0);
+			$('#basic').val(0);
+			
+			//$('#reduct1').val(0);
+			//$('#reduct2').val(0);
+			$('#reduct3').val(0);
+		}
+		$('#no_ovd').click(function()
+		{
+			if($('#salary_type').val() == '1')
+			{
+				$('#cause_holder').hide();
+				$('#cause_msg').val('');
+				$('#limit').text(500);
+				$('#overdrawn').attr('readonly','readonly');
+				$('#overdrawn').css('background-color','#EEE');
+				var net_amt = parseInt($('#overdrawn').val())+parseInt($('#net').val());
+				$('#net').val(net_amt);
+				$('#overdrawn').val(0);
+			}
+			if($('#salary_type').val() > '1')
+			{
+				$('#overdrawn').attr('readonly','readonly');
+				$('#overdrawn').css('background-color','#EEE');
+				var net_amt = parseInt($('#overdrawn').val())+parseInt($('#net').val());
+				$('#net').val(net_amt);
+				$('#overdrawn').val(0);
+			}
+		});
+		var count = $('#cause_msg').val().length;
+		$('#limit').text(500-count)
+		
+	});
+	
+	var ppp=$('#pay_in_band').val();
+</script>
+
+<?php 
+if($sal_chk[0]['block_code'] && $sal_chk[0]['emp_id_fk'] && $sal_chk[0]['salary_type']=='2')
+{ ?>
+	<script>
+		$('#working_days').keyup(function(e)
+		{
+			var work_days = $('#working_days').val();
+			var max_days_of_month = $('#month_last_date').val();
+			if($('#working_days').val() >= parseInt($('#month_last_date').val()) || $('#working_days').val() == '0')
+			{
+				alert('Please enter the valid working days for part salary calculation');
+				$('#pay_in_band').val('<?php echo $pay_in_band; ?>');
+				$('#consolidated_pay').val('<?php echo $consolidated_pay; ?>');
+				$('#grade_pay').val('<?php echo $ropa_level; ?>');
+				$('#da').val('<?php echo $da; ?>');
+				$('#interim_relief').val('<?php echo $interim_relief; ?>');
+				$('#hra').val('<?php echo $hra; ?>');
+				$('#ma').val('<?php echo $ma; ?>');
+				$('#conv_allow').val('<?php echo $conveyance_allowance; ?>');
+				$('#hill_allow').val('<?php echo $hill_allowance; ?>');
+				$('#gpf').val('<?php echo $gpf; ?>');
+				$('#pf_loan').val('<?php echo $pfl; ?>');
+				$('#p_tax').val('<?php echo $ptax; ?>');
+				$('#gsli').val('<?php echo $gsli; ?>');
+				$('#i_tax').val('<?php echo $itax; ?>');
+				$('#overdrawn').val('<?php echo $overdrawn; ?>');
+				$('#basic').val('<?php echo $basic; ?>');
+				var consolidated_pay=$('#consolidated_pay').val();
+				var pay_band = $('#pay_in_band').val();
+				var grade_pay = $('#grade_pay').val();
+				var da = $('#da').val();
+				var interim_relief = $('#interim_relief').val();
+				var hra = $('#hra').val();
+				var ma = $('#ma').val();
+				var conv_allow = $('#conv_allow').val();
+				var hill_allow = $('#hill_allow').val();
+				var cpf = $('#cpf').val();
+				var gross = parseInt(pay_band)+parseInt(consolidated_pay)+parseInt(hill_allow)+parseInt(da)+parseInt(interim_relief)+parseInt(hra)+parseInt(ma)+parseInt(conv_allow);
+				//cal_ptax(gross);
+				$('#gross').val(gross);
+				var gpf = $('#gpf').val();
+				var pfl = $('#pf_loan').val();
+				var ptax = $('#p_tax').val();
+				var itax = $('#i_tax').val();
+				var overdrawn = $('#overdrawn').val();
+				var gsli=$('#gsli').val();
+				//	var reduct1=$('#reduct1').val();
+				//	var reduct2=$('#reduct2').val();
+				var reduct3=$('#reduct3').val();
+				var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(gsli)+parseInt(ptax)+parseInt(itax)+parseInt(overdrawn)+parseInt(reduct3);
+				var net = parseInt(gross)-parseInt(deduct);	
+				$('#net').val(net);
+				$('#working_days').val('');
+				$('#working_days').focus();
+			}
+			else
+			{
+				if($('#working_days').val()=='')
+				{
+					$('#pay_in_band').val('<?php echo $pay_in_band; ?>');
+					$('#consolidated_pay').val('<?php echo $consolidated_pay; ?>');
+					$('#grade_pay').val('<?php echo $ropa_level; ?>');
+					$('#da').val('<?php echo $da; ?>');
+					$('#interim_relief').val('<?php echo $interim_relief; ?>');
+					$('#hra').val('<?php echo $hra; ?>');
+					$('#ma').val('<?php echo $ma; ?>');
+					$('#conv_allow').val('<?php echo $conveyance_allowance; ?>');
+					$('#hill_allow').val('<?php echo $hill_allowance; ?>');
+					$('#gpf').val('<?php echo $gpf; ?>');
+					$('#pf_loan').val('<?php echo $pfl; ?>');
+					$('#p_tax').val('<?php echo $ptax; ?>');
+					$('#gsli').val('<?php echo $gsli; ?>');
+					$('#i_tax').val('<?php echo $itax; ?>');
+					$('#overdrawn').val('<?php echo $overdrawn; ?>');
+					$('#basic').val('<?php echo $basic; ?>');
+					var consolidated_pay=$('#consolidated_pay').val();
+					var pay_band = $('#pay_in_band').val();
+					var grade_pay = $('#grade_pay').val();
+					var da = $('#da').val();
+					var interim_relief = $('#interim_relief').val();
+					var hra = $('#hra').val();
+					var ma = $('#ma').val();
+					var conv_allow = $('#conv_allow').val();
+					var hill_allow = $('#hill_allow').val();
+					var cpf = $('#cpf').val();
+										
+					var gross = parseInt(pay_band)+parseInt(consolidated_pay)+parseInt(hill_allow)+parseInt(da)+parseInt(interim_relief)+parseInt(hra)+parseInt(ma)+parseInt(conv_allow);
+					
+					//cal_ptax(gross);
+					$('#gross').val(gross);
+					var gpf = $('#gpf').val();
+					var pfl = $('#pf_loan').val();
+					var ptax = $('#p_tax').val();
+					var itax = $('#i_tax').val();
+					var overdrawn = $('#overdrawn').val();
+					var gsli=$('#gsli').val();
+					/*var reduct1=$('#reduct1').val();
+					var reduct2=$('#reduct2').val();*/
+					var reduct3=$('#reduct3').val();
+					var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(gsli)+parseInt(ptax)+parseInt(itax)+parseInt(overdrawn)+parseInt(reduct3);
+					var net = parseInt(gross)-parseInt(deduct);	
+					$('#net').val(net);
+					
+				}
+				else
+				{
+					var exist_part_day = $('#exist_part_day').val();
+					var pay_in_pay_band = $('#pay_in_band').val();
+					var consolidated_pay=$('#consolidated_pay').val();
+					if(pay_in_pay_band!=0)
+					{
+						var part_pay_band = Math.round((parseInt(<?php echo $pay_in_band; ?>)/parseInt(exist_part_day))*parseInt(work_days));
+						//var part_pay_band = Math.round((parseInt(pay_in_pay_band)/parseInt(exist_part_day))*parseInt(work_days));
+						$('#pay_in_band').val(part_pay_band);
+					}
+					else if(consolidated_pay!=0)
+					{
+						var part_consolidated_pay = Math.round((parseInt(<?php echo $consolidated_pay; ?>)/parseInt(exist_part_day))*parseInt(work_days));
+						$('#consolidated_pay').val(part_consolidated_pay);
+					}
+					var grade_pay = $('#grade_pay').val();
+					var part_grade_pay = Math.round((parseInt(exist_part_day))*parseInt(work_days));
+					$('#grade_pay').val(part_grade_pay);
+					var basic = parseInt(part_pay_band)+parseInt(part_consolidated_pay);
+					$('#basic').val(basic);
+					var da = $('#da').val();
+					var part_da = Math.round((parseInt(<?php echo $da; ?>)/parseInt(exist_part_day))*parseInt(work_days));
+					$('#da').val(part_da);
+					var interim_relief = $('#interim_relief').val();
+					var part_interim_relief = Math.round((parseInt(<?php echo $interim_relief; ?>)/parseInt(exist_part_day))*parseInt(work_days));
+					$('#interim_relief').val(part_interim_relief);
+					var hill_allow = $('#hill_allow').val();
+					var hill_allow = Math.round((parseInt(<?php echo $hill_allowance; ?>)/parseInt(exist_part_day))*parseInt(work_days));
+					$('#hill_allow').val(hill_allow);
+					var hra = Math.round((parseInt(<?php echo $hra; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+					$('#hra').val(hra);
+					var spouse_ma = $('#spouse_med_al').val();
+					if(spouse_ma=='Yes')
+					{
+						$('#ma').val(0);
+					}
+					else
+					{
+						//var ma = $('#ma').val();
+						var part_ma = Math.round((parseInt(<?php echo $max_ma; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+						$('#ma').val(part_ma);
+					}
+					
+					var conv_allow = $('#conv_allow').val();
+					var part_conv_allow = Math.round((parseInt(<?php echo $conveyance_allowance; ?>)/parseInt(exist_part_day))*parseInt(work_days));
+					$('#conv_allow').val(part_conv_allow);
+					
+					var hill_allow = $('#hill_allow').val();
+					var part_hill_allow =Math.round((parseInt(<?php echo $hill_allowance; ?>)/parseInt(exist_part_day))*parseInt(work_days));
+					$('#hill_allow').val(part_hill_allow);
+					
+					var pay_band = $('#pay_in_band').val();
+					var consolidated_pay=$('#consolidated_pay').val();
+					var grade_pay = $('#grade_pay').val();
+					var da = $('#da').val();
+					var interim_relief = $('#interim_relief').val();
+					var hra = $('#hra').val();
+					var ma = $('#ma').val();
+					var conv_allow = $('#conv_allow').val();
+					//$('#hill_allow');
+					//var hill_allow = $('#hill_allow').val();
+					//var cpf = $('#cpf').val();
+					var gross = parseInt(pay_band)+parseInt(consolidated_pay)+parseInt(da)+parseInt(interim_relief)+parseInt(hra)+parseInt(ma)+parseInt(conv_allow)+parseInt(hill_allow);
+					<?php if($tch[0]['emp_diff_able']!='1')
+					{ ?>
+						cal_ptax(gross);
+					<?php 
+					} 
+					else 
+					{ ?>
+						$('#p_tax').val(0);
+					<?php 
+					} ?>
+					
+					$('#gross').val(gross);
+					var min_gpf_amt = ((parseInt(pay_band)+parseInt(consolidated_pay))/100)*6;
+					var min_gpf = Math.round(min_gpf_amt);
+					$('#gpf').val(min_gpf);
+					var gpf = $('#gpf').val();
+					var pfl = $('#pf_loan').val();
+					//var cpfd = $('#cpf_deduct').val();
+					var ptax = $('#p_tax').val();
+					var itax = $('#i_tax').val();
+					var gsli = $('#gsli').val();
+					var overdrawn = $('#overdrawn').val();
+					//var reduct1=$('#reduct1').val();
+					//var reduct2=$('#reduct2').val();
+					var reduct3=$('#reduct3').val();
+					var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(ptax)+parseInt(itax)+parseInt(overdrawn)+parseInt(gsli)+parseInt(reduct3); 
+					var net = parseInt(gross)-parseInt(deduct);
+					$('#net').val(net);
+				}
+			}
+		});
+		
+		
+	</script>
+<?php 
+}
+else
+{ ?>
+	<script>
+		$('#working_days').keyup(function(e) 
+		{
+			var work_days = $('#working_days').val();
+			var max_days_of_month = $('#month_last_date').val();
+			
+			if($('#working_days').val() >= parseInt($('#month_last_date').val()) || $('#working_days').val() == '0')
+			{
+				alert('Please enter the valid working days for part salary calculation');
+				$('#pay_in_band').val('<?php echo $pay_in_band; ?>');
+				$('#consolidated_pay').val('<?php echo $consolidated_pay; ?>')
+				$('#grade_pay').val('<?php echo $ropa_level; ?>');
+				$('#da').val('<?php echo $da; ?>');
+				$('#interim_relief').val('<?php echo $interim_relief; ?>');
+				$('#hra').val('<?php echo $hra; ?>');
+				$('#ma').val('<?php echo $ma; ?>');
+				$('#conv_allow').val('<?php echo $conveyance_allowance; ?>');
+				$('#hill_allow').val('<?php echo $hill_allowance; ?>');
+				$('#gpf').val('<?php echo $gpf; ?>');
+				$('#pf_loan').val('<?php echo $pfl; ?>');
+				$('#p_tax').val('<?php echo $ptax; ?>');
+				$('#i_tax').val('<?php echo $itax; ?>');
+				$('#gsli').val('<?php  echo $gsli; ?>')
+				$('#overdrawn').val('<?php echo $overdrawn; ?>');
+				$('#basic').val('<?php echo $basic; ?>');
+				var pay_band = $('#pay_in_band').val();
+				var consolidated_pay=$('#consolidated_pay').val();
+				var grade_pay = $('#grade_pay').val();
+				var da = $('#da').val();
+				var interim_relief = $('#interim_relief').val();
+				var hra = $('#hra').val();
+				var ma = $('#ma').val();
+				var conv_allow = $('#conv_allow').val();
+				var hill_allaw=$('#hill_allow').val();
+				var gross = parseInt(pay_band)+parseInt(consolidated_pay)+parseInt(da)+parseInt(interim_relief)+parseInt(hra)+parseInt(ma)+parseInt(conv_allow)+parseInt(hill_allaw);
+				$('#gross').val(gross);
+				var gpf = $('#gpf').val();
+				var pfl = $('#pf_loan').val();
+				var ptax = $('#p_tax').val();
+				var itax = $('#i_tax').val();
+				var overdrawn = $('#overdrawn').val();
+				var gsli=$('#gsli').val();
+				//var reduct1=$('#reduct1').val();
+				//var reduct2=$('#reduct2').val();
+				var reduct3=$('#reduct3').val();
+				var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(gsli)+parseInt(ptax)+parseInt(itax)+parseInt(overdrawn)+parseInt(reduct3);
+				var net = parseInt(gross)-parseInt(deduct);	
+				$('#net').val(net);
+				$('#working_days').val('');
+				$('#working_days').focus();
+			}
+			else
+			{
+				if(work_days=='')
+				{				
+					$('#pay_in_band').val('<?php echo $pay_in_band; ?>');
+					$('#consolidated_pay').val('<?php echo $consolidated_pay; ?>')
+					$('#grade_pay').val('<?php echo $ropa_level; ?>');
+					$('#da').val('<?php echo $da; ?>');
+					$('#interim_relief').val('<?php echo $interim_relief; ?>');
+					$('#hra').val('<?php echo $hra; ?>');
+					$('#ma').val('<?php echo $ma; ?>');
+					$('#conv_allow').val('<?php echo $conveyance_allowance; ?>');
+					$('#hill_allow').val('<?php echo $hill_allowance; ?>');
+					$('#gpf').val('<?php echo $gpf; ?>');
+					$('#pf_loan').val('<?php echo $pfl; ?>');
+					$('#p_tax').val('<?php echo $ptax; ?>');
+					$('#i_tax').val('<?php echo $itax; ?>');
+					$('#gsli').val('<?php  echo $gsli; ?>')
+					$('#overdrawn').val('<?php echo $overdrawn; ?>');
+					$('#basic').val('<?php echo $basic; ?>');
+					var pay_band = $('#pay_in_band').val();
+					var consolidated_pay=$('#consolidated_pay').val();
+					var grade_pay = $('#grade_pay').val();
+					var da = $('#da').val();
+					var interim_relief = $('#interim_relief').val();
+					var hra = $('#hra').val();
+					var ma = $('#ma').val();
+					var conv_allow = $('#conv_allow').val();
+					var hill_allaw=$('#hill_allow').val();
+					var gross = parseInt(pay_band)+parseInt(consolidated_pay)+parseInt(da)+parseInt(interim_relief)+parseInt(hra)+parseInt(ma)+parseInt(conv_allow)+parseInt(hill_allaw);
+					$('#gross').val(gross);
+					var gpf = $('#gpf').val();
+					var pfl = $('#pf_loan').val();
+					var ptax = $('#p_tax').val();
+					var itax = $('#i_tax').val();
+					var overdrawn = $('#overdrawn').val();
+					var gsli=$('#gsli').val();
+					//var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(gsli)+parseInt(ptax)+parseInt(itax)+parseInt(overdrawn);
+					//var reduct1=$('#reduct1').val();
+					//var reduct2=$('#reduct2').val();
+					var reduct3=$('#reduct3').val();
+					var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(gsli)+parseInt(ptax)+parseInt(itax)+parseInt(overdrawn)+parseInt(reduct3);
+					var net = parseInt(gross)-parseInt(deduct);	
+					$('#net').val(net);
+				}
+				else
+				{
+					//$('#consolidated_pay').val(0);
+					
+					var desig=<?=$tch[0]['emp_desig']?>;
+					var pay_in_pay_band = $('#pay_in_band').val();
+					var hill_allow = $('#hill_allow').val();
+					var hill_allow = Math.round((parseInt(<?php echo $hill_allowance; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+					$('#hill_allow').val(hill_allow);
+					var consolidated_pay=$('#consolidated_pay').val();
+					if(pay_in_pay_band!=0)
+					{
+						var part_pay_band = Math.round((parseInt(<?php echo $pay_in_band; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+						//var part_pay_band = Math.round((parseInt(pay_in_pay_band)/parseInt(max_days_of_month))*parseInt(work_days));
+						$('#pay_in_band').val(part_pay_band);
+						part_consolidated_pay=0;
+					}
+					else if(consolidated_pay!=0)
+					{
+						var part_consolidated_pay = Math.round((parseInt(<?php echo $consolidated_pay; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+						$('#consolidated_pay').val(part_consolidated_pay);
+						part_pay_band=0;
+					}
+					if(desig!='1120' && desig!='1124' && desig!='1125')
+					{
+						var grade_pay = $('#grade_pay').val();
+						var part_grade_pay = Math.round((parseInt(max_days_of_month))*parseInt(work_days));
+					} 
+					else 
+					{
+						part_grade_pay=0;	
+					}
+					//$('#grade_pay').val(part_grade_pay);
+					$('#grade_pay').val('<?php echo $ropa_level; ?>');
+					var basic = parseInt(part_pay_band)+parseInt(part_consolidated_pay);
+					$('#basic').val(basic);
+					if(desig!='1120' && desig!='1124' && desig!='1125' )
+					{
+						var da = Math.round(((parseInt(part_pay_band))/100)*parseInt('<?php echo $da_per ?>'));
+					} 
+					else 
+					{
+						var da=0;	
+					}
+					$('#da').val(da);
+					if(desig!='1120' && desig!='1124' && desig!='1125')
+					{
+						var interim_relief = $('#interim_relief').val();
+						var interim_relief =  Math.round((parseInt(<?php echo $interim_relief; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+					} 
+					else 
+					{
+						interim_relief=0;	
+					}
+					$('#interim_relief').val(interim_relief);
+					
+					if(desig=='1120' || desig=='1124' || desig=='1125')
+					{
+						$('#hra').val(0);
+					}
+					else
+					{
+						var emp_spouse_res = parseInt(<?php echo $tch[0]['emp_spouse_res'] ?>);
+						if(emp_spouse_res=='251')
+						{
+							$('#hra').val(0);
+						}
+						else
+						{
+							var hra = Math.round((parseInt(<?php echo $hra; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+							$('#hra').val(hra);
+						}
+					} 
+					if(desig!='1120' && desig!='1124' && desig!='1125' )
+					{
+						var spouse_ma = $('#spouse_med_al').val();
+						if(spouse_ma=='Yes')
+						{
+							$('#ma').val(0);
+						}
+						else
+						{
+							var ma = $('#ma').val();
+							var part_ma = Math.round((parseInt(<?php echo $ma; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+							$('#ma').val(part_ma);
+						}
+					} 
+					else 
+					{
+						$('#ma').val(0);	
+					}
+					var emp_diff = parseInt(<?php echo $tch[0]['emp_diff_able'] ?>);
+					var emp_conv = parseInt(<?php echo $tch[0]['conv_allow_status'] ?>);
+					if(emp_diff=='1')
+					{
+						var conv_alw = $('#conv_allow').val();
+						var part_conv = Math.round((parseInt(<?php echo $conveyance_allowance; ?>)/parseInt(max_days_of_month))*parseInt(work_days));
+						$('#conv_allow').val(part_conv);
+						//$('#conv_allow').removeAttr('readonly');
+						$('#conv_allow').attr('readonly','readonly');
+						$('#conv_allow').css('background-color','#EEE');
+						$('#p_tax').val(0);
+						$('#p_tax').attr('readonly','readonly');
+						$('#p_tax').css('background-color','#EEE');
+					}
+					else
+					{
+						$('#conv_allow').val(0);
+						$('#conv_allow').attr('readonly','readonly');
+						$('#conv_allow').css('background-color','#EEE');
+						$('#p_tax').attr('readonly','readonly');
+						$('#p_tax').css('background-color','#EEE');
+					
+						
+					}
+					
+					
+					var pay_band = $('#pay_in_band').val();
+					var consolidated_pay=$('#consolidated_pay').val();
+					var grade_pay = $('#grade_pay').val();
+					var da = $('#da').val();
+					var interim_relief = $('#interim_relief').val();
+					var hra = $('#hra').val();
+					var ma = $('#ma').val();
+					var conv_allow = $('#conv_allow').val();
+					var cpf = $('#cpf').val();
+					var hill_allaw=$('#hill_allow').val();
+					
+					var gross = parseInt(pay_band)+parseInt(consolidated_pay)+parseInt(da)+parseInt(interim_relief)+parseInt(hra)+parseInt(ma)+parseInt(conv_allow)+parseInt(hill_allaw);
+					
+					<?php if($tch[0]['emp_diff_able']!='1')
+					{ ?>
+						cal_ptax(gross);
+					<?php 
+					} 
+					else 
+					{ ?>
+						$('#p_tax').val(0);
+					<?php } ?>
+					/*$('#p_tax').val(pt);*/
+					$('#gross').val(gross);
+					if(desig!='1120' && desig!='1124' && desig!='1125' )
+					{
+						if($("#retirement_gpf").val()=='1')
+						{
+							$('#gpf').val(0);
+						}
+						else if($("#emp_first_join_date").val()=='1')
+						{
+							$('#gpf').val(0);
+						}
+						else
+						{
+							var min_gpf_amt = ((parseInt(pay_band)+parseInt(consolidated_pay))/100)*6;
+							var min_gpf = Math.round(min_gpf_amt);
+							$('#gpf').val(min_gpf);
+						}
+					} 
+					else 
+					{
+						$('#gpf').val(0);
+					}
+					$.get('cal_ptax.php?gross='+gross, function(data)
+					{
+						var conv_allow=$('#conv_allow').val();
+						if(conv_allow>0)
+						{
+							$("#p_tax").val(0);	
+						}
+						else
+						{
+						$("#p_tax").val(data);	
+						}
+						
+						var reduct=$("#reduct").val();	
+						var pfl = $('#pf_loan').val();
+						var itax = $('#i_tax').val();
+						var overdrawn = $('#overdrawn').val();
+						var gsli=$('#gsli').val(); 
+						
+						var gpf=$('#gpf').val();
+						//var reduct1=$('#reduct1').val();
+						//var reduct2=$('#reduct2').val();
+						var reduct3=$('#reduct3').val();
+						var deduct = parseInt(gpf)+parseInt(pfl)+parseInt(gsli)+parseInt(data)+parseInt(itax)+parseInt(overdrawn)+parseInt(reduct3);
+						
+						var net = parseInt(gross)-parseInt(deduct);	
+						$('#net').val(net);			 
+					});
+				}
+			}
+		});
+    </script>
+<?php 
+} ?>
+	
+    

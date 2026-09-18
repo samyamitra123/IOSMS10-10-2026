@@ -1,0 +1,18 @@
+Table Name = prd_bonus_type_details
+
+Column name = active_status
+		0 = inactive bonus type
+		1 = active bonus type before bill generation
+		2 = after bill generation
+		
+
+Table Name = prd_employee_bonus_details
+
+Column name = bonus_status
+		1 = bonus submitted
+		2 = bonus saved
+		3 = bonus sent
+		4 = bonus locked
+	          delete_status
+		0 = inactive row
+		1 = active row

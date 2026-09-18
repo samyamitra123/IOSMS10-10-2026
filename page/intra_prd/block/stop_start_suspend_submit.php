@@ -1,0 +1,563 @@
+<?php
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+
+//---------------------------- LIBRARY INCLUDE ----------------------------
+//copy this two lines to every page
+//header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, max-age=0, post-check=0, pre-check=0");
+//header("Pragma: no-cache");
+ob_start();
+session_start();
+//error_reporting(0);
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require_once '../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+//require '../../page_visite.php';
+require '../../../includes/library/myvalidation.class.php';
+
+
+$crypto = new cryptography();
+
+//require 'includes/library/session.class.php';
+
+//------------------------------- LOGICAL AREA ---------------------------------------------------------------------------------
+//
+//Detect referer page from external domain
+//if(!isset($_SERVER['HTTP_REFERER'])){
+//    header('Location: '. $config['base_url'] . "page/error.php?id=1");
+//    exit("Do not paste URL directly");
+//    
+//} elseif (strpos($_SERVER['HTTP_REFERER'], $config['base_url']) === false) {
+//    // substring is not found in string
+//    header('Location: '. $config['base_url'] . "page/error.php?id=2");
+//    exit("<p style='background-color:#f00;'>Wrong website referer found</p>");
+//}
+//redirect to login page when login session not found
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+	
+
+	){
+	header('Location: '. $config['base_url'] . "page/login.php");
+	exit;
+}
+//print_r($_REQUEST);exit;
+//echo "11111";
+$query_string='?id='.$_REQUEST['gp_id_fk'];
+//--------------------------------------------------------------QUERY---------------------------------------------------------
+function fun_common($tcode, $code){
+		foreach ($code as $key) {
+			if($key['code'] == $tcode){
+				return $key['description'];
+			}
+		}
+	}
+function addzero($val){
+	if(strlen($val) == 1){
+		return '0'.$val;
+	}
+	else {
+		return $val;
+	}
+}
+
+$db = new database();
+//----------------------------
+	if($crypto->decode($_REQUEST['id'], 4) == "" || $crypto->decode($_REQUEST['id'], 4) == NULL){
+	?>
+		<div class="ui-state-error ui-corner-all">
+			<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span> Wrong Data inserted</p>
+		</div>
+	<?php		
+	} else {
+		
+		
+		if($_REQUEST['flag'] == 'stop'){
+			
+			//print_r($_REQUEST);exit;
+			if($_REQUEST['reason_date']=="")
+			{
+				$reason_date="0001-01-01";
+			}
+			else{
+				$reason_date=date("Y-m-d", strtotime($_REQUEST['reason_date']));
+				$next_month = date("Y-m-01", strtotime("$reason_date +1 month")); 		
+			}
+			//var_dump($_POST['reason']); die;
+			if(!$validator->blank_select($_POST['reason']) ){
+				echo '<div class="alert alert-danger" style="text-align:center"><strong>Please choose reason!!.</strong></div>';exit;
+			/*$_SESSION['msg']= '<div class="alert alert-danger" style="text-align:center"><strong>Invalide reason.<strong></div>';
+			header('location:show_employee_list.php'.$query_string);
+			exit(0);*/
+
+		}
+		else if((($_POST['reason'])==1993) && ($validator->blank_select($_POST['claimant_name']) == FALSE))
+		{
+		
+			echo '<div class="alert alert-danger" style="text-align:center"><strong>Please  Enter claimant Name!!.</strong></div>';exit;
+		}
+		else if((($_POST['reason'])==1993) && ($validator->blank_select($_POST['relationship_incumbent']) == FALSE))
+		{
+		
+			echo '<div class="alert alert-danger" style="text-align:center"><strong>Please choose Enter relationship with incumbent!!.</strong></div>';exit;
+		}
+		else if((($_POST['reason'])==1993) &&  ($validator->pattern_number($_POST['claimant_mob'])==FALSE) )
+		{
+		
+			echo '<div class="alert alert-danger" style="text-align:center"><strong>Please Enter claimant Mobile Number !!.</strong></div>';exit;
+		}
+		else{
+			
+			if($_POST['claimant_mob']=='' || $_POST['claimant_mob']=='0')
+			{
+				$claimant_mob='0';
+			}
+			else
+			{
+				$claimant_mob=$_POST['claimant_mob'];
+			}
+			
+	
+			$reason = $db->insert("
+				INSERT INTO
+					prd_stop_sal_reason (
+						ip_address,
+						date,
+						stopped_by,
+						reason,
+						reason_text,
+						emp_id_fk,
+						gp_id_fk,
+						reason_date,
+						claimant_name,
+						relationship_incumbent,
+						claiment_mobile_no
+						)
+				VALUES (
+						'".$_SESSION['user_agent']['USER_IP']."',
+						now(),
+						'".$_SESSION['user_info']['stake_user']."',
+						'".$_REQUEST['reason']."',
+						'".$_REQUEST['reason_sus']."',
+						'".$crypto->decode($_REQUEST['id'], 4)."',
+						'".$crypto->decode($_REQUEST['gp_id_fk'], 4)."',
+						'".$reason_date."',
+						'".strtoupper($_POST['claimant_name'])."',
+						'".$_POST['relationship_incumbent']."',
+						'".$claimant_mob."'
+						);
+				
+			");
+			//var_dump($reason); die;
+			if($reason){
+				//echo $_GET['id'];
+				
+				$dath=$db->fetch_table("Select reason_date,claimant_name,relationship_incumbent from prd_stop_sal_reason where emp_id_fk='". $crypto->decode($_REQUEST['id'], 4)."' and reason='1993'");
+				
+				$date=substr($dath[0]['reason_date'],0,10);
+				$pension_stat_fetch=$db->fetch_table(" SELECT emp_cosolidated_pay,emp_pension_status FROM prd_employee_master WHERE emp_id_pk='". $crypto->decode($_REQUEST['id'],4)."' ");
+				$pension_stat=$pension_stat_fetch[0]['emp_pension_status'];
+				if($pension_stat=='0')
+				{
+					$update_pension='0'; 
+				}
+				elseif($pension_stat=='1' || $pension_stat=='2') 
+				{
+					$update_pension='2'; 
+				}
+				
+				
+				if($dath>0)
+				{
+				$stop = $db->update("
+										UPDATE prd_employee_master
+										SET
+										emp_status ='2',emp_pension_status='".$update_pension."',emp_termination_date='". $date."'
+										WHERE emp_id_pk = ". $crypto->decode($_REQUEST['id'],4)."
+				
+				");
+				}
+				else
+				{
+					$stop = $db->update("
+										UPDATE prd_employee_master
+										SET
+										emp_status ='2'
+										WHERE emp_id_pk = ". $crypto->decode($_REQUEST['id'],4)."
+				
+				");
+				}
+				/*$school_id = $db->fetch_table("
+													SELECT 
+													   school_id_pk
+											
+													FROM ehrms_dise_location_master_school
+													
+													WHERE 
+														school_dise_code = '".$crypto->decode($_GET['id'], 3)."'
+									
+											");*/
+											
+											
+				}
+			else {
+				echo '<div class="alert alert-danger" style="text-align:center"><strong>Please select reason!!.</strong></div>';
+				exit;
+			}
+		}				
+		if( $transfer_emp || $stop)
+			{					
+				$security = $db->insert("
+										INSERT INTO
+													prd_salary_log (
+																		ip,
+																		date,
+																		browser,
+																		os,
+																		salary_status_id_fk,
+																		created_by,
+																		created_by_stake,
+																		gp_id_fk,
+																		emp_id_fk
+																		
+																	)
+													VALUES 			(
+																		'".$_SESSION['user_agent']['USER_IP']."',
+																		now(),
+																		'".$_SESSION['user_agent']['BROWSER']."',
+																		'".$_SESSION['user_agent']['OS']."',
+																		2,
+																		'".$_SESSION['user_info']['stake_user']."',
+																		'".$_SESSION['user_info']['stake_level']."',
+																		'".$crypto->decode($_REQUEST['gp_id_fk'], 4)."',
+																		". $crypto->decode($_REQUEST['id'], 4)."
+																	)
+										
+										");	
+				if($stop){
+					//echo 'location:'.$config['base_url'].'page/intra_prd/block/show_employee_list.php';
+					echo '<div class="alert alert-success" style="text-align:center"><strong>Salary has been stopped successfully.</strong></div>';exit;
+               /* $_SESSION['msg']= '<div class="alert alert-success" style="text-align:center"><strong>Salary has been stopped successfully.</strong></div>';
+				header('Location:'.$config['base_url'].'page/intra_prd/block/show_employee_list.php');
+				exit(0);*/
+				} else {
+					echo '<div class="alert alert-danger" style="text-align:center"><strong>Stop Salary fails.</strong></div>';exit;
+					
+               /* $_SESSION['msg']= '<div class="alert alert-danger" style="text-align:center"><strong>Stop Salary error!!.</strong></div>';
+				header('location:show_employee_list.php'.$query_string);
+				exit(0);*/
+				}
+			} 
+			
+			
+		} 
+		
+		elseif ($_REQUEST['flag'] == 'start') {
+			$start = $db->update("
+				UPDATE prd_employee_master
+				SET
+					emp_status = 1
+				WHERE emp_id_pk = ". $crypto->decode($_REQUEST['id'],4).";
+				
+			");
+			
+			
+				/*$school_id = $db->fetch_table("
+													SELECT 
+													   school_id_pk
+											
+													FROM ehrms_dise_location_master_school
+													
+													WHERE 
+														school_dise_code = '".$crypto->decode($_GET['id'], 3)."'
+									
+											");*/
+												
+				$security = $db->insert("
+										INSERT INTO
+													prd_salary_log (
+																		ip,
+																		date,
+																		browser,
+																		os,
+																		salary_status_id_fk,
+																		created_by,
+																		created_by_stake,
+																		gp_id_fk,
+																		emp_id_fk
+																		
+																	)
+													VALUES 			(
+																		'".$_SESSION['user_agent']['USER_IP']."',
+																		now(),
+																		'".$_SESSION['user_agent']['BROWSER']."',
+																		'".$_SESSION['user_agent']['OS']."',
+																		1,
+																		'".$_SESSION['user_info']['stake_user']."',
+																		'".$_SESSION['user_info']['stake_level']."',
+																		'".$crypto->decode($_REQUEST['gp_id_fk'], 4)."',
+																		". $crypto->decode($_REQUEST['id'], 4)."
+																	)
+										
+										");	
+			
+			if($start){
+				echo '<div class="alert alert-success" style="text-align:center"><strong>Started Salary successfully!!.</strong></div>';exit;
+				/*$_SESSION['msg']= '<div class="alert alert-success" style="text-align:center"><strong>Started Salary successfully!!.</strong></div>';
+				header('Location:show_employee_list.php?id='.$crypto->encode($_REQUEST['gp_id_fk'],4));
+				exit(0);*/
+			} else {
+				echo '<div class="alert alert-danger" style="text-align:center"><strong>Start Salary error!!.</strong></div>';exit;
+			}
+			
+		}
+
+		elseif ($_REQUEST['flag'] =='suspend') {
+			
+			
+			
+			//print_r($_REQUEST);exit;
+		
+			//echo $a=$_REQUEST['suspention_effect_date'];
+		
+//$lastDayOfMOnth = date('d', mktime(0,0,0, date('m', strtotime($suspention_effect_date))+1, 0, date('Y', strtotime($suspention_effect_date))));
+//echo date('Y-m-1',strtotime($_REQUEST['suspention_effect_date']));
+//echo date('Y-m-01',strtotime($_REQUEST['suspention_effect_date']));
+
+$suspention_start_date=date("Y-m-d", strtotime($_REQUEST['suspention_effect_date']));
+if(date("Y-m-d", strtotime($_REQUEST['suspention_effect_date']))==date('Y-m-01',strtotime($_REQUEST['suspention_effect_date'])))
+{
+ $suspention_effect_date=date("Y-m-d", strtotime($_REQUEST['suspention_effect_date']));
+}
+else{
+ $suspention_effect_date = date('Y-m-01', strtotime('+1 month', strtotime($suspention_start_date)));
+}
+ 
+
+
+
+
+ 
+		
+		if($_REQUEST['suspend_withdrawn_date']=="")
+			{
+			    $suspend_withdrawn_date="0001-01-01";
+			}
+			else{
+			    $suspend_withdrawn_date=date("Y-m-d", strtotime($_REQUEST['suspend_withdrawn_date']));
+			}	
+			
+				
+				
+				$update_delete = $db->update("
+				UPDATE prd_suspend_dts
+				SET
+					delete_status = 1
+				WHERE emp_id_fk = ". $crypto->decode($_REQUEST['id'],4)." and delete_status=0;
+				
+			");
+				
+				
+				$suspend_dts= $db->insert("
+										INSERT INTO
+													prd_suspend_dts (
+																		gp_id_fk,
+																		emp_id_fk,
+																		suspend_start_date,
+																		suspend_withdrawn_date,
+																		pencentage_basic,
+																		suspend_effect_date,
+																		resion
+																		
+																		
+																		
+																	)
+													VALUES 			(
+													                    '".$crypto->decode($_REQUEST['gp_id_fk'], 4)."',
+																		'". $crypto->decode($_REQUEST['id'],4)."',
+																		'". $suspention_start_date."',
+																		'". $suspend_withdrawn_date."',
+																		'". $_REQUEST['percentage_basic']."',
+																		'". $suspention_effect_date ."',
+																		'". $_REQUEST['reason_sus']."'
+																	)
+										
+										");	
+				
+			
+		
+		
+			if($suspend_dts){
+				//print_r($suspend_dts);exit;
+			$suspend = $db->update("
+				UPDATE prd_employee_master
+				SET
+					emp_status = 9
+				WHERE emp_id_pk = ". $crypto->decode($_REQUEST['id'],4).";
+				
+			");
+		
+											
+												
+				$security = $db->insert("
+										INSERT INTO
+													prd_salary_log (
+																		ip,
+																		date,
+																		browser,
+																		os,
+																		salary_status_id_fk,
+																		created_by,
+																		created_by_stake,
+																		gp_id_fk,
+																		emp_id_fk
+																		
+																	)
+													VALUES 			(
+																		'".$_SESSION['user_agent']['USER_IP']."',
+																		now(),
+																		'".$_SESSION['user_agent']['BROWSER']."',
+																		'".$_SESSION['user_agent']['OS']."',
+																		9,
+																		'".$_SESSION['user_info']['stake_user']."',
+																		'".$_SESSION['user_info']['stake_level']."',
+																		'".$crypto->decode($_REQUEST['gp_id_fk'], 4)."',
+																		". $crypto->decode($_REQUEST['id'], 4)."
+																	)
+										
+										");	
+				if($suspend){
+					//echo 'location:'.$config['base_url'].'page/intra_prd/block/show_employee_list.php';
+					echo '<div class="alert alert-success" style="text-align:center"><strong>Salary has been Suspended successfully.</strong></div>';
+               /* $_SESSION['msg']= '<div class="alert alert-success" style="text-align:center"><strong>Salary has been stopped successfully.</strong></div>';
+				header('Location:'.$config['base_url'].'page/intra_prd/block/show_employee_list.php');
+				exit(0);*/
+				} else {
+					echo '<div class="alert alert-danger" style="text-align:center"><strong>Suspend fails.</strong></div>';exit;
+					
+               /* $_SESSION['msg']= '<div class="alert alert-danger" style="text-align:center"><strong>Stop Salary error!!.</strong></div>';
+				header('location:show_employee_list.php'.$query_string);
+				exit(0);*/
+				}
+			} else {
+				echo '<div class="alert alert-danger" style="text-align:center"><strong>Wrong Data inserted!!!!.</strong></div>';exit;
+				/*$_SESSION['msg']= '<div class="alert alert-danger" style="text-align:center"><strong>Please select reason!!.</strong></div>';
+				header('location:show_employee_list.php'.$query_string);
+				exit(0);*/
+			}
+			
+		
+			
+			
+			
+			
+			
+			/*
+				$suspend = $db->update("
+				UPDATE prd_employee_master
+				SET
+					emp_status = 9
+				WHERE emp_id_pk = ". $crypto->decode($_REQUEST['id'],4).";
+				
+			");
+			
+			
+			
+												
+				$security = $db->insert("
+										INSERT INTO
+													prd_salary_log (
+																		ip,
+																		date,
+																		browser,
+																		os,
+																		salary_status_id_fk,
+																		created_by,
+																		created_by_stake,
+																		gp_id_fk,
+																		emp_id_fk
+																		
+																	)
+													VALUES 			(
+																		'".$_SESSION['user_agent']['USER_IP']."',
+																		now(),
+																		'".$_SESSION['user_agent']['BROWSER']."',
+																		'".$_SESSION['user_agent']['OS']."',
+																		9,
+																		'".$_SESSION['user_info']['stake_user']."',
+																		'".$_SESSION['user_info']['stake_level']."',
+																		'".$crypto->decode($_REQUEST['gp_id_fk'], 4)."',
+																		". $crypto->decode($_REQUEST['id'], 4)."
+																	)
+										
+										");	
+			if($suspend ){
+				echo '<div class="alert alert-success" style="text-align:center"><strong>Teacher Sunpanded successfully!!.</strong></div>';exit;
+			?>
+				<!--<div class="ui-state-highlight ui-corner-all">
+					<p><span class="ui-icon ui-icon-circle-close" style="float: left; margin-right: .3em;"></span> Teacher Sunpanded successfully</p>
+				</div>-->
+			<?php
+			} else {
+				//echo "error_suspend";exit;
+				echo '<div class="alert alert-danger" style="text-align:center"><strong>Sunpend error!!!!.</strong></div>';exit;
+				?>
+				<!--<div class="ui-state-error ui-corner-all">
+					<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span> Sunpand error!!</p>
+				</div>-->
+			<?php
+			}
+			
+		*/} else {
+			echo '<div class="alert alert-danger" style="text-align:center"><strong>Wrong Data inserted!!!!.</strong></div>';exit;
+			?>
+				<!--<div class="ui-state-error ui-corner-all">
+					<p><span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span> Wrong Data inserted</p>
+				</div>-->
+			<?php
+		}
+		
+	}
+//------------------------------
+
+
+/*$arr = $db->fetch_table("
+		SELECT 
+	       tchname,
+			category,
+			code,
+			teacher_id_pk,
+			status
+		FROM ehrms_dise_teacher
+		
+		WHERE 
+			schcd = '".$crypto->decode($_GET['id'], 3)."' AND status in (1,2,9)
+		order by tchname ASC
+
+		");
+$school = $db->fetch_table("
+		SELECT 
+	       school_name,
+	       school_dise_code
+
+		FROM ehrms_dise_location_master_school
+		
+		WHERE 
+			school_dise_code = '".$crypto->decode($_GET['id'], 3)."'
+
+		");*/
+//----------------------------------------------------------------------------------------------------------------------------
+	//echo $crypto->decode($_GET['id'], 3);
+	//echo "<pre>";
+	//print_r($_POST);
+	
+	//$crypto->decode($_POST['pk'], 3)
+
+	
+	
+	//echo $_POST['pk'].'<br />';
+	//echo $_POST['radio'];
+	

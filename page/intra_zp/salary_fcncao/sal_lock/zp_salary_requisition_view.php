@@ -1,0 +1,432 @@
+<?php
+
+//error_reporting(0);
+//---------------------------- LIBRARY INCLUDE ----------------------------
+//copy this two lines to every page
+//---------------------------- LIBRARY INCLUDE ----------------------------
+//copy this two lines to every page
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, max-age=0, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+session_start();
+
+require '../../../../includes/config/config.php';
+require '../../../../includes/config/database.config.php';
+require '../../../../includes/library/database.class.php';
+require '../../../../includes/library/cryptography.class.php';
+
+require '../../../../includes/library/myvalidation.class.php';
+
+//require '../../../page_visite.php';
+
+$crypto = new cryptography();
+
+$lock_val=$crypto->encode("lock",4);
+$unlock_val=$crypto->encode("unlock",4);
+
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '. $config['base_url'] . "page/login.php");
+	exit;
+}
+
+//------------------------------ PAGE VARIABLES --------------------------------------------------------------------------------
+
+//Page variables
+$common['title'] = "VIEW SALARY REQUISITION | eHRMS | Govt. of West Bengal ";
+
+//Meta tag variables
+//$common['meta']['keyword'] = 'West Bengal School Education Department, SED department';
+//$common['meta']['description'] = 'West Bengal School Education Department, SED department';
+
+//Self variable
+
+//------------------------------------------------------- HEADER --------------------------------------------------------------
+require '../../../../page/layout/header.php';
+//---------------------------------- MENU -------------------------------------------------------------------------------------
+require '../../../../page/layout/menu.php';
+//-----------------------------Business Logic---------------------------------------------------------------------------------
+//-----------------------------QUERY----------------------------------------------------------------------------------
+
+$db = new database();
+
+$requisition=$db->fetch_table("SELECT code FROM prd_dise_code_master WHERE code_master_id_pk='405'");
+$requisition_type=$requisition[0]['code'];
+
+function salaryType($sal_type)
+{
+	$db = new database();
+	$arr = $db->fetch_table("select salary_type from prd_salary_type where type_id='$sal_type'");
+	return $arr[0]['salary_type'];
+}
+
+$salary_details_fetch= $db->fetch_table("SELECT 
+							sal.ps_id_fk,tch.emp_status, sal.empcd, sal.bankname, sal.accountno, sal.basic, 
+							sal.da, sal.hra, sal.ma, sal.cpf, sal.pf_loan, sal.p_tax, sal.i_tax, sal.net, 
+							sal.bank_ifsc, sal.sal_source, sal.spl_pay, sal.pf_deduct, sal.code, 
+							sal.emp_salary_id_pk, sal.spl_alo, sal.status_flag, sal.salary_monthyear,
+							sal.consolidated_pay, sal.category_id, sal.block_code, sal.emp_id_fk, 
+							sal.pay_payband, sal.tch_grade_pay, sal.hill_allowance, sal.gpf, 
+							sal.cpf_deduct, sal.gross_salary, sal.is_saved, sal.conv_allow, 
+							sal.overdrawn, sal.salary_type, sal.cause, sal.part_day, sal.gsli,
+							sal.consolidated_pay,sal.other_deduction,sal.cooperative_loan, 
+							sal.hbl_loan,sal.hbl_loan,festival_loan,sal.interim_relief,
+							sal.hra_deduction, tch.emp_first_name, tch.emp_second_name, sal.total_loan_deduction,
+							tch.emp_last_name, tch.emp_pay_in_payband,consolidated_pay,sal.other_loan_deduction, sal.ropa_status
+							FROM 
+								prd_employee_salary_save as sal 
+							INNER JOIN 
+								prd_employee_master as tch 
+							ON 
+								sal.emp_id_fk =tch.emp_id_pk AND sal.zp_id_fk= tch.zp_id_fk 
+							WHERE 
+								tch.emp_status in('1') AND sal.zp_id_fk = '".$_SESSION['location']['district_id']."' 
+								AND sal.delete_status=1 
+								AND sal.status_flag in('3','4') AND salary_monthyear='".date('Ym')."' 
+								AND is_saved='1' AND requisition_type='".$requisition_type."' AND sal.ropa_status='2' 
+							ORDER BY tch.emp_first_name ;
+								");
+
+/*for($i=0;$i<count($salary_details_fetch);$i++)
+{
+	if($salary_details_fetch[$i]['status_flag']=='2')
+	{
+		$finz_data='1';
+	}
+	else
+	{
+		$finz_data='0';
+		break;
+	}
+}*/
+
+?>
+
+<script>
+
+function confirm_mod(k)
+{
+	$('#confirm_modal').modal('show');
+	if(k=='lock')
+	{
+		$('#lock_sal_msg').show();
+		$('#unlock_sal_msg').hide();
+		$('#sal_action').val('<?php echo $lock_val;?>');
+	}
+	else if(k=='unlock')
+	{
+		$('#unlock_sal_msg').show();
+		$('#lock_sal_msg').hide();
+		$('#sal_action').val('<?php echo $unlock_val;?>');
+	}
+}
+
+
+</script>
+
+
+<!--CONTENT START-->
+
+<div class="content">
+<!-- Common Back Button --->
+<?php require '../../../common_back_btns.php'; ?>	
+
+	<div class="welcome_msg">
+        <h2>WELCOME:  <?php echo $_SESSION['user_info']['stake_abbr']; ?>
+        <?php
+        if(isset($_SESSION['location']['gp_name'])) {
+        echo $_SESSION['location']['gp_name'].", ";
+        }elseif(isset($_SESSION['location']['block_name'])) {
+        echo $_SESSION['location']['block_name'].", ";
+        }elseif(isset($_SESSION['location']['ps_name'])) {
+        echo $_SESSION['location']['ps_name'].", ";
+        }elseif(isset($_SESSION['location']['district_name'])) {
+        echo $_SESSION['location']['district_name'].", ";
+        } elseif(isset($_SESSION['location']['state_name'])) {
+        echo $_SESSION['location']['state_name'].", ";
+        } ?></h2><h3>
+        <?php   
+        echo $_SESSION['location']['district_name'].", ".$_SESSION['location']['state_name'];
+        
+        ?></h3>
+    </div>
+    
+    <div class="row" id="cont">
+    	<div class="content">
+		<script>
+			$(document).ready(function(){
+			$( "tr:odd" ).css( "background-color", "#CCE6FF" );
+			$( "tr:even" ).css( "background-color", "#DDF7FF" );	  
+			});
+        </script>
+        <div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad">
+            <div class="col-sm-12">
+                <h1 class="heading">View Salary Requisition</h1>
+                <h2 class="heading">Salary Month Year : <?php echo date('M').','.date('Y') ?></h2>
+                <div class="border"></div>
+                <br>
+                <?
+					if(isset($_SESSION['msg']))
+					{
+						echo $_SESSION['msg'];
+						//unset($_SESSION['msg']);
+					}
+                ?>  
+                <div class="emplist">
+                    <div class="school">
+                    <?php if(count($salary_details_fetch)>0 && $salary_details_fetch[0]['status_flag']=='3')
+					{ ?>
+                        <div class="button">
+                            <a style="margin-left:55%; cursor:pointer" onClick="confirm_mod('unlock');"><i class="fa fa-unlock fa-3x" aria-hidden="true" style="color:#b20f08;"></i></a>&nbsp;&nbsp;&nbsp;
+                            <a onClick="confirm_mod('lock');" style= "cursor:pointer" ><i class="fa fa-lock fa-3x" aria-hidden="true" style="color:#347d76;"></i></a>
+                            
+                        </div>
+					<?php
+					} ?>
+                        </br>
+                        
+                        
+                        <div class="table-responsive">
+                            
+                            <table width="100%">
+                                <tr>
+                                    <th>&nbsp;</th>
+                                    <th>&nbsp;</th>
+                                    <th colspan="8">PAY & ALLOWANCE</th>
+                                    <th colspan="1"></th>
+                                    <th colspan="9">DEDUCTION</th>
+                                     <th></th>
+                                </tr>
+                                <tr>
+                                    <th>SL No.</th>
+                                    <th>EMPLOYEE NAME</th>
+                					 <th>CONSOLIDATED<br>PAY</th>
+                                    <th>PAY IN <br>PAY BAND</th>
+                                    <th>GRADE<br />PAY</th>
+                                    <th>DA</th>
+                                    <th>HRA</th>
+                                    <th>MA</th>
+                                    <th>CONV<br>ALLOW</th>
+                                    <!--<th>HILL<br>ALLOW</th>
+                                    <th>CPF</th>-->
+                                    <th>HILL ALLOWANCE</th>
+                                   <!-- <th>INTERIM RELIEF</th>-->
+                                    <th>GROSS<br>SALARY</th>
+                                    <th>GPF</th>
+                                    <!--<th>PF<br />Loan</th>-->
+                                    <!--<th>CPF<br />DEDUCT</th>-->
+                                    <th>PTax</th>
+                                    <th>ITax</th>
+                                    <th>GSLI</th>
+                                   <th>HRA DEDUCTION</th>
+                                    <th>OVER<br />DRAWN</th>
+                                    <!--<th>Co-operative Loan Recovery</th>
+                                    <th>HBL Recovery</th>-->
+                                    <th>FESTIVAL ADVANCE RECOVERY</th>
+                                    <th>TOTAL LOAN DEDUCTION</th>
+                                    <th>OUT OF ACCOUNT DEDUCTION</th>
+                                    <!--<th>Less Drawal</th>-->
+                                    <th>NET<br>SALARY</th>
+                                </tr>
+                                <?php 
+                                if(count($salary_details_fetch))
+								{
+									$count = 1;
+									$total = 0;
+									foreach($salary_details_fetch as $key){ ?>
+									<tr style="text-align: right;">
+									<td style="text-align: center;"><?php echo $count; ?></td>
+									<td style="text-align: left;">
+									<?php echo $key['emp_first_name'].' '.$key['emp_second_name'].' '.$key['emp_last_name'] ?>
+									<br>
+									<span style="color:red; font-weight:bold;">
+									<?php
+									echo salaryType($key['salary_type']);
+									if($key['salary_type']==3){
+									echo '('.$key['type_effect'].'%)';
+									}
+									if($key['salary_type']==4){
+									echo '('.$key['type_effect'].' Day)';
+									}
+									?>
+									</span>
+									</td>
+									<td><?php echo $key['consolidated_pay'] ?></td>
+									<td><?php echo $key['pay_payband'] ?></td>
+									<td><?php echo $key['tch_grade_pay'] ?></td>
+									<td><?php echo $key['da'] ?></td>
+									<td><?php echo $key['hra'] ?></td>
+									<td><?php echo $key['ma'] ?></td>
+									<td><?php echo $key['conv_allow'] ?></td>
+									<td><?php echo $key['hill_allowance'] ?></td>
+									
+									<td style="background-color: #AEC4DE; color: #fff;"><?php echo $key['gross_salary'] ?></td>
+									<td><?php echo $key['gpf'] ?></td>
+									
+									<td><?php echo $key['p_tax'] ?></td>
+									<td><?php echo $key['i_tax'] ?></td>
+									<td><?php echo $key['gsli'] ?></td>
+								    <td><?php echo $key['hra_deduction'] ?></td>
+									<td><?php echo $key['overdrawn'] ?></td>
+									
+									<td><?php echo $key['festival_loan'] ?></td>
+                                    <td><?php echo $key['total_loan_deduction'] ?></td>
+                                    <td><?php echo $key['other_loan_deduction'] ?></td>  
+									
+									<td style="background-color: #AEC4DE; color: #fff;"><?php echo $key['net'] ?>/-</td>
+									</tr>
+									<?php
+									$total += $key['net']; 
+									$count += 1;
+									}?>
+									<tr style="text-align: right;">
+									<th  colspan="20" style="text-align: right; padding:7px;">Total Amount</th>
+									<th><?php echo $total; ?>/-</th>
+									</tr>
+									<? 
+								} 
+								else
+								{ ?>
+                                    <tr>
+                                    <td colspan="22" style="color:red;font-weight:bold">No Data Found</td>
+                                    </tr>
+                                <? } ?>
+                            
+                            </table>
+                        </div>
+                        <br />
+                        
+                       <?php /*?> <?php $arr_lock_btn_check = $db->fetch_table("select emp_id_fk from prd_employee_salary_save where ps_id_fk='342' and status_flag=2 and delete_status=1 and is_saved=1 AND requisition_type='".$requisition_type."'");
+                        
+                        if($arr_lock_btn_check){
+                        
+                        ?>
+                        <a class="btn btn-success"style="margin-left:43%" data-toggle="modal"  onClick="lock_sch();">LOCK</a>
+                        <?php //} ?>
+                        <a class="btn btn-danger" data-toggle="modal" onClick="unlock_sch();">UNLOCK</a>
+                        <?php } ?><?php */?>
+                    </div>
+                </div>
+                <div>
+                
+                
+                </div>	
+            </div>
+        </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="clear"></div>
+
+<?php
+
+//---------------------------------- SLIDER -----------------------------------------------------------------------------------
+//require '../../right_sidebar_dashboard.php';
+//----------------------------------- FOOTER ----------------------------------------------------------------------------------
+require '../../../../page/layout/footer.php';
+//----------------------------------------------------------------------------------------------------------------------------
+?>
+
+
+<style>
+.button
+{
+	padding-left:785px;
+}
+.school table
+{
+	border-collapse:collapse;
+	background-color: #FFFFFF;
+	font-family: "calibri";
+	 
+}
+.school table, .school td, .school th
+{
+	/*border:1px solid #fff;*/
+	padding: 4px;
+	text-align:center;
+}
+	
+.school table th
+{
+	background-color: #3E9B96;
+	border:1px solid #fff;
+	color: #fff;
+	padding: 2px;
+	text-align:center;
+}
+.school table
+{
+	border-radius: 5px;
+	-moz-border-radius: 0px;
+	overflow: hidden;
+	font-size: 14px;
+}
+.school
+{
+	background-color: #FFFFFF;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	padding: 20px;
+}
+.school .title h2
+{
+	color: #FFF;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	background-color: #0D8BBD;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+.school .action .ui-widget
+{
+	font-size: 11px;
+}
+.school .action
+{
+	text-align: center;
+}
+.school .action .ui-button .ui-button-text
+{
+	padding: 20px 10px;
+}
+
+</style>
+
+<form name="salary_for_un" id="salary_for_un" action="zp_lock_unlock_salary.php" method="post">
+    <div class="modal fade bs-example-modal-sm" id="confirm_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-modal-parent="#schprfModal">
+    	<div class="modal-dialog modal-sm">
+        	<div class="modal-content" >
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">CONFIRM MESSAGE</h4>
+                </div>
+                <div class="modal-body"> 
+                    <p class="alert alert-warning" id="lock_sal_msg" style="display:none;"><strong><i class="fa fa-exclamation-triangle"></i> Are You Sure To Lock Salary Requisition?</strong></p>
+                    <p class="alert alert-warning" id="unlock_sal_msg" style="display:none;"><strong><i class="fa fa-exclamation-triangle"></i> Are You Sure To Unlock Salary Requisition?</strong></p>
+                    <input type="hidden" id="sal_action" name="sal_action"/>
+                </div>
+                <div class="modal-footer">
+                    <div class="btn-group">
+                    <input type="submit" name="submit" value="YES" class="btn btn-success finalize" />
+                    <button type="button" class="btn btn-warning" data-dismiss="modal">NO</button>      
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+ 
+ 
+ 
+ 
+ 
+ 

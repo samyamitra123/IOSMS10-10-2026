@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container>
+  <!--<level>
+    <id>1</id>
+    <type>3</type>
+    <abbr>DPSC</abbr>
+    <desc>District Primary School Council</desc>
+  </level>
+  <level>
+    <id>41</id>
+    <type>4</type>
+    <abbr>DDO</abbr>
+    <desc>Drawing And Disbursing Officer</desc>
+  </level>
+  <level>
+    <id>7</id>
+    <type></type>
+    <abbr>DM</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>8</id>
+    <type></type>
+    <abbr>OC MDM</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>9</id>
+    <type>5</type>
+    <abbr>SI/CLRC</abbr>
+    <desc>Sub Inspectors of Schools</desc>
+  </level>
+  <level>
+    <id>10</id>
+    <type></type>
+    <abbr>PTTI</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>21</id>
+    <type></type>
+    <abbr>SCHOOL</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>25</id>
+    <type></type>
+    <abbr>ADM</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>33</id>
+    <type></type>
+    <abbr>HEAD OF INSTITUTION</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>34</id>
+    <type></type>
+    <abbr>JDA</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>35</id>
+    <type></type>
+    <abbr>BDO</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>36</id>
+    <type></type>
+    <abbr>GOI MDM</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>38</id>
+    <type></type>
+    <abbr>NIN</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>32</id>
+    <type>6</type>
+    <abbr>HOI</abbr>
+    <desc>Head of Institute</desc>
+  </level>
+  <level>
+    <id>42</id>
+    <type>6</type>
+	<abbr>DA Getting School</abbr>
+   <desc>DA Getting School</desc>
+  </level>
+  <level>
+    <id>46</id>
+    <type></type>
+    <abbr>District NCLP</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>54</id>
+    <type></type>
+    <abbr>DEPUTY SECRETARY</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>57</id>
+    <type>2</type>
+    <abbr>ADMINISTRATOR</abbr>
+    <desc>Online Salary Requisition System Administrator</desc>
+  </level>
+  <level>
+    <id>61</id>
+    <type></type>
+    <abbr>DEO(CR)</abbr>
+    <desc></desc>
+  </level>
+ <level>
+    <id>4</id>
+    <type>3</type>
+    <abbr>DI Secondary</abbr>
+    <desc></desc>
+  </level>
+  <level>
+    <id>28</id>
+    <type></type>
+    <abbr>SPD PBSSM</abbr>
+    <desc>State Project Director, PBSSM</desc>
+  </level>
+  <level>
+    <id>24</id>
+    <type>2</type>
+    <abbr>Principal Secretary</abbr>
+    <desc>Principal Secretary of School Education Department</desc>
+  </level>-->
+  <level>
+    <id>57</id>
+    <type>2</type>
+    <abbr>ADMIN</abbr>
+    <desc>Administrator</desc>
+  </level>
+  <level>
+    <id>63</id>
+    <type>3</type>
+    <abbr>DPRDO</abbr>
+    <desc>District Panchayat &amp; Rural Development Officer</desc>
+  </level>
+  <level>
+    <id>35</id>
+    <type>4</type>
+    <abbr>BDO</abbr>
+    <desc>Block Development Officer</desc>
+  </level>
+  <level>
+    <id>64</id>
+    <type>8</type>
+    <abbr>GP</abbr>
+    <desc>Gram Panchayat</desc>
+  </level>
+  <level>
+    <id>62</id>
+    <type>7</type>
+    <abbr>WM</abbr>
+    <desc>Webmaster</desc>
+  </level>
+</container>

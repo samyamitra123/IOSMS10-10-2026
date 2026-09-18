@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container>
+
+  <level>
+    <id>57</id>
+    <type>2</type>
+    <abbr>ADMIN</abbr>
+    <desc>Administrator</desc>
+  </level>
+  <level>
+    <id>65</id>
+    <type>2</type>
+    <abbr>COMMISSIONER</abbr>
+    <desc>COMMISSIONER</desc>
+  </level>
+    <level>
+    <id>25</id>
+    <type>10</type>
+    <abbr>DPRDO</abbr>
+    <desc>District Panchayat &amp; Rural Development Officer</desc>
+  </level>
+  <level>
+    <id>36</id>
+    <type>9</type>
+    <abbr>EO</abbr>
+    <desc>Executive Officer</desc>
+  </level>
+  <level>
+    <id>37</id>
+    <type>9</type>
+    <abbr>DA</abbr>
+    <desc>Dealing Assistant</desc>
+  </level>
+  <level>
+    <id>62</id>
+    <type>7</type>
+    <abbr>WM</abbr>
+    <desc>Webmaster</desc>
+  </level>
+</container>

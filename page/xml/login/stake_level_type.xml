@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container>
+  <!--<level_type>
+    <type>2</type>
+    <name>State Level User</name>
+  </level_type>
+  <level_type>
+    <type>3</type>
+    <name>District Level User</name>
+  </level_type>
+  <level_type>
+    <type>4</type>
+    <name>SDO Level User</name>
+  </level_type>
+  <level_type>
+    <type>5</type>
+    <name>Circle Level User</name>
+  </level_type>
+  <level_type>
+    <type>6</type>
+    <name>School Level User</name>
+  </level_type>-->
+  <level_type>
+    <type>2</type>
+    <name>State Level User</name>
+  </level_type>
+   <level_type>
+    <type>3</type>
+    <name>District Level User</name>
+  </level_type>
+  <level_type>
+    <type>4</type>
+    <name>Block Level User</name>
+  </level_type>
+  <level_type>
+    <type>8</type>
+    <name>GP Level User</name>
+  </level_type>
+  <level_type>
+    <type>7</type>
+    <name>Webmaster</name>
+  </level_type>
+</container>

@@ -1,0 +1,440 @@
+<?php
+   require_once('api/ngipf.php');
+   date_default_timezone_set('Asia/Kolkata');
+   class NGIPFSALARY_API extends NGIPF
+    {
+         public function DownloadSalaryBill()
+           {
+              global $db, $drn;
+               date_default_timezone_set('Asia/Kolkata');
+               $current_millisec = mktime();
+               $time_stamp = $current_millisec.'000'; 
+              $SubscriberMasterQuery = "Select * from prd_gpf_subscriber_master where drn_number = '".$drn."'";
+              $SubscriberMasterData = $db->fetch_obj($SubscriberMasterQuery); 
+              $SubscriberMasterData = $SubscriberMasterData[0];  
+              $username = 'gen'.$SubscriberMasterData->operator_code;
+              $password_hash = 'genpanWb!fm5'.substr($SubscriberMasterData->operator_code,1);
+              $password = hash("sha512", $password_hash);  
+              $request_id=request_id_generation($SubscriberMasterData->operator_code);  
+              $target_url = 'https://uat.wbifms.gov.in/gws/epay/api/file/dwnld/md/1/multipart/epaydn/gen'.$SubscriberMasterData->operator_code.'/'.$request_id.'/'.$time_stamp;    
+              $postdata = array (
+                              'usersl'=> 1,
+                              'filename' => $SubscriberMasterData->filename,         
+                              'username' => $username,
+                              'password' => $password,
+                              'filetype' => 'ACKF'
+                             );   
+              $ch = curl_init();
+              curl_setopt($ch, CURLOPT_URL, $target_url);
+              curl_setopt($ch, CURLOPT_POST, 1);
+              curl_setopt($ch, CURLOPT_HEADER, 0);
+              curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+              curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible;)");
+              curl_setopt($ch, CURLOPT_HTTPHEADER,array('Content-Type: multipart/form-data'));
+              curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
+              curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
+              curl_setopt($ch, CURLOPT_TIMEOUT, 100);
+              curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+
+              $result = curl_exec ($ch);                                                                            
+              print_r($postdata); 
+              print_r($result);
+              print_r($target_url);
+              exit;
+              /*                 
+
+    
+              // 
+
+              //
+
+
+              print_r($postdata); */
+              //print_r($target_url); 
+              exit;                
+            /*  
+
+              print_r($result); exit;     */                                     
+                          
+           }
+         public function GetSalaryBillXML()
+           {
+           	    global $db, $drn;
+        				$Query = "select * from prd_block_bill_details WHERE drn_number=".$drn." AND bill_sending_status=2 AND requisition_type = 1001";
+        				$psDrnDetails =$db->fetch_obj($Query);
+        				$psDrnDetails = $psDrnDetails[0];
+                $billIdQuery = "SELECT * from prd_sftp_benf_upload_response WHERE bill_id_fk='".$psDrnDetails->block_bill_pk."'";
+                $billDetails =$db->fetch_obj($billIdQuery);
+                $billDetails = $billDetails[0];
+                //print_r($billDetails); exit;
+                $SalaryYear = substr($psDrnDetails->salary_monthyear,0,4);
+                $SalaryMonth = substr($psDrnDetails->salary_monthyear,4,6);
+                //print_r($SalaryMonth); exit;
+        				//print_r($billDetails); exit;
+        				$Where = array();
+                $profileWhere = array();
+                $profileTable = '';
+        				if($psDrnDetails->block_code != 0)
+        				{
+                  $Where[] = 'pess.block_code='.$psDrnDetails->block_code;
+                  $profileTable = '';
+        				}
+                elseif($psDrnDetails->ps_id_fk != '')
+                {
+                	$Where[] = 'pess.ps_id_fk='.$psDrnDetails->ps_id_fk;
+                  $profileTable = "Select * from psemp_ps_profile where ps_id_fk = ".$psDrnDetails->ps_id_fk;
+                  $profileData = $db->fetch_obj($profileTable); 
+                  //print_r($profileData); exit;
+                  $profileData = $profileData[0];
+                  $TresuryCode = $profileData->treasury_code; 
+                  $StakeHolderId = $profileData->pl_code_pf;
+                  $operatorCode = $profileData->hoa_scheme;
+                 // print_r($profileData); exit;
+                  $drnCharCount = strlen($drn) - 6;
+                  $randNunber = '88'; //rand(11,99);
+                  $ddoCode = str_pad($profileData->ddo_code,6,'0',STR_PAD_LEFT);
+                  $xmlFileName = $profileData->treasury_code.$ddoCode.$profileData->hoa_scheme.date('dYm').$randNunber.substr($drn,$drnCharCount); 
+                  $xmlfolder = 'ifmsps';
+                  //print_r($profileData->ddo_code); exit;
+                }	
+                elseif($psDrnDetails['zp_id_fk'] != '')
+                {
+                	$Where[] = 'pess.zp_id_fk='.$psDrnDetails->zp_id_fk;
+                }	
+                $Where[] = 'pess.delete_status=1';
+                $Where[] = 'pess.status_flag=3';
+                $Where[] = 'pess.is_saved=1';
+                $Where[] = "pess.salary_monthyear='".$psDrnDetails->salary_monthyear."'";
+                $Where[] = "pess.requisition_type='".$psDrnDetails->requisition_type."'";
+                $Where[] = "emp.emp_status in('1','9')";
+                $Query = "Select emp.*,pess.*, pgrm.pfaccno from 
+                          prd_employee_master as emp
+                          LEFT JOIN prd_gpf_request_master as pgrm ON emp.emp_id_const = pgrm.emp_id_const
+                          LEFT JOIN prd_employee_salary_save as pess ON emp.emp_id_pk=pess.emp_id_fk
+                          WHERE ".implode(" AND ",$Where). " ORDER BY emp.gp_id_fk ASC";
+
+        				$SalaryDetails =$db->fetch_obj($Query);
+               // print_r($SalaryDetails); exit;
+                $TotalAmount = 0;
+                foreach($SalaryDetails as $salary) {
+                  $TotalAmount = $TotalAmount + $salary->gpf;
+                  $TotalAmount = $TotalAmount + $salary->festival_loan;
+                  $net = isset($arrearData->net)?$arrearData->net:0;
+                  $TotalAmount = $TotalAmount + $net;
+                }
+
+                $CountOfSalary = $billDetails->total_beneficiary;
+               // $TotalAmount = $billDetails->total_amount;
+                $path = $_SERVER['DOCUMENT_ROOT'].'/readwrite/xml_file/'.$xmlfolder.'/ePayment_Files_009/';
+                //print($path); exit;
+                $xml =  new DOMDocument("1.0","UTF-8");
+                $container = $xml->createElement('SUBS_DATA');
+                //$container->setAttribute("totalamount",$TotalAmount);
+                $container->setAttribute("subscount",$CountOfSalary);
+                $container = $xml->appendChild($container);
+  
+                $drnNumber=$xml->createElement('DRN_NO',$psDrnDetails->drn_number);
+                $container->appendChild($drnNumber);  
+                $TresuryXml =$xml->createElement('TREASURY_CODE',$TresuryCode);
+                $container->appendChild($TresuryXml);  
+                $StakeHolderXml =$xml->createElement('STAKEHOLDER_ID',$StakeHolderId);
+                $container->appendChild($StakeHolderXml); 
+                $OpTreasuryXml =$xml->createElement('OP_TREASURY_CODE',$TresuryCode);
+                $container->appendChild($OpTreasuryXml); 
+                $OpratorXml =$xml->createElement('OP_CODE',$operatorCode);
+                $container->appendChild($OpratorXml);   
+                $TotalAmountXml =$xml->createElement('TOTAL_AMOUNT',$TotalAmount);
+                $container->appendChild($TotalAmountXml);
+                $IosmsIdXml =$xml->createElement('IOSMS_ID',$operatorCode);
+                $container->appendChild($IosmsIdXml);  
+                //$billDetails->bill_id_fk   
+                // Salary Loop Starts
+                foreach($SalaryDetails as $salary) {
+                $SubscriptionXml =$xml->createElement('SUBSCRIPTION_DETAILS');
+                $eachSubscription = $container->appendChild($SubscriptionXml);  
+                $ngipfXml =$xml->createElement('NGIPF_ID',$salary->pfaccno);
+                $eachSubscription->appendChild($ngipfXml); 
+                $RegularSubscriptionXml =$xml->createElement('REGULAR_SUBSCRIPTION');
+                $eachSubscriptionRegular = $eachSubscription->appendChild($RegularSubscriptionXml);  
+                $salaryMonthXml =$xml->createElement('SALARY_MONTH',$SalaryMonth);
+                $eachSubscriptionRegular->appendChild($salaryMonthXml);  
+                $salaryYearXml =$xml->createElement('SALARY_YEAR',$SalaryYear);
+                $eachSubscriptionRegular->appendChild($salaryYearXml);
+                $BasicPayXml =$xml->createElement('BASIC_PAY',$salary->pay_payband);
+                $eachSubscriptionRegular->appendChild($BasicPayXml);
+                $gradePayXml =$xml->createElement('GRADE_PAY',0);
+                $eachSubscriptionRegular->appendChild($gradePayXml);
+                $ropaXml =$xml->createElement('ROPA',1);
+                $eachSubscriptionRegular->appendChild($ropaXml);
+
+                $employerSubscritionXml =$xml->createElement('EMPLOYER_SUBSCRIPTION',0);
+                $eachSubscriptionRegular->appendChild($employerSubscritionXml);
+                $gpfXml =$xml->createElement('REGULAR_AMOUNT',$salary->gpf);
+                $eachSubscriptionRegular->appendChild($gpfXml);
+
+                $RefundSubscriptionXml =$xml->createElement('REFUND_SUBSCRIPTION');
+                $eachSubscriptionRefund = $eachSubscription->appendChild($RefundSubscriptionXml);  
+                $totalInstalment = ($salary->festival_loan == 0)?0:$this->getInstalment($salary); 
+                $currentInstalment = ($salary->festival_loan == 0)?0:$this->getcurInstalment($salary);
+                $refundInstalment = $salary->festival_loan;                             
+                $TotalInstalmentXml =$xml->createElement('TOTAL_INSTALLMENT',$totalInstalment);
+                $eachSubscriptionRefund->appendChild($TotalInstalmentXml); 
+                $CurrentInstalmentXml =$xml->createElement('CURENT_INSTALLMENT',$currentInstalment);
+                $eachSubscriptionRefund->appendChild($CurrentInstalmentXml);  
+                $RefundAmountXml =$xml->createElement('REFUND_AMOUNT',$refundInstalment);
+                $eachSubscriptionRefund->appendChild($RefundAmountXml);  
+
+                $ArrearSubscriptionXml =$xml->createElement('ARREAR_SUBSCRIPTION');
+                $eachSubscriptionArrear = $eachSubscription->appendChild($ArrearSubscriptionXml);  
+                $arrearData = $this->getArrearData($salary); 
+                $periodFrom = isset($arrearData->arrear_from_date)?date('d/m/Y',strtotime(str_replace('-','/',$arrearData->arrear_from_date))):''; 
+                
+                $periodTo = isset($arrearData->arrear_to_date)?date('d/m/Y',strtotime(str_replace('-','/',$arrearData->arrear_to_date))):'';  
+                //print($periodTo); exit;
+                $net = isset($arrearData->net)?$arrearData->net:'';       
+                $TotalInstalmentXml =$xml->createElement('PERIOD_FROM',$periodFrom);
+                $eachSubscriptionArrear->appendChild($TotalInstalmentXml); 
+                $CurrentInstalmentXml =$xml->createElement('PERIOD_TO',$periodTo);
+                $eachSubscriptionArrear->appendChild($CurrentInstalmentXml);  
+                $RefundAmountXml =$xml->createElement('ARREAR_AMOUNT',$net);
+                $eachSubscriptionArrear->appendChild($RefundAmountXml);                                                                                                                                           
+
+                }
+                       
+
+                $filename = 'SUBS'.$xmlFileName.".xml";
+                //print($filename);
+                $name = strftime($filename);
+                //print($path.$name); exit;
+                //header('Content-Disposition: attachment;filename=' . $name);
+                //header('Content-Type: text/xml');
+                $xml->saveXML();
+                //print_r($xml); exit;
+                $xml->save($path.$name); 
+                //echo "Done"; exit;
+                $cfile_xm_file_name = realpath($path.$name); /////// xml file content//////
+                
+                $hash_xm_file=hash_file("sha256",$cfile_xm_file_name);  
+                $path_sign = $_SERVER['DOCUMENT_ROOT'].'/readwrite/xml_file/'.$xmlfolder.'/sign_file/';
+                $xml_name= substr($name,0,-4);
+                $sig_file=$xml_name.".sig"; 
+                
+                $fp = fopen($path_sign . $sig_file,"wb");
+                fwrite($fp,$hash_xm_file);
+                fclose($fp);  
+                if(isset($name)){
+                  
+                  $zip = new ZipArchive();
+                  $new_name= substr($name,0,-4);
+                 // $filename_zip = "../../../../readwrite/xml_file/ifmsgp/ePayment_Files_006/".$new_name.".zip";
+                 
+                 $filename_zip=$_SERVER['DOCUMENT_ROOT'].'/readwrite/xml_file/'.$xmlfolder.'/ePayment_Files_009/'.$new_name.".zip";
+
+                  if ($zip->open($filename_zip, ZipArchive::CREATE)!==TRUE) {
+                    exit("cannot open <$filename_zip>\n");
+                  }
+                //$file='../ACKTISTTS0010062506201801007796.xml';
+                  $dir = $_SERVER['DOCUMENT_ROOT'].'/readwrite/xml_file/'.$xmlfolder.'/ePayment_Files_009/';
+                  $path_sign = $_SERVER['DOCUMENT_ROOT'].'/readwrite/xml_file/'.$xmlfolder.'/sign_file/';
+
+                  // Create zip
+                  createZip($zip,$dir,$name,$path,$path_sign,$sig_file);
+
+                  $zip->close();
+                } 
+
+                $local_directory = $_SERVER['DOCUMENT_ROOT'].'/readwrite/xml_file/'.$xmlfolder.'/ePayment_Files_009/';  
+                $username = 'gen'.$operatorCode;
+                $password_hash = 'genpanWb!fm5'.substr($operatorCode,1);
+                //print($password_hash); exit;
+                $password = hash("sha512", $password_hash);
+                $fileType = 'BENF';
+                $flag='1';
+                $zipped_name= $new_name.".zip";
+                $request_id=request_id_generation($party_code);
+                $party_code_api='gen'.$operatorCode;   
+                $agruments = array(
+                                     'filename'=>$filename,
+                                     'local_directory'=>$local_directory,
+                                     'username'=>$username,
+                                     'password'=>$password,
+                                     'fileType'=>$fileType,
+                                     'flag'=>$flag,
+                                     'zipped_name'=>$zipped_name,
+                                     'request_id'=>$request_id,
+                                     'party_code_api'=>$party_code_api
+                                  );
+                //print_r($agruments); exit;
+                $returnData = $this->callWebService($agruments);
+                $returnData = json_decode($returnData,true);
+                /*$returnData = array(
+                                  'filetypecd' => '006',
+                                  'filename' => 'SUBS0000000440071920230988014598.zip', 
+                                  'filetype' => 'BENF', 
+                                  'status' => 0
+                );*/
+                
+                if(isset($returnData['status']) && $returnData['status'] == 0)
+                {
+                $agruments = array(
+                                     'drn_number'=>$psDrnDetails->drn_number,
+                                     'status'=>$returnData['status'],
+                                     'filetypecd'=>$returnData['filetypecd'],
+                                     'filename'=>$returnData['filename'],
+                                     'filetype'=>$returnData['filetype'],
+                                     'operator_code'=>$operatorCode,
+                                  );  
+
+                $this->saveReturnResponse($agruments); 
+                print_r($returnData); 
+                echo "Done";
+                }
+                else
+                {
+                  echo $returnData['msg'];
+                }            
+                
+             
+           } 
+           function saveReturnResponse($pArguments)
+            {
+                global $db;
+                $InsertArg = array();
+                foreach($pArguments as $key=>$value)
+                {
+                  $InsertArg['key'][]=$key;
+                  $InsertArg['value'][]="'".$value."'";
+
+                }
+                $InsertQuery = "INSERT INTO prd_gpf_subscriber_master (".implode(",",$InsertArg['key']).") VALUES (".implode(",",$InsertArg['value']).")";
+                $db->insert($InsertQuery);
+                //print($InsertQuery); exit;
+
+            }
+           function callWebService($pArguments)
+           {
+  
+               date_default_timezone_set('Asia/Kolkata');
+               $current_millisec = mktime();
+               $time_stamp = $current_millisec.'000';
+                     
+                    
+                if(isset($pArguments['filename']) && $pArguments['flag']=='1'){
+
+                      $orignal_parse = parse_url($url, PHP_URL_HOST);
+                      $opts = array("ssl" => array("capture_peer_cert" => true)); 
+                      
+                      $get = stream_context_create($opts);
+                      
+                      
+                      $url = 'https://wbifms.gov.in';
+                      
+                      $orignal_parse = parse_url($url, PHP_URL_HOST);
+                      
+                      $read = stream_socket_client("ssl://".$orignal_parse.":443", $errno, $errstr, 90, STREAM_CLIENT_CONNECT , $get);
+                      $cert=(stream_context_get_params($read)); 
+                      
+                      $certinfo = openssl_x509_parse($cert['options']['ssl']['peer_certificate']);
+                      
+                      
+                      $valid_from = date(DATE_ATOM,$certinfo['validFrom_time_t']);
+                      $valid_from_date= date("Y-m-d",strtotime($valid_from));
+                      $valid_to = date(DATE_ATOM,$certinfo['validTo_time_t']);
+                      $valid_to_date= date("Y-m-d",strtotime($valid_to));
+                      
+                     //print_r($pArguments); exit;
+                     $target_url = 'https://uat.wbifms.gov.in/gws/epay/api/file/upld/md/1/multipart/epayup/'.$pArguments['party_code_api'].'/'.$pArguments['request_id'].'/'.$time_stamp;
+                    
+                   
+                      $fname = $pArguments['local_directory'].$pArguments['zipped_name']; 
+                      
+                      $cfile = realpath($fname); 
+                     /* if(($certinfo['subject']['CN']=='*.wbifms.gov.in' && $certinfo['issuer']['CN']=='GeoTrust TLS RSA CA G1') )
+                             {
+                               $check='2';
+                             }
+                             else
+                             {
+                              $check='3';
+                             }
+                            
+                            
+                            if($check=='2')
+                            {
+                                if( $certinfo['validFrom_time_t'] > time() || $certinfo['validTo_time_t'] < time() ){
+                              echo "Certificate is expired."; 
+                              }
+                              else
+                              { */
+                                //print("test"); exit;
+                               $postdata = array (
+                                              'usersl'=> 1,
+                                              'filename' => $pArguments['zipped_name'],         
+                                              'username' => $pArguments['username'],
+                                              'password' => $pArguments['password'],
+                                              'filetype' => $pArguments['fileType'],
+                                              'file' => '@'. $cfile
+                                             ); 
+                             // }
+                           // }
+// exit;
+                            $ch = curl_init();
+                            curl_setopt($ch, CURLOPT_URL, $target_url);
+                            curl_setopt($ch, CURLOPT_POST, 1);
+                            curl_setopt($ch, CURLOPT_HEADER, 0);
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                            curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible;)");
+                            curl_setopt($ch, CURLOPT_HTTPHEADER,array('Content-Type: multipart/form-data'));
+                            curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
+                            curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
+                            curl_setopt($ch, CURLOPT_TIMEOUT, 100);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+
+                            $result = curl_exec ($ch);
+                            print($target_url); 
+                            print_r($postdata);                        
+                            print_r($result); exit;
+                            
+                            if ($result === FALSE) {
+                                echo "Error sending" . $fname .  " " . curl_error($ch);
+                                curl_close ($ch);
+                            }else{
+                                curl_close ($ch);
+                          
+                             
+                             return $result;
+                        
+                            }
+
+                }             
+
+
+           }
+           function getInstalment($salary)
+           {
+              return '10';
+           }
+           function getcurInstalment($salary)
+           {
+              return '10';
+           }   
+           function getArrearData($salary)
+           {
+             global $db;
+              $Where = array();
+              $Where[] = 'delete_status=1';
+              $Where[] = 'is_saved=1';
+              
+              $Where[] = "salary_monthyear='".$salary->salary_monthyear."'";
+             
+              $Where[] = "status_flag =3"; 
+              //$Where[] = "emp_id_fk = 26257"; 
+              $Where[] = "emp_id_fk = ".$salary->emp_id_pk;             
+              $Query = "SELECT arrear_from_date, arrear_to_date, net from prd_employee_arrear WHERE ".implode(" AND ",$Where).' order by arrear_id_pk desc';
+              $arrearData = $db->fetch_obj($Query);
+              $arrearData = $arrearData[0];
+              return $arrearData;
+             //print_r($arrearData); exit;
+           }        
+    }	
+?>

@@ -1,0 +1,17 @@
+Table Name = prd_festival_advance_employee_details
+
+Column name = festival_advance_status
+		0 = inactive festival advance
+		1 = festival advance submitted
+		2 = festival advance saved
+		3 = festival advance finalized
+		4 = festival advance locked
+		5 = festival advance bill generated
+		
+		
+
+Table Name = prd_festival_advance_entry_sal
+
+Column name = bonus_status
+		0 = inactive festival advance data
+		1 = active festival advance data

@@ -1,0 +1,8 @@
+Table Name = prd_employee_annual_increment_details
+
+Column name = status
+		0 = inactive annual increment
+		1 = annual increment amount inserted
+		2 = accept increament amount
+		3 = reject increment amount
+		

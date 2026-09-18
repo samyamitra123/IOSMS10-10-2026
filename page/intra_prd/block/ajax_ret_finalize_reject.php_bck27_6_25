@@ -1,0 +1,581 @@
+<?php
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+session_start();
+require '../../../includes/config/config.php';
+require '../../../includes/config/database.config.php';
+require '../../../includes/library/database.class.php';
+require '../../../includes/library/cryptography.class.php';
+require '../../../includes/library/myvalidation.class.php';
+require '../../all_function/fun_store/zp_ps_gp_function.php';
+
+//print_r($_REQUEST);
+//header('Location:'.$config['base_url'].'page/intra_prd/block/employee_list.php');
+//exit(0);
+
+
+
+$cryptoGraph=new cryptography();
+function assign_rand_value($num) {
+
+    // accepts 1 - 36
+    switch($num) {
+        case "1"  : $rand_value = "A"; break;
+        case "2"  : $rand_value = "B"; break;
+        case "3"  : $rand_value = "C"; break;
+        case "4"  : $rand_value = "D"; break;
+        case "5"  : $rand_value = "E"; break;
+        case "6"  : $rand_value = "F"; break;
+        case "7"  : $rand_value = "G"; break;
+        case "8"  : $rand_value = "H"; break;
+        case "9"  : $rand_value = "I"; break;
+        case "10" : $rand_value = "J"; break;
+        case "11" : $rand_value = "K"; break;
+        case "12" : $rand_value = "L"; break;
+        case "13" : $rand_value = "M"; break;
+        case "14" : $rand_value = "N"; break;
+        case "15" : $rand_value = "O"; break;
+        case "16" : $rand_value = "P"; break;
+        case "17" : $rand_value = "Q"; break;
+        case "18" : $rand_value = "R"; break;
+        case "19" : $rand_value = "S"; break;
+        case "20" : $rand_value = "T"; break;
+        case "21" : $rand_value = "U"; break;
+        case "22" : $rand_value = "V"; break;
+        case "23" : $rand_value = "W"; break;
+        case "24" : $rand_value = "X"; break;
+        case "25" : $rand_value = "Y"; break;
+        case "26" : $rand_value = "Z"; break;
+        case "27" : $rand_value = "0"; break;
+        case "28" : $rand_value = "1"; break;
+        case "29" : $rand_value = "2"; break;
+        case "30" : $rand_value = "3"; break;
+        case "31" : $rand_value = "4"; break;
+        case "32" : $rand_value = "5"; break;
+        case "33" : $rand_value = "6"; break;
+        case "34" : $rand_value = "7"; break;
+        case "35" : $rand_value = "8"; break;
+        case "36" : $rand_value = "9"; break;
+    }
+    return $rand_value;
+}
+
+function get_rand_numbers($length) {
+    if ($length>0) {
+        $rand_id="";
+        for($i=1; $i<=$length; $i++) {
+            mt_srand((double)microtime() * 1000000);
+            $num = mt_rand(27,36);
+            $rand_id .= assign_rand_value($num);
+        }
+    }
+    return $rand_id;
+}
+
+function get_rand_letters($length) {
+    if ($length>0) {
+        $rand_id="";
+        for($i=1; $i<=$length; $i++) {
+            mt_srand((double)microtime() * 1000000);
+            $num = mt_rand(1,26);
+            $rand_id .= assign_rand_value($num);
+        }
+    }
+    return $rand_id;
+	
+}
+
+
+
+
+
+
+/*-----------------------------------------------------EMPLOYEE FINALIZE----------------------------------------------------------------------*/
+$db = new database();
+$fun_store=new zp_ps_gp_class();
+
+$gp_id=$db->fetch_table("select gp_id_fk from prd_employee_master where emp_id_pk='".$cryptoGraph->decode($_REQUEST['id'], 4)."'");
+$gp=$gp_id['0']['gp_id_fk'];
+
+if($_REQUEST['flag']=='finalize'){
+	//echo $_REQUEST['flag']; exit;
+	$final_accept=1;
+	$id=$_REQUEST['id'];
+	$empid= "PE".date("Y");
+    $rand_code_nw=$fun_store->check_rand_code();
+	$empid_const=$fun_store->check_unique_emp_const_id();
+	//echo $_POST['id']; exit;
+	$db = new database();
+	
+    $check_id=$db->fetch_table("select max(substr(emp_id_const,7,12)) as emp_id_max from prd_employee_master");
+    
+    $arr=$db->fetch_table("select  mas.emp_pension_status,stake.*
+	from prd_employee_master as mas
+	inner join prd_stake_epension_employee_profile as stake
+	on mas.emp_id_pk=stake.emp_id_fk where stake.emp_id_fk='".$cryptoGraph->decode($id, 4)."' ");
+
+	 $momo_no= $arr[0]['first_momo_no'];
+	$wef_date=$arr[0]['first_momo_wef_date'];
+	$gp_code=$arr[0]['gp_code'];
+	$ps_code=$arr[0]['ps_code'];
+	$district_id_fk=$arr[0]['district_id_fk'];
+	$zp_id_fk=$arr[0]['zp_id_fk'];
+	$pension_stat=$arr[0]['emp_pension_status'];
+	$present_memo_no=$arr[0]['present_memo_no'];
+	$present_momo_date=$arr[0]['presnt_memo_wef_date'];
+	
+	 if($arr[0]['zp_id_fk']!='0')
+	 {
+		$first_gp_ps_zp_code=$zp_id_fk;
+	 }
+	 else if($gp_code!='0')
+	 {
+		  $first_gp_ps_zp_code=$gp_code;
+	 }
+	 else if($ps_code!='0')
+	 {
+		  $first_gp_ps_zp_code=$ps_code;
+	 }
+	if($pension_stat=='0')
+	{
+		$update_pension='0';
+	}
+	elseif($pension_stat=='1' || $pension_stat=='2')
+	{
+		$update_pension='2';
+	}
+	
+	
+$check=$db->fetch_table("select emp_id_const,emp_pay_in_payband from prd_employee_master where emp_id_pk='".$cryptoGraph->decode($id, 4)."'");
+
+//print_r($check);exit;
+
+//echo $final_accept;exit;
+
+		$pay_in_payband=$check['0']['emp_pay_in_payband'];
+	    $interim_relief_cal=round(($pay_in_payband*10)/100);
+		
+		$security =$db->update ("UPDATE prd_stake_epension_employee_profile SET
+	                 status='3'
+					 where emp_id_fk='".$cryptoGraph->decode($id, 4)."'
+					 and status in('1','2','3')
+					  ");
+					  
+					   $query_unlock=$db->update("UPDATE prd_employee_master SET
+		update_status='3',emp_pension_status='".$update_pension."',emp_first_memo_no='".$momo_no."',emp_first_memo_date='".$wef_date."',emp_first_gp_ps_zp_code='".$first_gp_ps_zp_code."',emp_present_memo_no='".$present_memo_no."',emp_present_memo_date='".$present_momo_date."'
+		where emp_id_pk='".$cryptoGraph->decode($id, 4)."'
+		and update_status in('1','2','3')
+		"); 
+		
+		//echo $check['0']['emp_id_const'];exit;
+
+   if($check['0']['emp_id_const']!='0'){
+   	//echo $final_accept;exit;
+		$finalize_update=$db->update("
+		update prd_employee_master
+		set emp_status='".$final_accept."',
+		emp_system_code='".$rand_code_nw."',
+		modified_status= 1
+		where emp_id_pk='".$cryptoGraph->decode($id, 4)."';
+	");
+		//echo $final_accept;exit;
+		/*echo "update prd_employee_master
+	set emp_status=\\\"" . $final_accept . "\\\",
+	emp_system_code=\\\"" . $rand_code_nw . "\\\",
+	emp_id_const=\\\"" . $empid_const . "\\\",
+	interim_relief=\\\"" . $interim_relief_cal . "\\\",
+	modified_status=1
+	where emp_id_pk=\\\"" . $cryptoGraph->decode($id, 4) . "\\\";";
+	exit;*/
+	}
+	else{
+	$finalize_update=$db->update("
+		update prd_employee_master
+		set emp_status='".$final_accept."',
+		emp_system_code='".$rand_code_nw."',
+		emp_id_const='".$empid_const."',
+		interim_relief='".$interim_relief_cal."',
+		modified_status= 1
+		where emp_id_pk='".$cryptoGraph->decode($id, 4)."';
+	");
+
+
+	}
+	
+	
+	
+	
+	if($finalize_update){ 
+
+		//echo $gp;exit;
+	
+	$copy_table= $db->insert("INSERT INTO prd_employee_salary(slno ,latestupdate_time,latestupdate_ip_address,gp_id_fk,empcd ,bankname ,accountno ,basic ,da ,hra ,ma ,cpf ,pf_loan ,p_tax ,i_tax ,net ,bank_ifsc,sal_source,spl_pay,pf_deduct,code  ,spl_alo  ) 
+	SELECT  emp_id_pk,now(), '".$_SESSION['user_agent']['USER_IP']."',gp_id_fk,empcd,emp_bank_name,emp_acc_no,0,0,0,0,0,0,0,0,0,emp_ifsc_no,'PRD',0,0,0,0 FROM prd_employee_master WHERE emp_id_pk = '".$cryptoGraph->decode($id, 4)."'
+");
+
+echo "INSERT INTO prd_employee_salary(slno ,latestupdate_time,latestupdate_ip_address,gp_id_fk,empcd ,bankname ,accountno ,basic ,da ,hra ,ma ,cpf ,pf_loan ,p_tax ,i_tax ,net ,bank_ifsc,sal_source,spl_pay,pf_deduct,code  ,spl_alo  ) 
+	SELECT  emp_id_pk,now(), '".$_SESSION['user_agent']['USER_IP']."',gp_id_fk,empcd,emp_bank_name,emp_acc_no,0,0,0,0,0,0,0,0,0,emp_ifsc_no,'PRD',0,0,0,0 FROM prd_employee_master WHERE emp_id_pk = '".$cryptoGraph->decode($id, 4)."'
+";
+$msg='<p class="alert alert-success" style="text-align:center"><strong>Employee Has Been Successfully Finalized.</strong></p>';
+	?>
+    <script>
+    window.location.href="<?=$config['base_url'] ?>page/intra_prd/block/retired_employee_view_list.php";
+    </script>
+	<? } else{ 
+	$msg='<p class="alert alert-danger" style="text-align:center"><strong>Sorry !!! Employee Finalization Fails.</strong></p>';
+	?>
+    <script>
+    window.location.href="<?=$config['base_url'] ?>page/intra_prd/block/retired_employee_view_list.php?id=<?=$cryptoGraph->encode($gp, 4)?>&msg=<?=$cryptoGraph->encode($msg,4);?>";
+    </script>
+   <? }
+  }
+
+
+
+/*-----------------------------------------------------EMPLOYEE REJECT----------------------------------------------------------------------*/
+
+if($_REQUEST['flag']=='reject'){
+	$final_accept=7;
+	$id=$_REQUEST['id'];
+	//$rand_code_nw=check_rand_code();
+	//echo $_POST['id']; exit;
+	$db = new database();
+	
+	/*$query_archive=$db->insert("Insert into prd_employee_master_archive SELECT emp_id_pk, gp_id_fk, emp_first_name, emp_second_name, emp_last_name, 
+										   emp_dob, emp_sex, emp_caste, emp_voter_id, emp_aadhar_no, emp_edu_quali, 
+										   emp_desig, emp_first_join_date, emp_conf_join_date, emp_join_prsnt_post_date, 
+										   emp_join_prsnt_office_date, emp_retirement_date, emp_termination_date, 
+										   emp_status_deputation, emp_group, emp_desig_first_app, emp_next_increment_date, 
+										   emp_next_increment_amount, emp_cosolidated_pay, emp_pay_band, 
+										   emp_pay_in_payband, emp_grade_pay_bk, emp_pay_scale, emp_bank_name, 
+										   emp_bank_branch, emp_branch_code, emp_micr_no, emp_acc_no, emp_ifsc_no, 
+										   emp_father_name, emp_mother_name, emp_religion, emp_mother_tongue, 
+										   emp_marital_status, emp_spouse_name, emp_spouse_job_status, emp_spouse_details, 
+										   emp_spouse_pay, emp_spouse_hra, emp_spouse_res, emp_spouse_house_schm, 
+										   emp_pan_no, emp_blood_grp, emp_height, emp_diff_able, emp_disable_status, 
+										   emp_idf_mark, pre_state, emp_pre_house_no, emp_pre_street_no, 
+										   emp_pre_vill, emp_pre_post, emp_pre_pin, emp_pre_dist, emp_pre_dist_others, 
+										   per_state, emp_per_house_no, emp_per_street_no, emp_per_vill, 
+										   emp_per_post, emp_per_pin, emp_per_dist, emp_per_dist_others, 
+										   emp_land_no, emp_mobile_no, emp_mail_id, emp_system_code, emp_form_status, 
+										   emp_status, entry_time, entry_ip, empcd, emp_grade_pay, emp_id_const
+  										   FROM prd_employee_master where emp_id_pk='".$cryptoGraph->decode($id, 4)."'");*/	
+										   
+	$query_archive=$db->insert("Insert into prd_employee_master_archive
+													(emp_id_pk,gp_id_fk,emp_first_name,emp_second_name,emp_last_name,
+													emp_dob,emp_sex,emp_caste,emp_voter_id,emp_aadhar_no,emp_edu_quali,
+													emp_desig,emp_first_join_date,emp_conf_join_date,emp_join_prsnt_post_date,
+													emp_join_prsnt_office_date,emp_retirement_date,emp_termination_date,
+													emp_status_deputation,emp_group,emp_desig_first_app,emp_next_increment_date,
+													emp_next_increment_amount,emp_cosolidated_pay,emp_pay_band,
+													emp_pay_in_payband,emp_grade_pay_bk,emp_pay_scale,emp_bank_name,
+													emp_bank_branch,emp_branch_code,emp_micr_no,emp_acc_no,emp_ifsc_no,
+													emp_father_name,emp_mother_name,emp_religion,emp_mother_tongue,
+													emp_marital_status,emp_spouse_name,emp_spouse_job_status,emp_spouse_details,
+													emp_spouse_pay,emp_spouse_hra,emp_spouse_res,emp_spouse_house_schm,
+													emp_pan_no,emp_blood_grp,emp_height,emp_diff_able,emp_disable_status,
+													emp_idf_mark,pre_state,emp_pre_house_no,emp_pre_street_no,
+													emp_pre_vill,emp_pre_post,emp_pre_pin,emp_pre_dist,emp_pre_dist_others,
+													per_state,emp_per_house_no,emp_per_street_no,emp_per_vill,
+													emp_per_post,emp_per_pin,emp_per_dist,emp_per_dist_others,
+													emp_land_no,emp_mobile_no,emp_mail_id,emp_system_code,emp_form_status,
+													emp_status,entry_time,entry_ip,empcd,emp_grade_pay,emp_id_const,
+													bank_upd_status,bank_msg_flag,conf_dt_flag,interim_relief,ps_id_fk,
+													profile_update_time,profile_update_ip_address,spouse_medical_allowance,conv_allow_status) 
+													SELECT 
+													emp_id_pk, gp_id_fk, emp_first_name, emp_second_name, emp_last_name, 
+													emp_dob, emp_sex, emp_caste, emp_voter_id, emp_aadhar_no, emp_edu_quali, 
+													emp_desig, emp_first_join_date, emp_conf_join_date, emp_join_prsnt_post_date, 
+													emp_join_prsnt_office_date, emp_retirement_date, emp_termination_date, 
+													emp_status_deputation, emp_group, emp_desig_first_app, emp_next_increment_date, 
+													CAST (emp_next_increment_amount as numeric), emp_cosolidated_pay, emp_pay_band, 
+													emp_pay_in_payband, emp_grade_pay_bk, emp_pay_scale, emp_bank_name, 
+													emp_bank_branch, emp_branch_code, emp_micr_no, emp_acc_no, emp_ifsc_no, 
+													emp_father_name, emp_mother_name, emp_religion, emp_mother_tongue, 
+													emp_marital_status, emp_spouse_name, emp_spouse_job_status, emp_spouse_details, 
+													emp_spouse_pay, emp_spouse_hra, emp_spouse_res, emp_spouse_house_schm, 
+													emp_pan_no, emp_blood_grp, emp_height, emp_diff_able, emp_disable_status, 
+													emp_idf_mark, pre_state, emp_pre_house_no, emp_pre_street_no, 
+													emp_pre_vill, emp_pre_post, emp_pre_pin, emp_pre_dist, emp_pre_dist_others, 
+													per_state, emp_per_house_no, emp_per_street_no, emp_per_vill, 
+													emp_per_post, emp_per_pin, emp_per_dist, emp_per_dist_others, 
+													emp_land_no, emp_mobile_no, emp_mail_id, emp_system_code, emp_form_status, 
+													emp_status, entry_time, entry_ip, empcd, emp_grade_pay, emp_id_const,
+													bank_upd_status,bank_msg_flag,conf_dt_flag,interim_relief,ps_id_fk,
+													'now()','".$_SERVER['REMOTE_ADDR']."',spouse_medical_allowance,conv_allow_status
+													FROM prd_employee_master where emp_id_pk='".$cryptoGraph->decode($id,4)."'");	
+													
+	$security =$db->update("UPDATE prd_stake_epension_employee_profile SET
+	                 status='4'
+					 where emp_id_fk='".$cryptoGraph->decode($id,4)."'
+					 and status in('1','2')
+					  ");
+									
+						
+			
+ 	$query_unlock=$db->update("UPDATE prd_employee_master SET
+		update_status='4'
+		where emp_id_pk='".$cryptoGraph->decode($id,4)."'
+		and update_status in('1','2')
+		"); 												   
+	
+	$finalize_update=$db->update("
+		update prd_employee_master
+		set emp_status='".$final_accept."'
+		where emp_id_pk='".$cryptoGraph->decode($id, 4)."';
+	");
+	if($finalize_update){ 
+		//$msg="Employee Has Been Successfully Finalized";
+		//header('Location:teacher_list.php?id='.$crypto->encode($schl_dise, 3).'&msg=success');
+		$msg='<p class="alert alert-danger" style="text-align:center"><strong>Employee Has Been Successfully Rejected.</strong></p>';
+		?>
+        <script>
+    window.location.href="<?=$config['base_url'] ?>page/intra_prd/block/employee_list.php?id=<?=$cryptoGraph->encode($gp, 4)?>&msg=<?=$cryptoGraph->encode($msg,4);?>";
+    </script>
+	<? } else{ 
+	$msg='<p class="alert alert-danger" style="text-align:center"><strong>Sorry !!! Employee Rejection Fails.</strong></p>';
+	?>
+    <script>
+    window.location.href="<?=$config['base_url'] ?>page/intra_prd/block/employee_list.php?id=<?=$cryptoGraph->encode($gp, 4)?>&msg=<?=$cryptoGraph->encode($msg,4);?>";
+    </script>
+<? }}
+
+
+
+if($_REQUEST['flag']=='delete'){
+//$final_accept=7;
+$gp_id=$db->fetch_table("select gp_id_fk from prd_employee_master where emp_id_pk='".$cryptoGraph->decode($_POST['emp_id_val'], 4)."'");
+$gp=$gp_id['0']['gp_id_fk'];
+	//echo $gp;exit;
+	//$id=$_REQUEST['id'];
+	//$rand_code_nw=check_rand_code();
+	//echo $_POST['id']; exit;
+	$db = new database();
+	$reason=$_POST['reason']; 
+	$emp_id_pk=$_POST['emp_id_val']; 
+	$status=$_POST['status'];
+	
+	
+ $delete_reason=trim($reason);
+	
+	if($validator->blank_select($delete_reason)==FALSE)
+	{
+		
+	$msg='<p class="alert alert-danger" style="text-align:center"><strong>Enter valid reason.</strong></p>';	
+	 //header('location:employee_edit_details.php') ;
+		//exit(0);
+
+	?>
+	   <script>
+     window.location.href="<?=$config['base_url'] ?>page/intra_prd/block/employee_list.php?id=<?=$cryptoGraph->encode($gp, 4)?>&msg=<?=$cryptoGraph->encode($msg,4);?>";
+    </script>
+    
+    
+    
+    
+    
+<? exit(0); }
+
+
+
+
+
+	
+  $prd_employee_master_archive_delete=$db->insert("INSERT INTO  prd_employee_master_archive_delete (emp_id_pk,
+  gp_id_fk,
+  emp_first_name,
+  emp_second_name,
+  emp_last_name ,
+  emp_dob ,
+  emp_sex,
+  emp_caste,
+  emp_voter_id ,
+  emp_aadhar_no ,
+  emp_edu_quali,
+  emp_desig ,
+  emp_first_join_date ,
+  emp_conf_join_date ,
+  emp_join_prsnt_post_date ,
+  emp_join_prsnt_office_date ,
+  emp_retirement_date ,
+  emp_termination_date ,
+  emp_status_deputation,
+  emp_group,
+  emp_desig_first_app,
+  emp_next_increment_date ,
+  emp_next_increment_amount ,
+  emp_cosolidated_pay,
+  emp_pay_band ,
+  emp_pay_in_payband,
+  emp_grade_pay_bk ,
+  emp_pay_scale ,
+  emp_bank_name ,
+  emp_bank_branch ,
+  emp_branch_code ,
+  emp_micr_no,
+  emp_acc_no ,
+  emp_ifsc_no ,
+  emp_father_name ,
+  emp_mother_name ,
+  emp_religion,
+  emp_mother_tongue ,
+  emp_marital_status,
+  emp_spouse_name ,
+  emp_spouse_job_status ,
+  emp_spouse_details ,
+  emp_spouse_pay ,
+  emp_spouse_hra,
+  emp_spouse_res ,
+  emp_spouse_house_schm ,
+  emp_pan_no ,
+  emp_blood_grp ,
+  emp_height,
+  emp_diff_able,
+  emp_disable_status ,
+  emp_idf_mark ,
+  pre_state ,
+  emp_pre_house_no ,
+  emp_pre_street_no ,
+  emp_pre_vill ,
+  emp_pre_post ,
+  emp_pre_pin ,
+  emp_pre_dist,
+  emp_pre_dist_others ,
+  per_state ,
+  emp_per_house_no ,
+  emp_per_street_no ,
+  emp_per_vill ,
+  emp_per_post ,
+  emp_per_pin ,
+  emp_per_dist ,
+  emp_per_dist_others ,
+  emp_land_no,
+  emp_mobile_no,
+  emp_mail_id ,
+  emp_system_code,
+  emp_form_status,
+  emp_status ,
+  entry_time,
+  entry_ip,
+  empcd ,
+  emp_grade_pay ,
+  emp_id_const,
+  bank_upd_status ,
+  bank_msg_flag,
+  conf_dt_flag,
+  delete_reason,
+  delete_stake_user )
+  
+SELECT emp_id_pk ,
+  gp_id_fk,
+  emp_first_name,
+  emp_second_name,
+  emp_last_name ,
+  emp_dob ,
+  emp_sex,
+  emp_caste,
+  emp_voter_id ,
+  emp_aadhar_no ,
+  emp_edu_quali,
+  emp_desig ,
+  emp_first_join_date ,
+  emp_conf_join_date ,
+  emp_join_prsnt_post_date ,
+  emp_join_prsnt_office_date ,
+  emp_retirement_date ,
+  emp_termination_date ,
+  emp_status_deputation,
+  emp_group,
+  emp_desig_first_app,
+  emp_next_increment_date ,
+  emp_next_increment_amount ,
+  emp_cosolidated_pay,
+  emp_pay_band ,
+  emp_pay_in_payband,
+  emp_grade_pay_bk ,
+  emp_pay_scale ,
+  emp_bank_name ,
+  emp_bank_branch ,
+  emp_branch_code ,
+  emp_micr_no,
+  emp_acc_no ,
+  emp_ifsc_no ,
+  emp_father_name ,
+  emp_mother_name ,
+  emp_religion,
+  emp_mother_tongue ,
+  emp_marital_status,
+  emp_spouse_name ,
+  emp_spouse_job_status ,
+  emp_spouse_details ,
+  emp_spouse_pay ,
+  emp_spouse_hra,
+  emp_spouse_res ,
+  emp_spouse_house_schm ,
+  emp_pan_no ,
+  emp_blood_grp ,
+  emp_height,
+  emp_diff_able,
+  emp_disable_status ,
+  emp_idf_mark ,
+  pre_state ,
+  emp_pre_house_no ,
+  emp_pre_street_no ,
+  emp_pre_vill ,
+  emp_pre_post ,
+  emp_pre_pin ,
+  emp_pre_dist,
+  emp_pre_dist_others ,
+  per_state ,
+  emp_per_house_no ,
+  emp_per_street_no ,
+  emp_per_vill ,
+  emp_per_post ,
+  emp_per_pin ,
+  emp_per_dist ,
+  emp_per_dist_others ,
+  emp_land_no,
+  emp_mobile_no,
+  emp_mail_id ,
+  emp_system_code,
+  emp_form_status,
+  emp_status ,
+  entry_time,
+  entry_ip,
+  empcd ,
+  emp_grade_pay ,
+  emp_id_const,
+  bank_upd_status ,
+  bank_msg_flag,
+  conf_dt_flag,
+  '$reason',
+  '". $_SESSION['location']['block_code']."'
+FROM prd_employee_master
+where emp_id_pk='".$cryptoGraph->decode($emp_id_pk, 4)."'");
+
+	
+	
+	if($prd_employee_master_archive_delete){ 
+
+
+
+		$delete= $db->update("delete from prd_employee_master where emp_id_pk='".$cryptoGraph->decode($emp_id_pk, 4)."'");
+		$msg='<p class="alert alert-success" style="text-align:center"><strong>Employee Has Been Successfully Deleted.</strong></p>';
+		?>
+        <script>
+  window.location.href="<?=$config['base_url'] ?>page/intra_prd/block/employee_list.php?id=<?=$cryptoGraph->encode($gp, 4)?>&msg=<?=$cryptoGraph->encode($msg,4);?>";
+    </script>
+    
+	<? } else{ 
+	$msg='<p class="alert alert-danger" style="text-align:center"><strong>Sorry !!! Employee Delete Fails.</strong></p>';
+	?>
+    
+    <script>
+     window.location.href="<?=$config['base_url'] ?>page/intra_prd/block/employee_list.php?id=<?=$cryptoGraph->encode($gp, 4)?>&msg=<?=$cryptoGraph->encode($msg,4);?>";
+    </script>
+<? }}
+
+
+
+
+?>

@@ -1,0 +1,503 @@
+<?php
+
+ob_start();
+session_start();
+
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require_once '../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+$cryp = new cryptography();
+
+$cryptoGraph=new cryptography();
+
+if($_SERVER['HTTP_REFERER']==''){
+	header("Location:../../../dashboard.php");
+}
+
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '.$config['base_url']."page/login.php");
+	exit;
+}
+
+
+
+//error_reporting(0);
+
+if(!isset($_SERVER['HTTP_REFERER'])){
+    header('Location:'.$config['base_url']."page/error.php?id=1");
+    exit("Do not paste URL directly");
+    
+} elseif (strpos($_SERVER['HTTP_REFERER'], $config['base_url']) === false) {
+    // substring is not found in string
+    header('Location:'. $config['base_url']."page/error.php?id=2");
+    exit("<p style='background-color:#f00;'>Wrong website referer found</p>");
+}
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+			
+$common['title'] = "WBULBHRMS | Govt. of West Bengal ";
+//------------------------------------------------------- HEADER --------------------------------------------------------------
+require '../../../page/layout/header.php';
+//---------------------------------- MENU -------------------------------------------------------------------------------------
+require '../../../page/layout/menu.php';
+?>
+<style>
+.school table
+	{
+		border-collapse:collapse;
+		background-color: #FFFFFF;
+		font-family: "calibri";
+	}
+.school table, .school td, .school th
+	{
+		/*border:1px solid #fff;*/
+		padding: 4px;
+		text-align:center;
+	}
+	
+.school table th{
+		background-color: #3E9B96;
+		border:1px solid #fff;
+		color: #fff;
+		padding: 6px;
+		text-align:center;
+	}
+.school table{
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		overflow: hidden;
+		font-size: 14px;
+	}
+.school{
+	background-color: #FFFFFF;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	padding: 10px;
+	
+}
+.school .title h2{
+	color: #FFF;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	background-color: #0D8BBD;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+.school .action .ui-widget{
+	font-size: 11px;
+}
+.school .action{
+	text-align: center;
+}
+.school .action .ui-button .ui-button-text{
+	padding: 5px 10px;
+}
+
+</style>
+
+
+<?php
+if(isset($_GET['confirm'])){
+	if($_GET['confirm'] == 'success'){
+		$msg='<div id="sucess">Employee Profile Submitted Successfully...</div>';
+	}else if($_GET['confirm'] == 'false'){
+		$msg='<div id="error">Employee Profile Submission Fails...</div>';
+	}
+}
+if(isset($_GET['lock'])){
+	if($cryptoGraph->decode($_GET['lock'],4) == 'sent'){
+		$msg='<div class="alert alert-success" style="text-align:center"><strong>Employee Promotion Details Has Been Sent For Approval Successfully...</strong></div>';
+	}else if($cryptoGraph->decode($_GET['lock'],4) == 'failed'){
+		$msg='<div class="alert alert-danger" style="text-align:center">Employee Promotion Details Has Not Been Sent For Approval. Please Try Again...</strong></div>';
+	}
+}	
+?>
+
+    
+<script>
+function send_to_chairman(emp_id_pk){
+	//alert(emp_id_pk);
+	$("#emp_id_fk").val(emp_id_pk);
+}
+</script>
+    
+<?php
+$db=new database();
+
+//var_dump($_SESSION['user_info']['stake_abbr']); die;
+if($_SESSION['user_info']['stake_abbr'] == 'BDO')
+{
+	
+	$arr=$db->fetch_table("select a.emp_first_name,a.emp_second_name,a.emp_last_name,b.emp_desig,a.emp_status,a.emp_id_pk,a.gp_id_fk,
+	 a.emp_id_const,b.approval_status,b.delete_status ,gp.gp_name
+	from 
+	prd_location_master_block as block
+	INNER JOIN prd_location_master_gp as gp on block.block_id_pk=gp.block_id_fk
+	INNER JOIN prd_employee_master AS a on gp.gp_id_pk=a.gp_id_fk
+	INNER JOIN prd_employee_promotion_details AS b ON b.emp_id_fk = a.emp_id_pk 
+	where a.emp_status in(1) AND block.block_code='".substr($_SESSION['user_info']['stake_user'],0,7)."'
+	AND b.delete_status=1 
+	AND b.approval_status in (2,3,4,5) AND a.emp_id_pk = b.emp_id_fk order by a.emp_id_pk DESC
+	");
+}
+else if($_SESSION['user_info']['stake_abbr'] == 'EO')
+{
+	$arr=$db->fetch_table("select a.emp_first_name,a.emp_second_name,a.emp_last_name,b.emp_desig,a.emp_status,a.emp_id_pk,a.gp_id_fk,
+	 a.emp_id_const,b.approval_status,b.delete_status ,ps.ps_name
+	from 
+	prd_location_master_panchayat_samiti as ps
+	INNER JOIN prd_employee_master AS a on ps.ps_id_pk=a.ps_id_fk
+	INNER JOIN prd_employee_promotion_details AS b ON b.emp_id_fk = a.emp_id_pk 
+	where a.emp_status in(1) AND ps.ps_id_pk='".substr($_SESSION['location']['ps_id'],0,7)."'
+	AND b.delete_status=1 
+	AND b.approval_status in (2,3,4,5) order by a.emp_id_pk DESC
+	");
+}
+
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+
+else if($_SESSION['user_info']['stake_abbr'] == 'AEO')
+{
+	
+	$arr=$db->fetch_table("select a.emp_first_name,a.emp_second_name,a.emp_last_name,b.emp_desig,a.emp_status,a.emp_id_pk,a.gp_id_fk,
+	 a.emp_id_const,b.approval_status,b.delete_status ,dist.district_name
+	from 
+	prd_location_master_district as dist
+	INNER JOIN prd_employee_master AS a on dist.district_id_pk=a.zp_id_fk
+	INNER JOIN prd_employee_promotion_details AS b ON b.emp_id_fk = a.emp_id_pk 
+	where a.emp_status in(1) AND dist.district_id_pk='".substr($_SESSION['location']['district_id'],0,7)."'
+	AND b.delete_status=1 
+	AND b.approval_status in (1,2,3,4,5) AND zp_forward_status ='1' order by a.emp_id_pk DESC
+	");
+	
+}
+
+/************************************************* ZP end **********************************************************************************************/
+
+$code_data = $db->fetch_table("
+							SELECT code, description
+							FROM prd_dise_code_master;
+");
+
+function fun_common($tcode, $code){
+	foreach ($code as $key) {
+		if($key['code'] == $tcode){
+				return $key['description'];
+		}
+	}
+}
+
+?> 
+    
+<div class="content">
+	<?php require '../../../page/common_back_btns.php'; ?>
+
+   <div class="welcome_msg">
+                      <h2>WELCOME:  <?php echo $_SESSION['user_info']['stake_abbr']; ?>
+                      <?php
+					  if(isset($_SESSION['location']['gp_name'])) {
+                          echo $_SESSION['location']['gp_name'];
+                      }elseif(isset($_SESSION['location']['block_name'])) {
+                          echo $_SESSION['location']['block_name'].", ";
+                      }elseif(isset($_SESSION['location']['ps_name'])) {
+                          echo $_SESSION['location']['ps_name'].", ";
+                      }elseif(isset($_SESSION['location']['district_name'])) {
+                          echo $_SESSION['location']['district_name'];
+                      } elseif(isset($_SESSION['location']['state_name'])) {
+                          echo $_SESSION['location']['state_name'];
+                    } ?></h2><h3>
+			
+			<? echo $_SESSION['location']['district_name'].", ".$_SESSION['location']['state_name'];
+			
+                     ?></h3>
+       </div>
+      
+    <center>
+    <h1 class="heading">PROMOTION DETAILS </h1>
+    <?  
+    if(!empty($_SESSION['msg']))
+	{
+		echo $_SESSION['msg'];
+		unset($_SESSION['msg']);
+	}
+	?>
+   
+    <div id="sess_msg" style="padding-left:12px;padding-right:12px;">
+    
+	</div>
+    <br />
+  
+</center>
+
+     
+
+<?php 
+	if(isset($_SESSION['msg']))
+{
+		echo $_SESSION['msg'];
+		unset($_SESSION['school_msg']);
+} 
+if(!empty($_GET['msg'])){
+echo $cryptoGraph->decode($_GET['msg'],4);
+echo "<br/>";
+echo "<br/>";
+}
+//echo $msg;
+?>
+
+<div class="row">
+        <div class="content">
+       <div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad"> 
+        <div class="col-sm-12" style="width:98%">
+       <div class="emplist">
+<div class="school">
+<div class="table-responsive">
+           
+      <table class="table-responsive" style="width:100%;">
+<thead>
+<tr>
+<th>Serial No.</th>
+<?php if($_SESSION['user_info']['stake_abbr'] == 'BDO'){ ?>
+<th>GP Name</th>
+<?php }else if($_SESSION['user_info']['stake_abbr'] == 'EO'){ 
+?>
+<th>PS Name</th>
+<?php 
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+
+}else if($_SESSION['user_info']['stake_abbr'] == 'AEO'){ 
+?>
+<th>ZP Name</th>
+<?php 
+/************************************************* ZP end **********************************************************************************************/
+} ?>
+<th>Employee Name</th>
+<th>Employee ID</th>
+<th>Approval Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<? $cnt=1; if(count($arr) > 0){ foreach($arr as $item){
+$get_promotional_data = $db->fetch_table("SELECT approval_status, approval_status_by_ddo,delete_status FROM prd_employee_promotion_details WHERE emp_id_fk = '".$item['emp_id_pk']."' AND approval_status in('2') AND delete_status in('1')");
+
+if($item['approval_status']=='2' && $item['delete_status']=='1'|| $item['approval_status']=='3' ){
+	$status='<span style="color:#FA8072;font-weight:bold">Waiting for Approval</span>';
+}
+
+else if(($item['approval_status']=='4') && ($item['delete_status']=='1') || ($item['approval_status']=='5')||($item['approval_status']=='6') ) {
+	$status='<span style="color:#008000;font-weight:bold">APPROVED</span>';
+}
+else
+{
+ $status = '<span style="color:#FA8072;font-weight:bold">N/A</span>';
+}
+?>
+
+<tr>
+<td><?= $cnt;?></td>
+<td><? if($_SESSION['user_info']['stake_abbr'] == 'BDO'){echo $item['gp_name'];}else if($_SESSION['user_info']['stake_abbr'] == 'EO'){echo $item['ps_name'];}else if($_SESSION['user_info']['stake_abbr'] == 'AEO'){echo $item['district_name'];} ?></td>
+<td><?= $item['emp_first_name'].' '.$item['emp_second_name'].' '.$item['emp_last_name']?></td>
+<td><?= $item['emp_id_const']?></td>
+<td><?= $status; ?></td>
+<td class="view">
+<?php if((($item['approval_status'] =='2' ||$item['approval_status'] =='3') && $item['delete_status'] =='1') ){ ?>
+ <div class="edit" style="display:inline;">
+ 
+ <a href="" class="emp_edit" id="<?= $cryptoGraph->encode($item['emp_id_pk'],4);?>" data-bs-toggle="modal" data-bs-target="#myModal_edit"><img src="<?= $config['base_url'] ?>themes/default/image/edit_icon.png" width="25" alt="Edit" title="Edit" /></a></div>
+ <?php } else { ?> 
+ <img style="opacity:0.5;" src="<?= $config['base_url'] ?>themes/default/image/edit_icon.png" width="25" alt="Edit" title="" />
+ <?php } ?>
+ 
+ <a href="" class="emp_view" id="<?= $cryptoGraph->encode($item['emp_id_pk'],4);?>" data-bs-toggle="modal" data-bs-target="#myModal"><img src="<?= $config['base_url'] ?>themes/default/image/view_icon.png" width="25" alt="view" title="View"/></a> 
+ 
+</td>
+</tr>
+
+<? $cnt+=1; }} else { ?>
+<tr>
+<td colspan="6" style="color:red;font-weight:bold">No Data Found</td>
+</tr>
+<? } ?>
+</tbody>
+
+      </table>     
+          
+
+
+
+    
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p style="margin-left: 20px;  color:#F51102;"><strong>Note :</strong>
+    <ul>
+ 
+   <!--<li style="color:#F51102; font-weight:bold;">IF choose the option DOUBLE INCREMENT while edition is made from <?php //if($_SESSION['user_info']['stake_abbr'] == 'BDO'){?> Block <?php //}else if($_SESSION['user_info']['stake_abbr'] == 'EO'){?> EO <?php //} else if($_SESSION['user_info']['stake_abbr'] == 'AEO'){?> AEO <?php //}?> in Promotion module .</li>-->
+   
+  <li style="color:#F51102; font-weight:bold;">If any employee is getting CAS/Promotion between 1st January to 30th June, then Annual increment module should be done first and then the process of Promotion module should be completed.</li>
+    </ul>
+</p>
+</div>
+<div class="clear"></div>
+
+
+<? //----------------------------------- FOOTER ----------------------------------------------------------------------------------
+require '../../../page/layout/footer.php';
+//----------------------------------------------------------------------------------------------------------------------------
+ ?>
+
+
+<script>
+
+
+$(document).ready(function(){
+			
+			
+			
+			
+		  $( "tr:odd" ).css( "background-color", "#FFFFFF" );
+		  $( "tr:even" ).css( "background-color", "#DDF7FF" );
+		  $( ".divRow:last" ).css( "border-radius", "0px 0px 5px 5px" );
+		  $("#wait").css("display","none");
+		  $("#dialog-confirm").css("display", "none");
+		  $("#saving").css("display", "none");
+		
+		  $(".emp_edit").click(function() {	
+            var link = $(this).attr('id');
+			var link1= $("#gp_id").val();
+		    $.post('block_ajax_emp_promotion_edit.php?id='+link, function(data){
+				//alert(data);
+				
+				 $("#mbody1").html(data);
+				// $.noConflict();
+		       });
+		    });	
+			
+			$(".emp_view").click(function() {	
+          
+		var link = $(this).attr('id');
+		 $.post('block_ajax_emp_promotion_view.php?id='+link, function(data){
+				$("#mbody").html(data);
+		       });
+	
+		});
+		});
+
+
+		
+</script>
+
+<script type="text/javascript">
+//$(document).ready(function() {
+//    $('#example').DataTable();
+//		$( "#example tr.odd" ).addClass( "odd" );
+//		$( "#example tr:even" ).addClass( "even" );
+//    });
+</script>     
+<style>
+.odd{
+	background-color:#FFFFFF;
+	}
+.even{
+	background-color:#DDF7FF;
+	}
+</style> 
+
+<style>
+/*.modal-backdrop fade in{
+	height:auto 0;
+}*/
+</style>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+	  <h4 class="modal-title" id="myModalLabel1">Employee Promotion Details</h4>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        
+      </div>
+      <div class="modal-body"> 
+      <div class="mbody" id="mbody"> 
+      </div>
+      </div>
+      <div class="modal-footer">
+      <div class="btn-group"> 
+        <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>      
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!----------------------------------------------------------------- VIEW MODAL END---------------------------------------------------->
+
+<div class="modal fade bs-example-modal-lg" id="myModal_edit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" >
+    <div class="modal-content" style="width: 100%; margin-left: -0.5%;">
+      <div class="modal-header">
+	  <h4 class="modal-title" id="myModalLabel2">Employee Promotion Details</h4>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        
+      </div>
+      <div class="modal-body"> 
+      <div id="mbody1"> 
+      </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>      
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!--<div class="modal fade bs-example-modal-sm" id="send" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+     <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Employee Promotion Details Approval</h4>
+      </div>
+      <div class="modal-body"> 
+      <p class="alert alert-warning"><strong><i class="fa fa-exclamation-triangle"></i> Do You Want To Send This Employee Promotion Details For Approval?</strong></p>
+      </div>
+      <div class="modal-footer">
+      <div class="btn-group">
+      <form action="send_emp_promotion.php" method="post">
+      <input name="emp_id_fk" id="emp_id_fk" type="hidden"/>
+        
+<!--<a class="btn btn-success" id="ir_conform" href="javascript:void(0);">YES</a>-->
+		<!--<input type="submit" id="send_promotion" name="send_promotion" value="YES" class="btn btn-success" />
+        <button type="button" class="btn btn-warning" data-dismiss="modal">NO</button>
+        </form>      
+      </div>
+      </div>
+    </div>
+  </div>
+</div>-->
+
+
+
+
+
+
+
+
+ 

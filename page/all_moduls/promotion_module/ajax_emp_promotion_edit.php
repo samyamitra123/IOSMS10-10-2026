@@ -1,0 +1,975 @@
+<?php
+//echo 11; die;
+ob_start();
+session_start();
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require_once '../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+
+ if($_SERVER['HTTP_REFERER']==''){
+	header("Location:../../../dashboard.php");
+}
+
+
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '. $config['base_url'] . "page/login.php");
+	exit;
+}
+
+if(!isset($_SERVER['HTTP_REFERER'])){
+    header('Location:'.$config['base_url']."page/error.php?id=1");
+    exit("Do not paste URL directly");
+    
+} elseif (strpos($_SERVER['HTTP_REFERER'], $config['base_url']) === false) {
+    // substring is not found in string
+    header('Location:'. $config['base_url']."page/error.php?id=2");
+    exit("<p style='background-color:#f00;'>Wrong website referer found</p>");
+}
+
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+
+
+$cryp = new cryptography();
+
+$emp_id_pk=$cryp->decode($_GET['id'],4);
+	//var_dump($_SESSION); die;
+	
+if($_SESSION['user_info']['stake_abbr'] == 'GP')
+{ 
+	$dise=substr($_SESSION['location']['gp_id'],0,7);
+}
+else if($_SESSION['user_info']['stake_abbr'] == 'DA')
+{
+	$dise=substr($_SESSION['location']['ps_id'],0,7);
+}
+
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+
+else if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)')
+{
+	$dise=substr($_SESSION['location']['district_id'],0,7);
+}
+
+/************************************************* ZP end **********************************************************************************************/
+
+$time_token=time();
+$_SESSION['security_token']=$time_token;
+$enc_token=md5('371371371'.$time_token);
+$db = new database();
+//error_reporting(0);
+$time_token=time();
+$_SESSION['security_token']=$time_token;
+$enc_token=md5('369'.$time_token);
+//$id=$tch[0]['emp_id_pk']; 
+$tchcd=isset($_GET['tchcd'])?$_GET['tchcd']:' ';
+$db=new database();
+
+if($_SESSION['user_info']['stake_abbr'] == 'GP')
+{
+	//echo "fgsggf";exit;
+	
+	$promotion_data = $db->fetch_table("SELECT   
+											emp_id_fk,
+											emp_pay_scale,
+											emp_pay_in_payband,
+											emp_grade_pay,
+											emp_desig,
+											emp_pay_band,
+											effective_date,
+											increment_type,
+											approval_status,
+											delete_status,
+											ropa_level,
+											cas_type
+										FROM
+											prd_employee_promotion_details 
+										WHERE
+											emp_id_fk = '".$emp_id_pk."'
+											AND gp_id_fk = '".substr($_SESSION['location']['gp_id'],0,7)."'
+											AND delete_status = '1' and approval_status='1'
+											");
+											//echo "fgsggf12";exit;
+											
+											
+											
+											
+}
+
+else if($_SESSION['user_info']['stake_abbr'] == 'DA')
+{
+	
+	$promotion_data = $db->fetch_table("SELECT   
+											emp_id_fk,
+											emp_pay_scale,
+											emp_pay_in_payband,
+											emp_grade_pay,
+											emp_desig,
+											emp_pay_band,
+											effective_date,
+											increment_type,
+											approval_status,
+											delete_status,
+											ropa_level,
+											cas_type
+										FROM
+											prd_employee_promotion_details 
+										WHERE
+											emp_id_fk = '".$emp_id_pk."'
+											AND ps_id_fk = '".substr($_SESSION['location']['ps_id'],0,7)."'
+											AND delete_status = '1' and approval_status='1'
+											");
+}
+
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+
+else if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)')
+{
+	$promotion_data = $db->fetch_table("SELECT   
+											emp_id_fk,
+											emp_pay_scale,
+											emp_pay_in_payband,
+											emp_grade_pay,
+											emp_desig,
+											emp_pay_band,
+											effective_date,
+											increment_type,
+											approval_status,
+											delete_status,
+											ropa_level,
+											cas_type
+										FROM
+											prd_employee_promotion_details 
+										WHERE
+											emp_id_fk = '".$emp_id_pk."'
+											AND zp_id_fk = '".substr($_SESSION['location']['district_id'],0,7)."'
+											AND delete_status = '1' and approval_status='1'
+											");
+}
+
+/************************************************* ZP end **********************************************************************************************/
+//if(count($promotion_data) > 0)
+//{
+	//echo "fgsggf123456";exit;
+	
+		//$emp_count=count($promotion_data);  
+		
+		//$lock_status=$emp_data[0]['interim_lock_status'];
+		$emp_pay_bandp=$promotion_data[0]['emp_pay_band'];
+		$emp_pay_in_paybandp=$promotion_data[0]['emp_pay_in_payband'];
+		$emp_ropa_levelp=$promotion_data[0]['ropa_level'];
+		$emp_grade_payp=$promotion_data[0]['emp_grade_pay'];
+		$emp_pay_scalep=$promotion_data[0]['emp_pay_scale']; 
+		$emp_desigp = $promotion_data[0]['emp_desig']; 
+		$effective_datep = $promotion_data[0]['effective_date'];
+		$increment_typep = $promotion_data[0]['increment_type'];
+		//$single_double_incrementp = $promotion_data[0]['single_double_increment'];
+		$cas_type=$promotion_data[0]['cas_type'];
+		
+//}
+
+if(isset($promotion_data))
+{
+  
+	//$status = $promotion_data[0]['status'];
+	$approval_status = $promotion_data[0]['approval_status'];	
+	$delete_status = $promotion_data[0]['delete_status'];
+}
+else
+{
+    
+	//$status = 99;
+	$approval_status = 99;	
+	$delete_status = 99;	
+}
+//else{
+if($_SESSION['user_info']['stake_abbr'] == 'GP')
+{
+	$emp_data = $db->fetch_table("SELECT   
+											emp_id_pk,emp_pay_band,
+											emp_pay_scale,
+											emp_pay_in_payband,
+											emp_grade_pay,
+											emp_desig,
+											emp_pay_band,
+											ropa_level,
+											zp_emp_type,
+											emp_next_increment_date
+										FROM
+											prd_employee_master 
+										WHERE
+											emp_id_pk = '".$emp_id_pk."'  AND ropa_status='1'	
+											AND gp_id_fk = '".substr($_SESSION['location']['gp_id'],0,7)."' 											
+								");
+}
+else if($_SESSION['user_info']['stake_abbr'] == 'DA')
+{
+	$emp_data = $db->fetch_table("SELECT   
+											emp_id_pk,emp_pay_band,
+											emp_pay_scale,
+											emp_pay_in_payband,
+											emp_grade_pay,
+											emp_desig,
+											emp_pay_band,
+											ropa_level,
+											zp_emp_type,
+											emp_next_increment_date
+										FROM
+											prd_employee_master 
+										WHERE
+											emp_id_pk = '".$emp_id_pk."' AND ropa_status='1'	
+											AND ps_id_fk = '".substr($_SESSION['location']['ps_id'],0,7)."'											
+								");
+}
+
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+
+else if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)')
+{
+	$emp_data = $db->fetch_table("SELECT   
+											emp_id_pk,emp_pay_band,
+											emp_pay_scale,
+											emp_pay_in_payband,
+											emp_grade_pay,
+											emp_desig,
+											emp_pay_band,
+											ropa_level,
+											zp_emp_type,
+											emp_next_increment_date
+										FROM
+											prd_employee_master 
+										WHERE
+											emp_id_pk = '".$emp_id_pk."' AND ropa_status='1'	
+											AND zp_id_fk = '".substr($_SESSION['location']['district_id'],0,7)."'											
+								");
+}
+
+/************************************************* ZP end **********************************************************************************************/
+
+
+		//$emp_count=count($emp_data); 
+		$emp_pay_band=$emp_data[0]['emp_pay_band'];
+		$emp_pay_in_payband=$emp_data[0]['emp_pay_in_payband'];
+		$emp_ropa_level=$emp_data[0]['ropa_level'];
+		$emp_zp_emp_type=$emp_data[0]['zp_emp_type'];
+		$emp_grade_pay=$emp_data[0]['emp_grade_pay'];
+		$emp_pay_scale=$emp_data[0]['emp_pay_scale']; 
+		$emp_desig = $emp_data[0]['emp_desig']; 
+		$promotion_date = $emp_data[0]['emp_next_increment_date']; 
+		$increment_type = 99;
+		$single_double_increment = 99;
+//}
+ 
+?>
+<style>
+        .form-horizontal .control-label {
+			text-align:left;
+			}
+        </style>
+
+<?php
+
+$cryptoGraph=new cryptography();
+if(isset($_GET['confirm'])){
+	if($_GET['confirm'] == 'success'){
+		$msg='<div class="alert alert-success" style="text-align:center"><strong>Professional Details of the Employee submitted Successfully...</strong></div>';
+	}else if($_GET['confirm'] == 'false'){
+		$msg='<div class="alert alert-danger" style="text-align:center"><strong>Data insertion failed. Please try again...</strong></div>';
+	}
+}
+
+?>
+
+
+
+
+<script>
+    
+function payband(val){
+ $.post('ajax_payscale_details.php?payband='+val, function(data){
+	 $(".payscale").html(data);	 
+	 $.post('ajax_gradepay_details.php?payband='+val, function(data){
+	 $(".gradepay").html(data);	 
+ });
+ });
+ 
+  $.post('ajax_payscale_range_details.php?payband='+val, function(data){
+	 $("#pay_scale_range").val(data); });
+	
+}
+
+
+//function grade(val){
+//	 $.post('<?= $config['base_url'] ?>page/intra_mad/chairman_deo/promotion_module/ajax_designation_details.php?grade='+val, function(data){
+//	 $("#vice_desig").html(data); });
+//}
+//function showConfirmDate(val){
+//			if(val=='1'){
+//				$('.confirm_date_label').show();
+//				$('.confirm_date_div').show();
+//			}else{
+//				$('.confirm_date_label').hide();
+//				$('.confirm_date_div').hide();
+//				
+//			}
+//		}
+//		
+//function show_dcrb_options(val){
+//			if(val=='1'){
+//				$('.dcrb_option_label').show();
+//				$('.dcrb_option_div').show();
+//			}else{
+//				$('.dcrb_option_label').hide();
+//				$('.dcrb_option_div').hide();
+//				
+//			}
+//		}
+
+</script>
+<?
+
+function dateshow($dateval)
+{	
+	if(!empty($dateval)){
+		$date=substr($dateval,0,10);
+		$datearr=explode('-',$date);
+		//var_dump($datearr);
+		$dob= $datearr['2'].'-'.$datearr['1'].'-'.$datearr['0'];
+		return $dob=='--'?'':$dob;
+	}
+	
+}
+	
+
+
+function getEmpAmount($type,$dise,$emp_id_pk){
+	if($_SESSION['user_info']['stake_abbr'] == 'GP')
+	{
+		$gp_or_ps_id_fk = 'gp_id_fk';
+	}
+	else if($_SESSION['user_info']['stake_abbr'] == 'DA')
+	{
+		$gp_or_ps_id_fk = 'ps_id_fk';
+	}
+	
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+	
+	else if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)')
+	{
+		$gp_or_ps_id_fk = 'zp_id_fk';
+	}
+	
+/************************************************* ZP end **********************************************************************************************/
+	
+	$db = new database();
+	//echo "select emp_pay_band from prd_employee_master where empcd='".$empcd."' AND gp_id_fk='".$dise."'";exit;
+	if($type == 'pay_in_pay_band'){
+	$arr = $db->fetch_table("select emp_pay_in_payband from prd_employee_master where emp_id_pk='".$emp_id_pk."' AND ".$gp_or_ps_id_fk."='".$dise."'");
+		if($arr[0]['emp_pay_in_payband']){
+			return $arr[0]['emp_pay_in_payband'];
+		}else{
+			return 0;
+		}
+	}
+	
+	
+	if($type == 'grade_pay'){
+	//$arr = $db->fetch_table("select emp_grade_pay from prd_employee_master where empcd='".$empcd."' AND gp_id_fk='".$dise."'");
+	$arr = $db->fetch_table("select emp_grade_pay,grade_amount from prd_employee_master as emp
+	INNER JOIN prd_dise_gradepay_master as gd 
+	ON trim(emp.emp_grade_pay)=gd.grade_code
+	where emp_id_pk='".$emp_id_pk."' AND ".$gp_or_ps_id_fk."='".$dise."'");
+		if($arr[0]['grade_amount']){
+			return $arr[0]['grade_amount'];
+		}else{
+			return 0;
+		}
+	}
+}
+
+?>
+ 
+
+<div class="content" style="padding-top:20px !important;">
+  
+<!-- Latest compiled and minified JavaScript -->
+<div class="row" id="cont">
+      <div class="col-lg-12 col-md-8 col-sm-8"> 
+        <div class="col-sm-12">
+<center><h1 class="heading" style="color:#932203;">PROMOTION/CAS DETAILS OF EMOPLOYEE</h1></center>
+<div class="border"></div>
+</br>
+<?php 
+if(!empty($msg)){
+echo $msg;
+echo "<br/>";
+}
+if(!empty($error_msg)){
+echo $error_msg;
+echo "<br/>";
+}
+?>
+<script>
+$(document).ready(function() 
+{
+			$('#view1').hide();
+			$('#view2').hide();
+			$('#view3').hide();
+			$('#option_cas_type1').hide();
+	if($('#form_show').css("visibility")=="hidden")
+		{
+			$('#form_show').removeClass("invisible").css('height', 'auto');
+		}
+	
+	if($("#increment").val() == 1)
+	{
+			$("#type_incre").hide();
+	}
+	window.value = $("#pay_in_payband").val();
+	//$(".option_get_promo").hide();
+	//$(".option_get_cas").hide();
+	   //$("#promotion_details1").hide();
+	//$("#promotion_details2").hide();
+	
+});
+
+function valid_promotion_old()    //   change old function name by kalyan ghosh 20/3/2017
+{
+	if(window.value >= $("#pay_in_payband").val())
+	{
+		//alert(window.value);
+		//alert($("#pay_in_payband").val());
+		alert("Please Enter Valid Pay in Payband.");
+			$("#pay_in_payband").focus();
+		return false;
+	}
+	if($(".promotion_option:checked").val() == '')
+	{
+		alert("Please Select Get Promotion or Get Career Advancement Scheme (CAS).");	
+		return false;
+	}
+	return true;
+}
+</script>
+
+<script>
+$(document).ready(function()
+{
+	var type=$("#type").val();
+		if(type=='2')
+		{
+			$('#option_cas_type1').show();
+			$('#view1').show();
+			$('#view2').show();
+			$('#view3').hide();	
+		}
+		else if (type=='1')
+		{
+			$('#view1').show();
+			$('#view2').show();
+			$('#view3').show();
+		}
+});
+
+</script>
+
+<!--For increment module-->
+  <div class="col-sm-12">
+<form class="form-horizontal"  id="loginForm" method="post" action="" onsubmit="return valid_promotion();">
+<input type="hidden"  id="type" value="<?php echo $increment_typep;?>">
+<noscript>Please Enable JavaScript In your Browser</noscript>
+<center><h4 class="heading" style="color: #e75d1e;"> Present Basic Pay Details of Employee</h4></center><br/>
+
+  <!--<div class="form-group">
+    <label for="inputEmail3" class="col-sm-2 control-label">Pay Band<span class="star_color"></span></label>
+    <div class="col-sm-4">
+   				<?
+				/*$db = new database();
+				$arr = $db->fetch_table("select payband_code,payband_name from prd_payband_master where payband_code='".$emp_pay_band."'");*/
+				?>
+                 
+	
+	 <input type="text" style="background-color:#d3d3d3;" id="pay_band1" class="form-control" name="pay_band1"  autocomplete="off" value="<? //echo $arr[0]['payband_name']; ?>" onKeyPress="return keyRestrict(event,'0123456789');" maxlength="5" readonly>
+</div>-->
+    
+    <!--<label for="inputPassword3" class="col-sm-2 control-label">Pay Scale<span class="star_color"></span></label>
+  <div class="col-sm-4">
+   				<?
+				/*$db = new database();
+				$arr = $db->fetch_table("select payscale_range,payscale_code from prd_dise_payscale_master where payscale_code='$emp_pay_scale'");*/
+				?>
+       <input type="text" style="background-color:#d3d3d3;" id="pay_scale1" class="form-control" name="pay_scale1"  autocomplete="off" value="<?// echo $arr[0]['payscale_range']; ?>" onKeyPress="return keyRestrict(event,'0123456789');" maxlength="5" readonly>
+       
+       
+     
+    </div>
+  </div>-->
+ 
+	<div class="row mb-3">
+		<label for="inputPassword3" class="col-sm-2 control-label" style="color: #246a8e;">Basic Pay<span class="star_color"></span></label>
+		<div class="col-sm-4">
+		  <input type="text" style="background-color:#d3d3d3;" id="pre_pay_in_payband" class="form-control" name="pay_in_payband1" placeholder="Basic Pay" autocomplete="off" value="<? if(!empty($emp_pay_in_payband)){ echo $emp_pay_in_payband; }else{ echo $pay_in_payband;} ?>" onKeyPress="return keyRestrict(event,'0123456789');" maxlength="5" readonly>
+		</div>
+		 <!--<label for="inputPassword3" class="col-sm-2 control-label">Grade Pay<span class="star_color"></span> </label>
+	  
+	  <div class="col-sm-4">
+			   <input type="text" style="background-color:#d3d3d3;" id="grade_pay1" class="form-control" name="grade_pay1"  autocomplete="off" value="<? //echo //getEmpAmount('grade_pay',$dise,$emp_id_pk); ?>" onKeyPress="return keyRestrict(event,'0123456789');" maxlength="5" readonly>-->
+			   
+		<label for="inputPassword3" class="col-sm-2 control-label" style="color: #246a8e;" >Level<span class="star_color"></span> </label>
+	  
+		<div class="col-sm-4">
+			   <input type="text" style="background-color:#d3d3d3;" id="grade_pay1" class="form-control" name="grade_pay1"  autocomplete="off" value="<? if(!empty($emp_ropa_level)){ echo $emp_ropa_level; }else{ echo $emp_ropa_level;} ?>" maxlength="5" readonly>
+	  
+		</div>
+	</div>
+  
+	<div class="row mb-3">
+
+		<label for="inputEmail3" class="col-sm-2 control-label" style="color: #246a8e;"> Next Increment Date<span class="star_color"></span></label>
+		<div class="col-sm-4">
+			<input type="text" class="form-control" id="promotion_date1" name="promotion_date1" value="<?php echo dateshow($promotion_date); ?>" placeholder="DD-MM-YYYY" readonly style="background-color:#d3d3d3;" />
+		</div>
+		
+		
+		<label for="inputEmail3" class="col-sm-2 control-label" style="color: #246a8e;">Designation<span class="star_color"></span></label>
+		<div class="col-sm-4">
+		  <div>
+			<?php 
+			
+			/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+			
+			if($_SESSION['user_info']['stake_abbr'] != 'DEALING ASSISTANT (Establishment)'){
+				$desig = $db->fetch_table("SELECT code,description FROM prd_dise_code_master WHERE code ='".$emp_desig."'"); ?>
+				<input type="text" style="background-color:#d3d3d3;" id="vice_desig1" class="form-control" name="vice_desig1"  autocomplete="off" value="<? echo $desig[0]['description']; ?>" onKeyPress="return keyRestrict(event,'0123456789');" maxlength="5" readonly>
+			<?php }
+			else if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)'){
+				$desig = $db->fetch_table("SELECT designation_name,designation_id FROM zpemp_emp_desig_master WHERE designation_id='".$emp_desig."'"); 
+				
+			/************************************************* ZP end **********************************************************************************************/	
+				?>
+				<input type="text" style="background-color:#d3d3d3;" id="vice_desig1" class="form-control" name="vice_desig1"  autocomplete="off" value="<? echo $desig[0]['designation_name']; ?>" onKeyPress="return keyRestrict(event,'0123456789');" maxlength="5" readonly>
+			<?php } ?>
+			
+		 </div>
+		 
+		</div>
+		
+	   
+		<div class="col-sm-4">
+			
+		</div>
+	</div>
+
+
+</form>
+
+  </div>
+  <div class="col-sm-12" style="  border-top:dashed; margin-top: 5%;">
+ 
+<strong style="color:#E93437;"><center><noscript>This Form Is Blocked. Enable Javascript In Your Browser To View The Form.</noscript></center></strong>
+
+<div id="form_show" class="dashcontenr invisible" style="margin-top: 5%;">
+
+<form class="form-horizontal" id="loginForm" method="post" action="emp_promotion_submission.php" onsubmit="return valid_promotion();">
+<noscript>Please Enable JavaScript In your Browser</noscript>
+<center><h4 class="heading" style="color: #e75d1e;">Insert Promotion/CAS Details of Employee</h4></center><br/>
+
+
+ <input type="hidden" name="emp_id_pk" value="<?= $cryptoGraph->encode($emp_id_pk,4) ?>" />
+ <input type="hidden" name="sec_tok" id="sec_tok" value="<?=$enc_token?>" />
+ <input type="hidden" name="approval_status" id="approval_status" value="<?=$cryptoGraph->encode($approval_status,4)?>" />
+ <input type="hidden" name="delete_status" id="delete_status" value="<?=$cryptoGraph->encode($delete_status,4)?>" />
+
+  <div class="row mb-3"> 
+    <label for="inputEmail3" class="col-sm-3 control-label" style="color: #246a8e;">Effective Date<span class="star_color">*</span></label>
+    <div class="col-sm-6">
+    	<input type="date" class="form-control" id="effective_date" name="effective_date" value="<?php echo dateshow($effective_datep); ?>" placeholder="DD-MM-YYYY" style="background-color:#FFF;cursor:pointer;"/>
+    </div>
+  </div>
+  
+   <div class="row mb-3" > 
+      <div class="col-sm-12">
+  <!-- <label><strong>Do You want to Give Promotion Or CAS?</strong><span class="star_color">*</span></label>-->
+    <label class="option_get_promo" style="color: #246a8e;"><input class="promotion_option" type="radio" value="<?=$cryptoGraph->encode('1',4)?>" name="increment_type" id="option_get_promo" onclick="return promotion_or_cas('<?=$cryptoGraph->encode('1',4)?>');" <?php if($increment_typep == '1'){ echo 'checked'; } ?>/>  Get Promotion</label>
+    <label class="option_get_cas"  style="color: #246a8e;"><input class="promotion_option" type="radio" value="<?=$cryptoGraph->encode('2',4)?>" name="increment_type" id="option_get_cas" onclick="return promotion_or_cas('<?=$cryptoGraph->encode('2',4)?>');" <?php if($increment_typep == '2'){ echo 'checked'; } ?> />  Get Career Advancement Scheme (CAS)</label>
+   </div>
+  </div>
+  
+ <div class="row mb-3" id="option_cas_type1"> 
+      <div class="col-sm-12">
+      <?
+	   $db = new database();
+	   
+	   
+       $cas = $db->fetch_table("SELECT * FROM prd_employee_promotion_details  WHERE emp_id_fk= '".$emp_id_pk."' AND delete_status='1' order by increment_id DESC  LIMIT 1 "); 
+	   if(count($cas) < 1)
+	   {
+		
+		    $cas_archive = $db->fetch_table("SELECT * FROM prd_employee_promotion_details_archive  WHERE emp_id_fk= '".$emp_id_pk."' AND delete_status='0' order by increment_archive_id DESC  LIMIT 1 ");
+       		$check_cas=$cas_archive[0]['cas_type'];
+	   }
+	   
+?>
+
+<?php if($emp_zp_emp_type == 366){?>
+	 
+        <label class="option_cas_type" style="color: #246a8e;">CAS Type <span class="star_color">*</span> :</label>
+        <label class="option_cas_type" style="color: #246a8e;"><input class="cas_type" type="radio" value="<?=$cryptoGraph->encode('8',4)?>" name="cas_type" id="cas_type8"  <?php if($increment_typep == '2' && $cas_type=='8'){ echo 'checked'; } ?> <?php if($check_cas=='8'||$check_cas=='16' || $check_cas=='25'){  echo "disabled='disabled'"; }  ?> /> 8 Year</label>
+        <label class="option_cas_type"  style="color: #246a8e;"><input class="cas_type" type="radio" value="<?=$cryptoGraph->encode('16',4)?>" name="cas_type" id="cas_type16" <?php if($increment_typep == '2' && $cas_type=='16'){ echo 'checked'; } ?> <?php if($check_cas=='16' ||  $check_cas=='25'){ echo "disabled='disabled'";}?>  /> 16 Year</label>
+        
+        <label class="option_cas_type"  style="color: #246a8e;"><input class="cas_type" type="radio" value="<?=$cryptoGraph->encode('25',4)?>" name="cas_type" id="cas_type25" <?php if($increment_typep == '2' && $cas_type=='25'){ echo 'checked'; } ?> <?php if($check_cas=='25' ){ echo "disabled='disabled'";}?>  /> 25 Year</label>
+       <? }else {?>
+       
+       <label class="option_cas_type" style="color: #246a8e;">CAS Type <span class="star_color">*</span> :</label>
+        <label class="option_cas_type" style="color: #246a8e;"><input class="cas_type" type="radio" value="<?=$cryptoGraph->encode('10',4)?>" name="cas_type" id="cas_type10"  <?php if($increment_typep == '2' && $cas_type=='10'){ echo 'checked'; } ?> <?php if($check_cas=='20'||$check_cas=='10'){  echo "disabled='disabled'"; }  ?> />10 Year</label>
+        <label class="option_cas_type"  style="color: #246a8e;"><input class="cas_type" type="radio" value="<?=$cryptoGraph->encode('20',4)?>" name="cas_type" id="cas_type20" <?php if($increment_typep == '2' && $cas_type=='20'){ echo 'checked'; } ?> <?php if($check_cas=='20'){ echo "disabled='disabled'";}?>  /> 20 Year</label>
+        <?php }?>
+   </div>
+  </div>
+ 
+
+ 
+ 
+ 
+ 
+<div id="promotion_details2">
+<!--  <div class="form-group promotion_only" <?php if($increment_typep != '1'){ echo "style='display:none;'";} ?>>
+    <label for="inputEmail3" class="col-sm-2 control-label">DLB Order No<span class="star_color">*</span></label>
+    <div class="col-sm-4">
+   				
+       </div>
+    <label for="inputPassword3" class="col-sm-2 control-label">Date of Order<span class="star_color">*</span></label>
+  <div class="col-sm-4">
+   	  </div>
+  </div>-->
+
+
+  <!--<div class="form-group" id="view1">
+    <label for="inputEmail3" class="col-sm-2 control-label" >Pay Band<span class="star_color">*</span></label>
+    <div class="col-sm-4">
+   				<?
+				$db = new database();
+				$arr = $db->fetch_table("select payband_code,payband_name from prd_payband_master order by payband_code");
+				?>
+      <select class="form-control" name="pay_band" id="pay_band" onchange="payband(this.value)">
+      <option value="">-Please Select-</option>
+       <? foreach($arr as $key){ $key['payband_code']. '<br />'; ?>
+       <option <?php if($cryptoGraph->encode($emp_pay_bandp,4) == $cryptoGraph->encode($key['payband_code'],4)){ echo "selected"; } ?> value="<?=  $cryptoGraph->encode($key['payband_code'],4); ?>" <? //if($emp_pay_band==$key['payband_code'] || $pay_band==$key['payband_code']){ echo "selected";}?>><?= $key['payband_name']; ?></option>
+       <? } ?>
+      </select>
+    </div>
+    <label for="inputPassword3" class="col-sm-2 control-label">Pay Scale<span class="star_color">*</span></label>
+  <div class="col-sm-4">
+   				<?
+				$db = new database();
+				
+				$arr = $db->fetch_table("select payscale_range,payscale_code from prd_dise_payscale_master where payscale_code='$emp_pay_scalep'");
+				?>
+      <select class="form-control payscale" name="pay_scale" id="pay_scale">
+      <option value="">-Please Select-</option>
+    
+		<?  foreach($arr as $key){ $key['payscale_code']. '<br />'; ?>
+        <option value="<?=$key['payscale_code']; ?>" <? if($emp_pay_scalep==$key['payscale_code']){ echo "selected";}?>><?=$key['payscale_range']; ?></option>
+	
+        <? } ?>
+      </select>
+      <input type="hidden" id="pay_scale_range" value="<?=$key['payscale_range']; ?>" />
+    </div>
+  </div>-->
+  
+  
+  <div class="row mb-3" id="view1">
+    <label for="inputEmail3" class="col-sm-2 control-label" >Level<span class="star_color">*</span></label>
+    <div class="col-sm-4">
+		<?
+		//echo $emp_zp_emp_type;exit;
+		if($emp_zp_emp_type == "" || $emp_zp_emp_type == 367){
+			$db = new database();
+		$get_column=$db->fetch_table("SELECT  level1,level2,level3,level4,level5,level6,level7,level8,level9,level10,level11,level12,level13,level14,level15,level16,level17,level19 
+		from ropa_2019 order by level ");
+		}
+		else if($emp_zp_emp_type == 366){
+			$db = new database();
+		$get_column=$db->fetch_table("SELECT  level1,level2,level3,level4,level5,level6,level7,level8,level9,level10,level11,level12,level13,level14,level15,level16,level17,level19,level20,level21,level22,level23,level24 from ropa_2019_ll order by level ");
+		}
+		//var_dump($emp_ropa_level); die;
+		?>
+		<select class="form-control" name="ropa_level" id="ropa_level">
+
+			<option value="">-Please Select-</option>
+			<? 
+			foreach($get_column[0] as $key=>$value){ 
+				$key1 = str_split($key,5);
+				$emp_ropa_level1 = str_split($emp_ropa_level,5);
+				//var_dump($key1[0]); 
+			?>
+			<option value="<?= $key; ?>" <? if($emp_ropa_levelp==$key){ echo "selected";} if($key1[1] < $emp_ropa_level1[1]){?> disabled <? } ?> ><?= $key; ?></option>
+			<? } ?>
+		</select>
+	</div>
+	
+	<div class="row mb-3" id="view3">
+    <label for="inputEmail3" class="col-sm-2 control-label" id="designation">Designation<span class="star_color">*</span></label>
+    <div class="col-sm-4">
+      <div  id="vice_desig">
+	  <?php	
+if($_SESSION['user_info']['stake_abbr'] == 'DA')
+{
+		$desig = $db->fetch_table("select code,description from prd_dise_code_master where length(code)=4 and code like '90%' order by code");
+}
+
+/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+
+else if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)')
+{
+		$desig = $db->fetch_table("select designation_id,designation_name from zpemp_emp_desig_master");
+}
+
+/************************************************* ZP end **********************************************************************************************/
+
+else
+{
+		$desig = $db->fetch_table("SELECT code,description FROM prd_dise_code_master where code in('1114','1115','1116','1117','1118','1119','1121','1122','1123','1119')"); 
+}?>
+     	<select class="form-control vice_designation" name="vice_desig" id="emp_vice_desig">
+        	<option value="">-Please Select-</option>
+            
+            <?php 
+			/*********************************************** Added by ANJAN for ZP Start ******************************************************************/
+			
+			foreach($desig as $designations){
+					if($_SESSION['user_info']['stake_abbr'] != 'DEALING ASSISTANT (Establishment)'){?>
+						<option <?php if($designations['code'] == $emp_desigp){ echo 'selected'; }?> value="<?php echo $designations['code'] ?>"><?php echo $designations['description'] ?></option>
+			<?php }
+					else if($_SESSION['user_info']['stake_abbr'] == 'DEALING ASSISTANT (Establishment)'){ ?>
+						<option <?php if($designations['designation_id'] == $emp_desigp){ echo 'selected'; }?> value="<?php echo $designations['designation_id'] ?>"><?php echo $designations['designation_name'] ?></option>
+			<?php }
+				} 
+				
+		/************************************************* ZP end **********************************************************************************************/		
+				?>
+        </select>
+     </div>
+     
+    </div>
+   </div>
+   
+  </div>
+  
+ 
+  <div class="row mb-3" >
+    
+      
+      <!--<div id="view2">
+     <label for="inputPassword3" class="col-sm-2 control-label">Grade Pay<span class="star_color">*</span> </label>
+  <div class="col-sm-4">
+   		<?
+				$db = new database();
+				
+				$grad = $db->fetch_table("select grade_amount,grade_code from prd_dise_gradepay_master where grade_code='$emp_grade_payp'");
+				?>
+      <select class="form-control gradepay" name="grade_pay" id="grade_pay" onchange="grade(this.value)">
+      <option value="">-Please Select-</option>
+       <?php foreach($grad as $grad_pay){ ?>
+            <option <?php if($grad_pay['grade_code'] == $emp_grade_payp){ echo 'selected'; }?> value="<?php echo $grad_pay['grade_code'] ?>"><?php echo $grad_pay['grade_amount'] ?></option>
+            <?php } ?>
+      </select>
+    </div>
+      </div>-->
+      
+  </div>
+    
+  
+  <div class="row mb-3">
+    <div class="col-sm-8" align="center">
+      <button type="submit" class="btn btn-info" style="float:right">SAVE & CONTINUE <!--<i class="fa fa-chevron-right"></i>--></button>
+    </div>
+  </div>
+</div>
+<!--End of promotion_details2 -->
+ 
+</form>
+</div>
+  </div>
+
+<!--End of increment module-->
+
+  
+
+        </div>
+        
+      </div>
+
+    </div>
+    </div>
+    <div class="clear"></div>
+    
+  
+    
+    
+    
+<?
+  //----------------------------------- FOOTER ----------------------------------------------------------------------------------
+//require '../../../../page/layout/footer.php';
+//----------------------------------------------------------------------------------------------------------------------------
+?>  
+ 
+<script>
+
+/*function promotion(effective_date){
+	//alert(new_effective_date);
+	$('.option_get_cas').show();
+	$('.option_get_promo').show();
+	//$("#promotion_details1").show();
+	$("#promotion_details2").hide();
+	$(".promotion_option").prop('checked', false);
+}*/
+
+function promotion_or_cas(val)
+{
+	if(val=='<?=$cryptoGraph->encode('1',4)?>')
+		{
+				$('#view1').show();
+				$('#view2').show();
+				$('#view3').show();
+				$('#option_cas_type1').hide();
+		}
+	else if(val=='<?=$cryptoGraph->encode('2',4)?>')
+		{
+			$('#option_cas_type1').show();
+			$('#view1').show();
+			$('#view2').show();
+			$('#view3').hide();
+			
+		}
+	
+}
+
+</script>
+
+
+
+   <!--   Kalyan Ghosh   20/3/2017   start   --> 
+   <script>
+   function valid_promotion()
+{
+		if($('#effective_date').val()=='')
+		{
+					alert('Please Enter Valid Date.');
+					$('#effective_date').focus();
+					return false;
+		}
+		
+	var invalue = document.getElementsByName('increment_type');
+	var genValue = false;
+
+		for(var i=0; i<invalue.length;i++)
+		 {
+					if(invalue[i].checked == true)
+				{
+						genValue = true;    
+				}
+		 }
+		if(!genValue)
+		{
+		   alert("Please Select Promotion or Career Advancement Scheme");
+			return false;
+		 }
+		if ($('#option_get_promo').is(':checked'))
+	 	{ 
+		
+					/* if($('#pay_band').val()=='')
+				{
+							alert('Please select Valid Pay Band.');
+							$('#pay_band').focus();
+							return false;
+				}
+					if($('#pay_scale').val()=='')
+				{
+							alert('Please select Valid Pay Scale.');
+							$('#pay_scale').focus();
+							return false;
+				}
+			
+				  	if($('#grade_pay').val()=='')
+				{
+							alert('Please select Valid Grade Pay.');
+							$('#grade_pay').focus();
+							return false;
+				}*/
+					if($('#ropa_level').val()=='')
+				{
+							alert('Please select Valid Level.');
+							$('#ropa_level').focus();
+							return false;
+				}
+				 	if($('#emp_vice_desig').val()=='')
+				{
+				//alert($('#designation').val());
+							alert('Please select Designation.');
+							$('#emp_vice_desig').focus();
+							return false;
+				}
+		}
+			if ($('#option_get_cas').is(':checked'))
+	 		{ 
+							var type_10=$('#cas_type10').is(':checked');
+							var type_8=$('#cas_type8').is(':checked');
+							//var type_16=$('#cas_type16').is(':checked');
+							var type_20=$('#cas_type20').is(':checked');
+							var type_16=$('#cas_type16').is(':checked');
+							var type_25=$('#cas_type25').is(':checked');
+							
+						 //return false;
+		  		 if(!(type_10 || type_8 || type_20 ||  type_16 ||  type_25 ))
+				{
+			
+							alert('Please Select Case Type.');
+							//$('#cas_type10').focus();
+							return false;
+				}
+				/* if($('#pay_band').val()=='')
+				{
+							alert('Please select Valid Pay Band.');
+							$('#pay_band').focus();
+							return false;
+				}
+				 if($('#pay_scale').val()=='')
+				{
+							alert('Please select Valid Pay Scale.');
+							$('#pay_scale').focus();
+							return false;
+				}
+			
+				 if($('#grade_pay').val()==''){
+							alert('Please select Valid Grade Pay.');
+							$('#grade_pay').focus();
+							return false;
+				}*/
+				
+				if($('#ropa_level').val()==''){
+							alert('Please select Valid Level.');
+							$('#ropa_level').focus();
+							return false;
+				}
+		}
+  }
+
+	/*$( "#effective_date" ).datepicker({
+		changeMonth: true,
+		changeYear: true,
+		yearRange: "-50:+50",
+		dateFormat: 'dd-mm-yy' 
+	}); */
+	
+	  
+   </script>
+ 
+
+   <?php @pg_close($con); ?>

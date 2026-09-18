@@ -1,0 +1,2417 @@
+[
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2723,
+    "BLOCK_NAME": "AMDANGA",
+    "BLOCK_NAME_BENG": "আমডাঙ্গা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2724,
+    "BLOCK_NAME": "BADURIA",
+    "BLOCK_NAME_BENG": "বাদুরিয়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2725,
+    "BLOCK_NAME": "BAGDAH",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2726,
+    "BLOCK_NAME": "BARASAT-I",
+    "BLOCK_NAME_BENG": "বারাসাত-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2727,
+    "BLOCK_NAME": "BARASAT-II",
+    "BLOCK_NAME_BENG": "বারাসাত-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2728,
+    "BLOCK_NAME": "BARRACKPORE-I",
+    "BLOCK_NAME_BENG": "ব্যারাকপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2729,
+    "BLOCK_NAME": "BARRACKPORE-II",
+    "BLOCK_NAME_BENG": "ব্যারাকপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2730,
+    "BLOCK_NAME": "BASIRHAT-I",
+    "BLOCK_NAME_BENG": "বসিরহাট-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2731,
+    "BLOCK_NAME": "BASIRHAT-II",
+    "BLOCK_NAME_BENG": "বসিরহাট-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2732,
+    "BLOCK_NAME": "BANGAON",
+    "BLOCK_NAME_BENG": "বনগাঁ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2733,
+    "BLOCK_NAME": "DEGANGA",
+    "BLOCK_NAME_BENG": "দেগঙ্গা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2734,
+    "BLOCK_NAME": "GAIGHATA",
+    "BLOCK_NAME_BENG": "গাইঘাটা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2735,
+    "BLOCK_NAME": "HABRA-I",
+    "BLOCK_NAME_BENG": "হাবরা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2736,
+    "BLOCK_NAME": "HABRA-II",
+    "BLOCK_NAME_BENG": "হাবরা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2737,
+    "BLOCK_NAME": "HAROA",
+    "BLOCK_NAME_BENG": "হাড়োয়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2738,
+    "BLOCK_NAME": "HASNABAD",
+    "BLOCK_NAME_BENG": "হাসনাবাদ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2739,
+    "BLOCK_NAME": "HINGALGANJ",
+    "BLOCK_NAME_BENG": "হিঙ্গলগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2740,
+    "BLOCK_NAME": "MINAKHA",
+    "BLOCK_NAME_BENG": "মিনাখান",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2741,
+    "BLOCK_NAME": "RAJARHAT",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2742,
+    "BLOCK_NAME": "SANDESHKHALI-I",
+    "BLOCK_NAME_BENG": "সন্দেশখালি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2743,
+    "BLOCK_NAME": "SANDESHKHALI-II",
+    "BLOCK_NAME_BENG": "সন্দেশখালি-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 303,
+    "BLOCK_LGD": 2744,
+    "BLOCK_NAME": "SWARUPNAGAR",
+    "BLOCK_NAME_BENG": "স্বরুপনগর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2745,
+    "BLOCK_NAME": "BARUIPUR",
+    "BLOCK_NAME_BENG": "বারুইপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2746,
+    "BLOCK_NAME": "BASANTI",
+    "BLOCK_NAME_BENG": "বাসন্তি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2747,
+    "BLOCK_NAME": "BHANGAR-I",
+    "BLOCK_NAME_BENG": "ভাঙর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2748,
+    "BLOCK_NAME": "BHANGAR-II",
+    "BLOCK_NAME_BENG": "ভাঙর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2749,
+    "BLOCK_NAME": "BISHNUPUR-I",
+    "BLOCK_NAME_BENG": "বিষ্ণুপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2750,
+    "BLOCK_NAME": "BISHNUPUR-II",
+    "BLOCK_NAME_BENG": "বিষ্ণুপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2751,
+    "BLOCK_NAME": "BUDGE BUDGE-I",
+    "BLOCK_NAME_BENG": "বজবজ-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2752,
+    "BLOCK_NAME": "BUDGE BUDGE-II",
+    "BLOCK_NAME_BENG": "বজবজ-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2753,
+    "BLOCK_NAME": "CANNING-I",
+    "BLOCK_NAME_BENG": "ক্যানিং-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2754,
+    "BLOCK_NAME": "CANNING-II",
+    "BLOCK_NAME_BENG": "ক্যানিং-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2755,
+    "BLOCK_NAME": "DIAMOND HARBOUR-I",
+    "BLOCK_NAME_BENG": "ডায়মন্ড হারবার-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2756,
+    "BLOCK_NAME": "DIAMOND HARBOUR-II",
+    "BLOCK_NAME_BENG": "ডায়মন্ড হারবার-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2757,
+    "BLOCK_NAME": "FALTA",
+    "BLOCK_NAME_BENG": "ফলতা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2758,
+    "BLOCK_NAME": "GOSABA",
+    "BLOCK_NAME_BENG": "গোসাবা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2759,
+    "BLOCK_NAME": "JAYNAGAR-I",
+    "BLOCK_NAME_BENG": "জয়নগর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2760,
+    "BLOCK_NAME": "JAYNAGAR-II",
+    "BLOCK_NAME_BENG": "জয়নগর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2761,
+    "BLOCK_NAME": "KAK DWIP",
+    "BLOCK_NAME_BENG": "কাকদ্বীপ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2762,
+    "BLOCK_NAME": "KULPI",
+    "BLOCK_NAME_BENG": "কুলপি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2763,
+    "BLOCK_NAME": "KULTALI",
+    "BLOCK_NAME_BENG": "কুলতলি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2764,
+    "BLOCK_NAME": "MAGRA HAT-I",
+    "BLOCK_NAME_BENG": "মগরাহাট-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2765,
+    "BLOCK_NAME": "MAGRA HAT-II",
+    "BLOCK_NAME_BENG": "মগরাহাট-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2766,
+    "BLOCK_NAME": "MANDIRBAZAR",
+    "BLOCK_NAME_BENG": "মন্দিরবাজার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2767,
+    "BLOCK_NAME": "MATHURAPUR I",
+    "BLOCK_NAME_BENG": "মথুরাপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2768,
+    "BLOCK_NAME": "MATHURAPUR-II",
+    "BLOCK_NAME_BENG": "মথুরাপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2769,
+    "BLOCK_NAME": "NAMKHANA",
+    "BLOCK_NAME_BENG": "নামখানা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2770,
+    "BLOCK_NAME": "PATHAR PRATIMA",
+    "BLOCK_NAME_BENG": "পাথর প্রতিমা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2771,
+    "BLOCK_NAME": "SAGAR",
+    "BLOCK_NAME_BENG": "সাগর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2772,
+    "BLOCK_NAME": "SONARPUR",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 304,
+    "BLOCK_LGD": 2773,
+    "BLOCK_NAME": "THAKURPUKUR MAHESTOLA",
+    "BLOCK_NAME_BENG": "ঠাকুরপুকুর মহেশতলা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2774,
+    "BLOCK_NAME": "BANKURA-I",
+    "BLOCK_NAME_BENG": "বাঁকুড়া-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2775,
+    "BLOCK_NAME": "BANKURA-II",
+    "BLOCK_NAME_BENG": "বাঁকুড়া-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2776,
+    "BLOCK_NAME": "BARJORA",
+    "BLOCK_NAME_BENG": "বড়জোড়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2777,
+    "BLOCK_NAME": "CHHATNA",
+    "BLOCK_NAME_BENG": "ছাতনা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2778,
+    "BLOCK_NAME": "GANGAJAL GHATI",
+    "BLOCK_NAME_BENG": "গঙ্গাজাল ঘাটি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2779,
+    "BLOCK_NAME": "HIRBANDH",
+    "BLOCK_NAME_BENG": "হিরবান্ধ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2780,
+    "BLOCK_NAME": "INDPUR",
+    "BLOCK_NAME_BENG": "ইন্দপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2781,
+    "BLOCK_NAME": "INDUS",
+    "BLOCK_NAME_BENG": "ইন্দাস",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2782,
+    "BLOCK_NAME": "JOYPUR",
+    "BLOCK_NAME_BENG": "জয়পুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2783,
+    "BLOCK_NAME": "KHATRA",
+    "BLOCK_NAME_BENG": "খাতরা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2784,
+    "BLOCK_NAME": "KOTULPUR",
+    "BLOCK_NAME_BENG": "কোতুলপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2785,
+    "BLOCK_NAME": "MEJHIA",
+    "BLOCK_NAME_BENG": "মেজিয়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2786,
+    "BLOCK_NAME": "ONDA",
+    "BLOCK_NAME_BENG": "ওন্দা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2787,
+    "BLOCK_NAME": "PATRASAYER",
+    "BLOCK_NAME_BENG": "পাত্রসয়ার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2788,
+    "BLOCK_NAME": "RAIPUR",
+    "BLOCK_NAME_BENG": "রাইপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2789,
+    "BLOCK_NAME": "RANIBUNDH",
+    "BLOCK_NAME_BENG": "রানিবুন্ধ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2790,
+    "BLOCK_NAME": "SALTORA",
+    "BLOCK_NAME_BENG": "সালতোরা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2791,
+    "BLOCK_NAME": "SARENGA",
+    "BLOCK_NAME_BENG": "সারেঙ্গা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2792,
+    "BLOCK_NAME": "SIMLAPAL",
+    "BLOCK_NAME_BENG": "সিমলাপাল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2793,
+    "BLOCK_NAME": "SONAMUKHI",
+    "BLOCK_NAME_BENG": "সোনামুখি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2794,
+    "BLOCK_NAME": "TALDANGRA",
+    "BLOCK_NAME_BENG": "তালডাংরা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 305,
+    "BLOCK_LGD": 2795,
+    "BLOCK_NAME": "VISHNUPUR",
+    "BLOCK_NAME_BENG": "বিষ্ণুপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2796,
+    "BLOCK_NAME": "AUSGRAM-I",
+    "BLOCK_NAME_BENG": "আশুগ্রাম-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2797,
+    "BLOCK_NAME": "AUSGRAM-II",
+    "BLOCK_NAME_BENG": "আশুগ্রাম-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 704,
+    "BLOCK_LGD": 2798,
+    "BLOCK_NAME": "BARABANI",
+    "BLOCK_NAME_BENG": "বারাবনি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2799,
+    "BLOCK_NAME": "BHATAR",
+    "BLOCK_NAME_BENG": "ভাতার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2800,
+    "BLOCK_NAME": "BURDWAN-I",
+    "BLOCK_NAME_BENG": "বর্ধমান-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2801,
+    "BLOCK_NAME": "BURDWAN-II",
+    "BLOCK_NAME_BENG": "বর্ধমান-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 704,
+    "BLOCK_LGD": 2802,
+    "BLOCK_NAME": "FARIDPUR - DURGAPUR",
+    "BLOCK_NAME_BENG": "ফরিদপুর-দুর্গাপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2803,
+    "BLOCK_NAME": "GALSI-I",
+    "BLOCK_NAME_BENG": "গলসি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2804,
+    "BLOCK_NAME": "GALSI-II",
+    "BLOCK_NAME_BENG": "গলসি-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2805,
+    "BLOCK_NAME": "JAMAL PUR",
+    "BLOCK_NAME_BENG": "জামালপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 704,
+    "BLOCK_LGD": 2806,
+    "BLOCK_NAME": "JAMURIA",
+    "BLOCK_NAME_BENG": "জামুরিয়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2807,
+    "BLOCK_NAME": "KALNA II",
+    "BLOCK_NAME_BENG": "কালনা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2808,
+    "BLOCK_NAME": "KALNA-II",
+    "BLOCK_NAME_BENG": "কালনা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 704,
+    "BLOCK_LGD": 2809,
+    "BLOCK_NAME": "KANKSA",
+    "BLOCK_NAME_BENG": "কাঙ্কসা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2810,
+    "BLOCK_NAME": "KATWA-I",
+    "BLOCK_NAME_BENG": "কাটোয়া-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2811,
+    "BLOCK_NAME": "KATWA-II",
+    "BLOCK_NAME_BENG": "কাটোয়া-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2812,
+    "BLOCK_NAME": "KETUGRAM-II",
+    "BLOCK_NAME_BENG": "কেতুগ্রাম-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2813,
+    "BLOCK_NAME": "KETUGRAM-I",
+    "BLOCK_NAME_BENG": "কেতুগ্রাম-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2814,
+    "BLOCK_NAME": "KHANDAGHOSH",
+    "BLOCK_NAME_BENG": "খন্ডঘোশ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2815,
+    "BLOCK_NAME": "MANGOLKOTE",
+    "BLOCK_NAME_BENG": "মঙ্গলকোট",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2816,
+    "BLOCK_NAME": "MANTESWAR",
+    "BLOCK_NAME_BENG": "মন্তেশ্বর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2817,
+    "BLOCK_NAME": "MEMARI-1",
+    "BLOCK_NAME_BENG": "মেমারি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2818,
+    "BLOCK_NAME": "MEMARI-II",
+    "BLOCK_NAME_BENG": "মেমারি-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 704,
+    "BLOCK_LGD": 2819,
+    "BLOCK_NAME": "ONDAL",
+    "BLOCK_NAME_BENG": "ওন্দাল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 704,
+    "BLOCK_LGD": 2820,
+    "BLOCK_NAME": "PANDABESHWAR",
+    "BLOCK_NAME_BENG": "পাণ্ডবেশ্বর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2821,
+    "BLOCK_NAME": "PURBASTHALI-I",
+    "BLOCK_NAME_BENG": "পূর্বস্থলি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2822,
+    "BLOCK_NAME": "PURBASTHALI-II",
+    "BLOCK_NAME_BENG": "পূর্বস্থলি-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2823,
+    "BLOCK_NAME": "RAINA-I",
+    "BLOCK_NAME_BENG": "রাইনা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 306,
+    "BLOCK_LGD": 2824,
+    "BLOCK_NAME": "RAINA-II",
+    "BLOCK_NAME_BENG": "রাইনা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 704,
+    "BLOCK_LGD": 2825,
+    "BLOCK_NAME": "RANIGANJ",
+    "BLOCK_NAME_BENG": "রানিগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 704,
+    "BLOCK_LGD": 2826,
+    "BLOCK_NAME": "SALANPUR",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2827,
+    "BLOCK_NAME": "BOLPUR-SRINIKETAN",
+    "BLOCK_NAME_BENG": "বোলপুর-শ্রীনিকেতন",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2828,
+    "BLOCK_NAME": "DUBRAJPUR",
+    "BLOCK_NAME_BENG": "দুবরাজপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2829,
+    "BLOCK_NAME": "ILLAMBAZAR",
+    "BLOCK_NAME_BENG": "ইল্লামবাজার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2830,
+    "BLOCK_NAME": "KHOYRASOL",
+    "BLOCK_NAME_BENG": "খয়রাশোল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2831,
+    "BLOCK_NAME": "LABPUR",
+    "BLOCK_NAME_BENG": "লাবপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2832,
+    "BLOCK_NAME": "MAYURESWAR-I",
+    "BLOCK_NAME_BENG": "ময়ুরেশ্বর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2833,
+    "BLOCK_NAME": "MAYURESWAR-II",
+    "BLOCK_NAME_BENG": "ময়ুরেশ্বর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2834,
+    "BLOCK_NAME": "MOHAMMAD BAZAR",
+    "BLOCK_NAME_BENG": "মহম্মদ বাজার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2835,
+    "BLOCK_NAME": "MURARAI-I",
+    "BLOCK_NAME_BENG": "মুরারাই-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2836,
+    "BLOCK_NAME": "MURARAI-II",
+    "BLOCK_NAME_BENG": "মুরারাই-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2837,
+    "BLOCK_NAME": "NALHATI-I",
+    "BLOCK_NAME_BENG": "নলহাটি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2838,
+    "BLOCK_NAME": "NALHATI-II",
+    "BLOCK_NAME_BENG": "নলহাটি-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2839,
+    "BLOCK_NAME": "NANOOR",
+    "BLOCK_NAME_BENG": "নানুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2840,
+    "BLOCK_NAME": "RAJNAGAR",
+    "BLOCK_NAME_BENG": "রাজনগর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2841,
+    "BLOCK_NAME": "RAMPURHAT-I",
+    "BLOCK_NAME_BENG": "রামপুরহাট-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2842,
+    "BLOCK_NAME": "RAMPURHAT-II",
+    "BLOCK_NAME_BENG": "রামপুরহাট-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2843,
+    "BLOCK_NAME": "SAINTHIA",
+    "BLOCK_NAME_BENG": "সাঁইথিয়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2844,
+    "BLOCK_NAME": "SURI-I",
+    "BLOCK_NAME_BENG": "সিউড়ি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 307,
+    "BLOCK_LGD": 2845,
+    "BLOCK_NAME": "SURI-II",
+    "BLOCK_NAME_BENG": "সিউড়ি-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2846,
+    "BLOCK_NAME": "COOCH BEHAR II",
+    "BLOCK_NAME_BENG": "কোচবিহার-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2847,
+    "BLOCK_NAME": "COOCH BEHAR-I",
+    "BLOCK_NAME_BENG": "কোচবিহার-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2848,
+    "BLOCK_NAME": "DINHATA-I",
+    "BLOCK_NAME_BENG": "দিনহাটা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2849,
+    "BLOCK_NAME": "DINHATA-II",
+    "BLOCK_NAME_BENG": "দিনহাটা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2850,
+    "BLOCK_NAME": "HALDIBARI",
+    "BLOCK_NAME_BENG": "হলদিবাড়ি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2851,
+    "BLOCK_NAME": "MATHA BHANGA-II",
+    "BLOCK_NAME_BENG": "মাথাভাঙ্গা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2852,
+    "BLOCK_NAME": "MATHABHANGA-I",
+    "BLOCK_NAME_BENG": "মাথাভাঙ্গা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2853,
+    "BLOCK_NAME": "MEKLIGANJ",
+    "BLOCK_NAME_BENG": "মেখেলিগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2854,
+    "BLOCK_NAME": "SITAI",
+    "BLOCK_NAME_BENG": "সিতাই",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2855,
+    "BLOCK_NAME": "SITALKUCHI",
+    "BLOCK_NAME_BENG": "শীতলকুচি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2856,
+    "BLOCK_NAME": "TUFANGANJ-I",
+    "BLOCK_NAME_BENG": "তুফানগঞ্জ-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 308,
+    "BLOCK_LGD": 2857,
+    "BLOCK_NAME": "TUFANGANJ-II",
+    "BLOCK_NAME_BENG": "তুফানগঞ্জ-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2858,
+    "BLOCK_NAME": "DARJEELING PULBAZAR",
+    "BLOCK_NAME_BENG": "দার্জিলিং-পুলবাজার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 702,
+    "BLOCK_LGD": 2859,
+    "BLOCK_NAME": "GARUBATHAN",
+    "BLOCK_NAME_BENG": "গোউরবাথান",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2860,
+    "BLOCK_NAME": "JOREBUNGLOW SUKHIA POKHARI",
+    "BLOCK_NAME_BENG": "জোরবাংলো-সুখিয়াপোখরি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 702,
+    "BLOCK_LGD": 2861,
+    "BLOCK_NAME": "KALIMPONG-I",
+    "BLOCK_NAME_BENG": "কালিম্পং-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 702,
+    "BLOCK_LGD": 2862,
+    "BLOCK_NAME": "KALIMPONG-II",
+    "BLOCK_NAME_BENG": "কালিম্পং-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2863,
+    "BLOCK_NAME": "KHORIBARI",
+    "BLOCK_NAME_BENG": "খড়িবারি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2864,
+    "BLOCK_NAME": "KURSEONG",
+    "BLOCK_NAME_BENG": "কার্শিয়াং",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2865,
+    "BLOCK_NAME": "MATIGARA",
+    "BLOCK_NAME_BENG": "মাটিগাড়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2866,
+    "BLOCK_NAME": "MIRIK",
+    "BLOCK_NAME_BENG": "মিরিক",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2867,
+    "BLOCK_NAME": "NAXALBARI",
+    "BLOCK_NAME_BENG": "নকশালবাড়ি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2868,
+    "BLOCK_NAME": "PHANSIDEWA",
+    "BLOCK_NAME_BENG": "ফাঁসিদেওয়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 309,
+    "BLOCK_LGD": 2869,
+    "BLOCK_NAME": "RANGLI RANGLIOT",
+    "BLOCK_NAME_BENG": "রঙ্গলি-রঙ্গলিয়ট",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 310,
+    "BLOCK_LGD": 2870,
+    "BLOCK_NAME": "BALURGHAT",
+    "BLOCK_NAME_BENG": "বালুরঘাট",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 310,
+    "BLOCK_LGD": 2871,
+    "BLOCK_NAME": "BANSIHARI",
+    "BLOCK_NAME_BENG": "বংশীহারি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 310,
+    "BLOCK_LGD": 2872,
+    "BLOCK_NAME": "GANGARAMPUR",
+    "BLOCK_NAME_BENG": "গঙ্গারামপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 310,
+    "BLOCK_LGD": 2873,
+    "BLOCK_NAME": "HARIRAMPUR",
+    "BLOCK_NAME_BENG": "হরিরামপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 310,
+    "BLOCK_LGD": 2874,
+    "BLOCK_NAME": "HILI",
+    "BLOCK_NAME_BENG": "হিলি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 310,
+    "BLOCK_LGD": 2875,
+    "BLOCK_NAME": "KUMARGANJ",
+    "BLOCK_NAME_BENG": "কুমারগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 310,
+    "BLOCK_LGD": 2876,
+    "BLOCK_NAME": "KUSHMANDI",
+    "BLOCK_NAME_BENG": "কুশমন্ডি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 310,
+    "BLOCK_LGD": 2877,
+    "BLOCK_NAME": "TAPAN",
+    "BLOCK_NAME_BENG": "তপন",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2878,
+    "BLOCK_NAME": "CHOPRA",
+    "BLOCK_NAME_BENG": "চোপড়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2879,
+    "BLOCK_NAME": "GOALPOKHAR II",
+    "BLOCK_NAME_BENG": "গোয়ালপোখর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2880,
+    "BLOCK_NAME": "GOALPOKHAR-I",
+    "BLOCK_NAME_BENG": "গোয়ালপোখর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2881,
+    "BLOCK_NAME": "HEMTABAD",
+    "BLOCK_NAME_BENG": "হেমতাবাদ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2882,
+    "BLOCK_NAME": "ISLAMPUR",
+    "BLOCK_NAME_BENG": "ইসলামপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2883,
+    "BLOCK_NAME": "ITAHAR",
+    "BLOCK_NAME_BENG": "ইটাহার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2884,
+    "BLOCK_NAME": "KALIAGANJ",
+    "BLOCK_NAME_BENG": "কালিয়াগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2885,
+    "BLOCK_NAME": "KARANDIGHI",
+    "BLOCK_NAME_BENG": "করণদীঘি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 311,
+    "BLOCK_LGD": 2886,
+    "BLOCK_NAME": "RAIGANJ",
+    "BLOCK_NAME_BENG": "রাইগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2887,
+    "BLOCK_NAME": "ARAMBAGH",
+    "BLOCK_NAME_BENG": "আরামবাগ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2888,
+    "BLOCK_NAME": "BALAGARH",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2889,
+    "BLOCK_NAME": "CHANDITALA-I",
+    "BLOCK_NAME_BENG": "চণ্ডীতলা- ১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2890,
+    "BLOCK_NAME": "CHANDITALA-II",
+    "BLOCK_NAME_BENG": "চণ্ডীতলা- ২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2891,
+    "BLOCK_NAME": "CHINSURAH-MOGRA",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2892,
+    "BLOCK_NAME": "DHANIAKHALI",
+    "BLOCK_NAME_BENG": "ধনিয়াখালি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2893,
+    "BLOCK_NAME": "GOGHAT-I",
+    "BLOCK_NAME_BENG": "গোঘাট-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2894,
+    "BLOCK_NAME": "GOGHAT-II",
+    "BLOCK_NAME_BENG": "গোঘাট-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2895,
+    "BLOCK_NAME": "HARIPAL",
+    "BLOCK_NAME_BENG": "হরিপাল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2896,
+    "BLOCK_NAME": "JANGIPARA",
+    "BLOCK_NAME_BENG": "জাঙ্গিপারা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2897,
+    "BLOCK_NAME": "KHANAKUL-I",
+    "BLOCK_NAME_BENG": "খানাকুল- ১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2898,
+    "BLOCK_NAME": "KHANAKUL-II",
+    "BLOCK_NAME_BENG": "খানাকুল- ২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2899,
+    "BLOCK_NAME": "PANDUA",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2900,
+    "BLOCK_NAME": "POLBA-DADPUR",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2901,
+    "BLOCK_NAME": "PURSURAH",
+    "BLOCK_NAME_BENG": "পুরশুরা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2902,
+    "BLOCK_NAME": "SINGUR",
+    "BLOCK_NAME_BENG": "সিঙ্গুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2903,
+    "BLOCK_NAME": "SRIRAMPORE-UTTARPARA",
+    "BLOCK_NAME_BENG": "শ্রীরামপুর উত্তরপাড়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 312,
+    "BLOCK_LGD": 2904,
+    "BLOCK_NAME": "TARAKESWAR",
+    "BLOCK_NAME_BENG": "তারকেশ্বর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2905,
+    "BLOCK_NAME": "AMTA-I",
+    "BLOCK_NAME_BENG": "আমতা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2906,
+    "BLOCK_NAME": "AMTA-II",
+    "BLOCK_NAME_BENG": "আমতা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2907,
+    "BLOCK_NAME": "BAGNAN-I",
+    "BLOCK_NAME_BENG": "বাগনান-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2908,
+    "BLOCK_NAME": "BAGNAN-II",
+    "BLOCK_NAME_BENG": "বাগনান-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2909,
+    "BLOCK_NAME": "BALLY-JAGACHA",
+    "BLOCK_NAME_BENG": "বালি-জগাছা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2910,
+    "BLOCK_NAME": "DOMJUR",
+    "BLOCK_NAME_BENG": "ডোমজুড়",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2911,
+    "BLOCK_NAME": "JAGATBALLAVPUR",
+    "BLOCK_NAME_BENG": "জগতবল্লভপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2912,
+    "BLOCK_NAME": "PANCHLA",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2913,
+    "BLOCK_NAME": "SANKRAIL",
+    "BLOCK_NAME_BENG": "সাঁকরাইল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2914,
+    "BLOCK_NAME": "SHYAMPUR-I",
+    "BLOCK_NAME_BENG": "শ্যামপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2915,
+    "BLOCK_NAME": "SHYAMPUR-II",
+    "BLOCK_NAME_BENG": "শ্যামপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2916,
+    "BLOCK_NAME": "UDAYNARAYANPUR",
+    "BLOCK_NAME_BENG": "উদয়নারায়াণপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2917,
+    "BLOCK_NAME": "ULUBERIA-I",
+    "BLOCK_NAME_BENG": "উলুবেড়িয়া-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 313,
+    "BLOCK_LGD": 2918,
+    "BLOCK_NAME": "ULUBERIA-II",
+    "BLOCK_NAME_BENG": "উলুবেড়িয়া-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 664,
+    "BLOCK_LGD": 2919,
+    "BLOCK_NAME": "ALIPURDUAR-I",
+    "BLOCK_NAME_BENG": "আলিপুরদুয়ার-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 664,
+    "BLOCK_LGD": 2920,
+    "BLOCK_NAME": "ALIPURDUAR-II",
+    "BLOCK_NAME_BENG": "আলিপুরদুয়ার-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 2921,
+    "BLOCK_NAME": "DHUPGURI",
+    "BLOCK_NAME_BENG": "ধুপগুড়ি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 664,
+    "BLOCK_LGD": 2922,
+    "BLOCK_NAME": "FALAKATA",
+    "BLOCK_NAME_BENG": "ফালাকাটা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 2923,
+    "BLOCK_NAME": "JALPAIGURI",
+    "BLOCK_NAME_BENG": "জলপাইগুড়ি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 664,
+    "BLOCK_LGD": 2924,
+    "BLOCK_NAME": "KALCHINI",
+    "BLOCK_NAME_BENG": "কালচিনি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 664,
+    "BLOCK_LGD": 2925,
+    "BLOCK_NAME": "KUMARGRAM",
+    "BLOCK_NAME_BENG": "কুমারগ্রাম",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 664,
+    "BLOCK_LGD": 2926,
+    "BLOCK_NAME": "MADARIHAT",
+    "BLOCK_NAME_BENG": "মাদারিহাট",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 2927,
+    "BLOCK_NAME": "MAL",
+    "BLOCK_NAME_BENG": "মাল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 2928,
+    "BLOCK_NAME": "MATIALI",
+    "BLOCK_NAME_BENG": "মেটিয়ালি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 2929,
+    "BLOCK_NAME": "MAYNAGURI",
+    "BLOCK_NAME_BENG": "ময়নাগুড়ি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 2930,
+    "BLOCK_NAME": "NAGRAKATA",
+    "BLOCK_NAME_BENG": "নাগরাকাটা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 2931,
+    "BLOCK_NAME": "RAJGANJ",
+    "BLOCK_NAME_BENG": "রাইগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2932,
+    "BLOCK_NAME": "BAMONGOLA",
+    "BLOCK_NAME_BENG": "বামনগোলা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2933,
+    "BLOCK_NAME": "CHANCHAL-I",
+    "BLOCK_NAME_BENG": "চাঁচল-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2934,
+    "BLOCK_NAME": "CHANCHAL-II",
+    "BLOCK_NAME_BENG": "চাঁচল-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2935,
+    "BLOCK_NAME": "ENGLISH BAZAR",
+    "BLOCK_NAME_BENG": "ইংলিশ বাজার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2936,
+    "BLOCK_NAME": "GAZOLE",
+    "BLOCK_NAME_BENG": "গাজল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2937,
+    "BLOCK_NAME": "HABIBPUR",
+    "BLOCK_NAME_BENG": "হবিবপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2938,
+    "BLOCK_NAME": "HARISHCHANDRAPUR-I",
+    "BLOCK_NAME_BENG": "হরিশচন্দ্রপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2939,
+    "BLOCK_NAME": "HARISHCHANDRAPUR-II",
+    "BLOCK_NAME_BENG": "হরিশচন্দ্রপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2940,
+    "BLOCK_NAME": "KALIACHAK-I",
+    "BLOCK_NAME_BENG": "কালিয়াচক-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2941,
+    "BLOCK_NAME": "KALIACHAK-II",
+    "BLOCK_NAME_BENG": "কালিয়াচক-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2942,
+    "BLOCK_NAME": "KALIACHAK-III",
+    "BLOCK_NAME_BENG": "কালিয়াচক-৩",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2943,
+    "BLOCK_NAME": "MANIKCHAK",
+    "BLOCK_NAME_BENG": "মানিকচক",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2944,
+    "BLOCK_NAME": "OLD MALDA",
+    "BLOCK_NAME_BENG": "ওল্ড মালদা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2945,
+    "BLOCK_NAME": "RATUA-I",
+    "BLOCK_NAME_BENG": "রাতুয়া-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 316,
+    "BLOCK_LGD": 2946,
+    "BLOCK_NAME": "RATUA-II",
+    "BLOCK_NAME_BENG": "রাতুয়া-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2947,
+    "BLOCK_NAME": "BHAGWANPUR-I",
+    "BLOCK_NAME_BENG": "ভগবানপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2948,
+    "BLOCK_NAME": "BHAGWANPUR-II",
+    "BLOCK_NAME_BENG": "ভগবানপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2949,
+    "BLOCK_NAME": "CHANDIPUR",
+    "BLOCK_NAME_BENG": "চাঁন্দিপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2950,
+    "BLOCK_NAME": "CONTAI-I",
+    "BLOCK_NAME_BENG": "কাঁথি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2951,
+    "BLOCK_NAME": "CONTAI-III",
+    "BLOCK_NAME_BENG": "কাঁথি-৩",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2952,
+    "BLOCK_NAME": "DESHAPRAN",
+    "BLOCK_NAME_BENG": "দেশপ্রান",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2953,
+    "BLOCK_NAME": "EGRA-I",
+    "BLOCK_NAME_BENG": "এগরা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2954,
+    "BLOCK_NAME": "EGRA-II",
+    "BLOCK_NAME_BENG": "এগরা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2955,
+    "BLOCK_NAME": "HALDIA",
+    "BLOCK_NAME_BENG": "হলদিয়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2956,
+    "BLOCK_NAME": "KHEJURI-I",
+    "BLOCK_NAME_BENG": "খেজুরি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2957,
+    "BLOCK_NAME": "KHEJURI-II",
+    "BLOCK_NAME_BENG": "খেজুরি-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2958,
+    "BLOCK_NAME": "KOLAGHAT",
+    "BLOCK_NAME_BENG": "কোলাঘাট",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2959,
+    "BLOCK_NAME": "MAHISHADAL",
+    "BLOCK_NAME_BENG": "মহিষাদল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2960,
+    "BLOCK_NAME": "MOYNA",
+    "BLOCK_NAME_BENG": "ময়না",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2961,
+    "BLOCK_NAME": "NANDAKUMAR",
+    "BLOCK_NAME_BENG": "নন্দকুমার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2962,
+    "BLOCK_NAME": "NANDIGRAM-I",
+    "BLOCK_NAME_BENG": "নন্দীগ্রাম-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2963,
+    "BLOCK_NAME": "NANDIGRAM-II",
+    "BLOCK_NAME_BENG": "নন্দীগ্রাম-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2964,
+    "BLOCK_NAME": "PANSKURA-I",
+    "BLOCK_NAME_BENG": "পাঁশকুড়া-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2965,
+    "BLOCK_NAME": "PATASHPUR-I",
+    "BLOCK_NAME_BENG": "পটাশপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2966,
+    "BLOCK_NAME": "PATASHPUR-II",
+    "BLOCK_NAME_BENG": "পটাশপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2967,
+    "BLOCK_NAME": "RAMNAGAR-I",
+    "BLOCK_NAME_BENG": "রামনগর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2968,
+    "BLOCK_NAME": "RAMNAGAR-II",
+    "BLOCK_NAME_BENG": "রামনগর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2969,
+    "BLOCK_NAME": "SHAHID MATANGINI",
+    "BLOCK_NAME_BENG": "শহিদ মাতঙ্গিনি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2970,
+    "BLOCK_NAME": "SUTAHATA",
+    "BLOCK_NAME_BENG": "সুতাহাটা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 317,
+    "BLOCK_LGD": 2971,
+    "BLOCK_NAME": "TAMLUK",
+    "BLOCK_NAME_BENG": "তমলুক",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 703,
+    "BLOCK_LGD": 2972,
+    "BLOCK_NAME": "BINPUR-I",
+    "BLOCK_NAME_BENG": "বিনপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 703,
+    "BLOCK_LGD": 2973,
+    "BLOCK_NAME": "BINPUR-II",
+    "BLOCK_NAME_BENG": "বিনপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2974,
+    "BLOCK_NAME": "CHANDRAKONA-I",
+    "BLOCK_NAME_BENG": "চন্দ্রকোনা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2975,
+    "BLOCK_NAME": "CHANDRAKONA-II",
+    "BLOCK_NAME_BENG": "চন্দ্রকোনা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2976,
+    "BLOCK_NAME": "DANTAN-I",
+    "BLOCK_NAME_BENG": "দাঁতন-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2977,
+    "BLOCK_NAME": "DANTAN-II",
+    "BLOCK_NAME_BENG": "দাঁতন-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2978,
+    "BLOCK_NAME": "DASPUR-I",
+    "BLOCK_NAME_BENG": "দাসপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2979,
+    "BLOCK_NAME": "DASPUR-II",
+    "BLOCK_NAME_BENG": "দাসপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2980,
+    "BLOCK_NAME": "DEBRA",
+    "BLOCK_NAME_BENG": "ডেবরা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2981,
+    "BLOCK_NAME": "GARBETA-I",
+    "BLOCK_NAME_BENG": "গড়বেতা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2982,
+    "BLOCK_NAME": "GARBETA-II",
+    "BLOCK_NAME_BENG": "গড়বেতা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2983,
+    "BLOCK_NAME": "GARBETA-III",
+    "BLOCK_NAME_BENG": "গড়বেতা-৩",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2984,
+    "BLOCK_NAME": "GHATAL",
+    "BLOCK_NAME_BENG": "ঘাটাল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 703,
+    "BLOCK_LGD": 2985,
+    "BLOCK_NAME": "GOPIBALLAV PUR -II",
+    "BLOCK_NAME_BENG": "গোপীবল্লভপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 703,
+    "BLOCK_LGD": 2986,
+    "BLOCK_NAME": "GOPIBALLAVPUR-I",
+    "BLOCK_NAME_BENG": "গোপীবল্লভপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 703,
+    "BLOCK_LGD": 2987,
+    "BLOCK_NAME": "JAMBANI",
+    "BLOCK_NAME_BENG": "জামবনি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 703,
+    "BLOCK_LGD": 2988,
+    "BLOCK_NAME": "JHARGRAM",
+    "BLOCK_NAME_BENG": "ঝাড়গ্রাম",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2989,
+    "BLOCK_NAME": "KESHIARY",
+    "BLOCK_NAME_BENG": "কেশিয়ারি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2990,
+    "BLOCK_NAME": "KESHPUR",
+    "BLOCK_NAME_BENG": "কেশপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2991,
+    "BLOCK_NAME": "KHARAGPUR-I",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2992,
+    "BLOCK_NAME": "KHARAGPUR-II",
+    "BLOCK_NAME_BENG": "খড়গপূর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2993,
+    "BLOCK_NAME": "MIDNAPORE",
+    "BLOCK_NAME_BENG": "মেদিনীপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2994,
+    "BLOCK_NAME": "MOHANPUR",
+    "BLOCK_NAME_BENG": "মোহনপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2995,
+    "BLOCK_NAME": "NARAYANGARH",
+    "BLOCK_NAME_BENG": "নারায়াণগড়",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 703,
+    "BLOCK_LGD": 2996,
+    "BLOCK_NAME": "NAYAGRAM",
+    "BLOCK_NAME_BENG": "নয়াগ্রাম",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2997,
+    "BLOCK_NAME": "PINGLA",
+    "BLOCK_NAME_BENG": "পিংলা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2998,
+    "BLOCK_NAME": "SABANG",
+    "BLOCK_NAME_BENG": "সবং",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 318,
+    "BLOCK_LGD": 2999,
+    "BLOCK_NAME": "SALBANI",
+    "BLOCK_NAME_BENG": "শালবনি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 703,
+    "BLOCK_LGD": 3000,
+    "BLOCK_NAME": "SANKRAIL",
+    "BLOCK_NAME_BENG": "সাঁকরাইল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3001,
+    "BLOCK_NAME": "BELDANGA-I",
+    "BLOCK_NAME_BENG": "বেলডাঙ্গা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3002,
+    "BLOCK_NAME": "BELDANGA-II",
+    "BLOCK_NAME_BENG": "বেলডাঙ্গা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3003,
+    "BLOCK_NAME": "BERHAMPORE",
+    "BLOCK_NAME_BENG": "বহরমপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3004,
+    "BLOCK_NAME": "BHAGAWANGOLA-II",
+    "BLOCK_NAME_BENG": "ভগবানগোলা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3005,
+    "BLOCK_NAME": "BHAGOBANGOLA-I",
+    "BLOCK_NAME_BENG": "ভগবানগোলা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3006,
+    "BLOCK_NAME": "BHARATPUR-I",
+    "BLOCK_NAME_BENG": "ভারতপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3007,
+    "BLOCK_NAME": "BHARATPUR-II",
+    "BLOCK_NAME_BENG": "ভারতপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3008,
+    "BLOCK_NAME": "BURWAN",
+    "BLOCK_NAME_BENG": "বারোয়ান",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3009,
+    "BLOCK_NAME": "DOMKAL",
+    "BLOCK_NAME_BENG": "ডোমকল",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3010,
+    "BLOCK_NAME": "FARAKKA",
+    "BLOCK_NAME_BENG": "ফারাক্কা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3011,
+    "BLOCK_NAME": "HARIHARPARA",
+    "BLOCK_NAME_BENG": "হরিহরপাড়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3012,
+    "BLOCK_NAME": "JALANGI",
+    "BLOCK_NAME_BENG": "জলঙ্গি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3013,
+    "BLOCK_NAME": "KANDI",
+    "BLOCK_NAME_BENG": "কান্দি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3014,
+    "BLOCK_NAME": "KHARGRAM",
+    "BLOCK_NAME_BENG": "খড়গ্রাম",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3015,
+    "BLOCK_NAME": "LALGOLA",
+    "BLOCK_NAME_BENG": "লালগোলা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3016,
+    "BLOCK_NAME": "MURSHIDABAD-JIAGUNJ",
+    "BLOCK_NAME_BENG": "মুর্শিদাবাদ-জিয়াগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3017,
+    "BLOCK_NAME": "NABAGRAM",
+    "BLOCK_NAME_BENG": "নবগ্রাম",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3018,
+    "BLOCK_NAME": "NAWDA",
+    "BLOCK_NAME_BENG": "নওদা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3019,
+    "BLOCK_NAME": "RAGHUNATHGANJ-I",
+    "BLOCK_NAME_BENG": "রঘুনাথগঞ্জ-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3020,
+    "BLOCK_NAME": "RAGHUNATHGANJ-II",
+    "BLOCK_NAME_BENG": "রঘুনাথগঞ্জ-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3021,
+    "BLOCK_NAME": "RANINAGAR-I",
+    "BLOCK_NAME_BENG": "রানিনগর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3022,
+    "BLOCK_NAME": "RANINAGAR-II",
+    "BLOCK_NAME_BENG": "রানিনগর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3023,
+    "BLOCK_NAME": "SAGARDIGHI",
+    "BLOCK_NAME_BENG": "সাগরদীঘি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3024,
+    "BLOCK_NAME": "SAMSHERGANJ",
+    "BLOCK_NAME_BENG": "সামশেরগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3025,
+    "BLOCK_NAME": "SUTI-I",
+    "BLOCK_NAME_BENG": "সুতি-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 319,
+    "BLOCK_LGD": 3026,
+    "BLOCK_NAME": "SUTI-II",
+    "BLOCK_NAME_BENG": "সুতি-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3027,
+    "BLOCK_NAME": "CHAKDAH",
+    "BLOCK_NAME_BENG": "চাকদা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3028,
+    "BLOCK_NAME": "CHAPRA",
+    "BLOCK_NAME_BENG": "চোপরা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3029,
+    "BLOCK_NAME": "HANSKHALI",
+    "BLOCK_NAME_BENG": "হাঁসখালি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3030,
+    "BLOCK_NAME": "HARINGHATA",
+    "BLOCK_NAME_BENG": "হরিণঘাটা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3031,
+    "BLOCK_NAME": "KALIGANJ",
+    "BLOCK_NAME_BENG": "কালীগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3032,
+    "BLOCK_NAME": "KARIMPUR-1",
+    "BLOCK_NAME_BENG": "করিমপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3033,
+    "BLOCK_NAME": "KARIMPUR-II",
+    "BLOCK_NAME_BENG": "করিমপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3034,
+    "BLOCK_NAME": "KRISHNAGANJ",
+    "BLOCK_NAME_BENG": "কৃষ্ণগঞ্জ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3035,
+    "BLOCK_NAME": "KRISHNAGAR-I",
+    "BLOCK_NAME_BENG": "কৃষ্ণনগর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3036,
+    "BLOCK_NAME": "KRISHNAGAR-II",
+    "BLOCK_NAME_BENG": "কৃষ্ণনগর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3037,
+    "BLOCK_NAME": "NABADWIP",
+    "BLOCK_NAME_BENG": "নবদ্বীপ",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3038,
+    "BLOCK_NAME": "NAKASHIPARA",
+    "BLOCK_NAME_BENG": "নাকাশিপাড়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3039,
+    "BLOCK_NAME": "RANAGHAT-I",
+    "BLOCK_NAME_BENG": "রানাঘাট-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3040,
+    "BLOCK_NAME": "RANAGHAT-II",
+    "BLOCK_NAME_BENG": "রানাঘাট-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3041,
+    "BLOCK_NAME": "SANTIPUR",
+    "BLOCK_NAME_BENG": "শান্তিপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3042,
+    "BLOCK_NAME": "TEHATTA-I",
+    "BLOCK_NAME_BENG": "তেহট্ট-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 3043,
+    "BLOCK_NAME": "TEHATTA-II",
+    "BLOCK_NAME_BENG": "তেহট্ট-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3044,
+    "BLOCK_NAME": "ARSHA",
+    "BLOCK_NAME_BENG": "আরশা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3045,
+    "BLOCK_NAME": "BAGMUNDI",
+    "BLOCK_NAME_BENG": "বাগ্মুন্ডি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3046,
+    "BLOCK_NAME": "BALARAMPUR",
+    "BLOCK_NAME_BENG": "বলরামপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3047,
+    "BLOCK_NAME": "BARABAZAR",
+    "BLOCK_NAME_BENG": "বড়বাজার",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3048,
+    "BLOCK_NAME": "BUNDWAN",
+    "BLOCK_NAME_BENG": "বান্দোয়ান",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3049,
+    "BLOCK_NAME": "HURA",
+    "BLOCK_NAME_BENG": "হুরা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3050,
+    "BLOCK_NAME": "JAIPUR",
+    "BLOCK_NAME_BENG": "জয়পুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3051,
+    "BLOCK_NAME": "JHALDA-I",
+    "BLOCK_NAME_BENG": "ঝালদা-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3052,
+    "BLOCK_NAME": "JHALDA-II",
+    "BLOCK_NAME_BENG": "ঝালদা-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3053,
+    "BLOCK_NAME": "KASHIPUR",
+    "BLOCK_NAME_BENG": "কাশিপুর",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3054,
+    "BLOCK_NAME": "MANBAZAR-I",
+    "BLOCK_NAME_BENG": "মানবাজার-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3055,
+    "BLOCK_NAME": "MANBAZAR-II",
+    "BLOCK_NAME_BENG": "মানবাজার-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3056,
+    "BLOCK_NAME": "NETURIA",
+    "BLOCK_NAME_BENG": "নেতুরিয়া",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3057,
+    "BLOCK_NAME": "PARA",
+    "BLOCK_NAME_BENG": "পারা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3058,
+    "BLOCK_NAME": "PUNCHA",
+    "BLOCK_NAME_BENG": "পুঞ্চা",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3059,
+    "BLOCK_NAME": "PURULIA-I",
+    "BLOCK_NAME_BENG": "পুরুলিয়া-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3060,
+    "BLOCK_NAME": "PURULIA-II",
+    "BLOCK_NAME_BENG": "পুরুলিয়া-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3061,
+    "BLOCK_NAME": "RAGHUNATH PUR-I",
+    "BLOCK_NAME_BENG": "রঘুনাথপুর-১",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3062,
+    "BLOCK_NAME": "RAGHUNATHPUR-II",
+    "BLOCK_NAME_BENG": "রঘুনাথপুর-২",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 321,
+    "BLOCK_LGD": 3063,
+    "BLOCK_NAME": "SANTURI",
+    "BLOCK_NAME_BENG": "সান্তুরি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 320,
+    "BLOCK_LGD": 7115,
+    "BLOCK_NAME": "KALYANI",
+    "BLOCK_NAME_BENG": "কল্যাণি",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 702,
+    "BLOCK_LGD": 7355,
+    "BLOCK_NAME": "Pedong",
+    "BLOCK_NAME_BENG": "NULL",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 7483,
+    "BLOCK_NAME": "BANARHAT",
+    "BLOCK_NAME_BENG": "বানরহাট",
+    "SUB_DIV_CODE": "NULL"
+  },
+  {
+    "DIST_LGD": 314,
+    "BLOCK_LGD": 7484,
+    "BLOCK_NAME": "KRANTI",
+    "BLOCK_NAME_BENG": "ক্রান্তি",
+    "SUB_DIV_CODE": "NULL"
+  }
+]

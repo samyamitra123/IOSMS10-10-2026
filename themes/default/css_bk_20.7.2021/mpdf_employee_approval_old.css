@@ -1,0 +1,29 @@
+body {
+	font-size: 20px;
+}
+table{
+	border-collapse:collapse;
+}
+table, td, th{
+	/*border:1px solid black;*/
+	padding:5px;
+	width:250px;
+}
+table .heading{
+	background-color: #666;
+	color: #FFF;
+	padding:5px;
+}
+.colgray{
+	
+	background-color: #EEE;
+}
+.statusn{
+	color: #F20000;
+	font-size: 18px;
+}
+.statusf{
+	color: green;
+	font-size: 18px;
+}
+

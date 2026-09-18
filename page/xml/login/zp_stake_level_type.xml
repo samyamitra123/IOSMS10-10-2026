@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container>
+
+  <level_type>
+    <type>2</type>
+    <name>State Level User</name>
+  </level_type>
+   <level_type>
+    <type>20</type>
+    <name>District Level User</name>
+  </level_type>
+  
+</container>

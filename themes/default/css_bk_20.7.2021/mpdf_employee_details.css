@@ -1,0 +1,96 @@
+body {
+
+}
+.logo{
+	text-align: center;
+}
+
+/*header*/
+.he1{
+	width: 100px;
+	vertical-align: top;
+
+}
+.he2{
+	text-align: center;
+	width: 480px;
+}
+.he3{
+	width: 100px;
+	vertical-align: top;
+	text-align: right;
+}
+.department{
+	font-size: 11px;
+	margin: 0px;
+	padding:0px;
+}
+.school{
+	color: #008200;
+	font-size: 24px;
+}
+.location{
+	font-size: 12px;
+}
+/*Segment*/
+.segment{
+	
+}
+.segment h4{
+	background-color: #4BB1CF;
+	color: #FFF;
+	text-align: center;
+}
+.segment h5{
+	margin: 0px;
+	padding: 0px;
+	text-transform: uppercase;
+}
+.segment table{
+	font-size: 11px;
+	vertical-align: bottom;
+}
+.segment table .col1{
+	color: #1F6377;
+	width: 225px;
+	font-weight: bold;
+	font-family: "Arial Narrow";
+	/*text-align: right;*/
+	font-style: italic;
+}
+ .segment table .col3{
+	color: #1F6377;
+	width: 156px;
+	font-weight: bold;
+	font-family: "Arial Narrow";
+	/*text-align: right;*/
+	font-style: italic;
+}
+/*.segment table {
+	border-collapse: collapse;
+}
+.segment table, .segment td, .segment th {
+	border: 1px solid black;
+}*/
+
+
+/*Color*/
+.bg_red{
+	background-color: #f00;
+}
+.bg_green{
+	background-color: #f00;
+}
+
+.bg_blue{
+	background-color: #f00;
+}
+
+.bg_orange{
+	background-color: #f00;
+}
+
+.bg_gray{
+	background-color: #eee;
+}
+

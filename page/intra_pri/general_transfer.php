@@ -1,0 +1,1763 @@
+	<?php
+	session_start();
+	error_reporting(0);
+	$time_token=time();
+	$_SESSION['security_token']=$time_token;
+	$enc_token=md5('369'.$time_token);
+	
+	header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+	header("Pragma: no-cache");
+	
+	
+	error_reporting(0);
+	//ob_start();
+	require_once '../../includes/config/config.php';
+	require_once '../../includes/config/database.config.php';
+	require_once '../../includes/library/database.class.php';
+	require_once '../../includes/library/cryptography.class.php';
+	
+	
+	$blockId = ($_SESSION['user_info']['stake_level'] == 'BLOCK')?(int) $_SESSION['user_info']['stake_user_code']:0;
+	//print_r($blockId);    exit;
+	$crypto=new cryptography();
+	
+	   $stake_level_district=$crypto->decode($_GET['dis'],4); 
+	   //$_SESSION['application_id'] = 'ID/2301/TRANSFER WITHIN DISTRICT/000632';
+	   //print($stake_level_district); exit;
+	//var_dump($_SESSION);
+	//print_r($_SESSION); exit;
+	/*if(! isset($_SESSION['application_id']))
+	  {
+	  	$Query ="SELECT application_id from intra_pri_district_transfer WHERE stake_user_code=".$_SESSION['stake_user_code'];
+
+	  }*/ 
+	?>
+	<style>
+.school table
+	{
+		border-collapse:collapse;
+		background-color: #FFFFFF;
+		font-family: "calibri";
+	}
+.school table, .school td, .school th
+	{
+		/*border:1px solid #fff;*/
+		padding: 4px;
+		text-align:center;
+	}
+	
+.school table th{
+		background-color: #3E9B96;
+		border:1px solid #fff;
+		color: #fff;
+		padding: 6px;
+		text-align:center;
+	}
+.school table{
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		overflow: hidden;
+		font-size: 14px;
+	}
+.school{
+	background-color: #FFFFFF;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	padding: 10px;
+	
+}
+.school .title h2{
+	color: #FFF;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	background-color: #0D8BBD;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+.school .action .ui-widget{
+	font-size: 11px;
+}
+.school .action{
+	text-align: center;
+}
+.school .action .ui-button .ui-button-text{
+	padding: 5px 10px;
+}
+
+</style>
+	<style>
+	.modal-body{
+	font-size: 10px;
+	}
+	
+	</style>
+	
+	<meta charset="UTF-8">
+	
+	
+	
+	<!--<body>-->
+	<?php
+	
+	ob_start();
+	
+	//------------------------------ PAGE VARIABLES --------------------------------------------------------------------------------
+	
+	//Page variables
+	$common['title'] = "Profile Form| PRD | Govt. of West Bengal ";
+	
+	
+	
+	//------------------------------------------------------- HEADER --------------------------------------------------------------
+	require '../../page/layout/header.php';
+	//---------------------------------- MENU -------------------------------------------------------------------------------------
+	require '../../page/layout/menu.php';
+	
+	
+	?>
+	<script>
+    	$(document).ready(function(){
+		  $( "tr:odd" ).css( "background-color", "#CCE6FF" );
+		  $( "tr:even" ).css( "background-color", "#DDF7FF" );
+		  //$( ".modal fade in" ).css( "height", "1000px" );
+		});
+    </script>
+	
+	<?php
+	function code_gp($val)
+	{
+	
+	//echo 222; 
+	$db=new database();
+	
+	$arr =$db->fetch_table("SELECT gp_id_pk, gp_name  FROM prd_location_master_gp WHERE gp_id_pk='".$val."'");
+	return $arr[0]['gp_name'];																	
+	
+	}
+	
+	
+	function code_ps($val)
+	{
+	
+	//echo 222; 
+	$db=new database();
+	
+	$arr =$db->fetch_table("SELECT ps_id_pk,ps_name FROM prd_location_master_panchayat_samiti WHERE ps_id_pk ='".$val."'");
+	return $arr[0]['ps_name'];																	
+	
+	}
+	
+	function code_district($val)
+	{
+	
+	//echo 222; 
+	$db=new database();
+	
+	$arr =$db->fetch_table("SELECT district_id_pk ,district_name  FROM prd_location_master_district WHERE district_id_pk ='".$val."'");
+	return $arr[0]['district_name'];																	
+	
+	}
+	
+	function code_block($val)
+	{
+	
+	//echo 222; 
+	$db=new database();
+	
+	$arr =$db->fetch_table("SELECT block_id_pk,block_name FROM prd_location_master_block WHERE block_id_pk ='".$val."'");
+	return $arr[0]['block_name'];																	
+	
+	}
+	
+	function fun_d($val)
+	{
+	
+	//echo 222; 
+	$db=new database();
+	
+	$arr =$db->fetch_table("SELECT district_id_pk ,district_name  FROM prd_location_master_district WHERE district_code ='".$val."'");
+	return $arr[0]['district_id_pk'];																	
+	
+	}
+	
+	function fun_b($val)
+	{
+	
+	//echo 222; 
+	$db=new database();
+	
+	$arr =$db->fetch_table("SELECT block_id_pk,block_name FROM prd_location_master_block WHERE block_code ='".$val."'");
+	return $arr[0]['block_id_pk'];																	
+	
+	}
+	
+	function fun_master($val)
+	{
+	
+	//echo 222; 
+	$db=new database();
+	
+	$arr =$db->fetch_table("SELECT description FROM prd_dise_code_master WHERE code ='".$val."'");
+	return $arr[0]['description'];																	
+	
+	}
+	
+	function fun_master_zp($val)
+	{
+	
+	//echo 222; 
+	$db=new database();
+	
+	$arr =$db->fetch_table("SELECT designation_name FROM zpemp_emp_desig_master WHERE designation_id='".$val."'");
+	return $arr[0]['designation_name'];																	
+	
+	}
+	
+	
+	?>
+	<style>
+	.form-horizontal .control-label {
+	text-align:left;
+	}
+	</style>
+	<script>
+	
+	$(function() {
+	$( "#notice_date" ).datepicker({
+	changeMonth: true,
+	changeYear: true,
+	yearRange: "-100:+0",
+	dateFormat: 'dd-mm-yy',
+	//minDate:dateToday	 
+	});
+	});
+	
+	</script>
+	
+	<div class="content">
+	<?php require 'common_back_btns_intra_pri.php'; ?>
+    
+    <style>
+h1 {
+display: block;
+font-size: 2em;
+-webkit-margin-before: 0.67em;
+-webkit-margin-after: 0.67em;
+-webkit-margin-start: 0px;
+-webkit-margin-end: 0px;
+font-weight: bold;
+}
+</style>
+	<div class="welcome_msg">
+	<?php
+	//echo 33;die;
+	$db = new database();
+	$officer_name = $db->fetch_table(" SELECT officer_name FROM intra_pri_master WHERE mobile_no = '".$_SESSION['user_info']['stake_user_mob']."' ");
+	
+	?>
+	<h2><b>WELCOME TO <?php echo $_SESSION['user_info']['stake_level']; ?> LOGIN</b></h2>
+	<h3> <?php echo $officer_name[0]['officer_name']; ?></h3>
+	</div>
+	<!-- Latest compiled and minified JavaScript -->
+	<div class="row" id="cont">
+	<div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad">
+	<div class="col-sm-12" style="width:98%; padding-left:2%">
+	<h1 class="heading">Transfer & Posting</h1>
+	<div class="border"></div>
+	</br>
+	<strong style="color:#E93437;margin-left:25%"><noscript>This Form Is Blocked. Enable Javascript In Your Browser To View The Form.</noscript></strong>
+	<div id="form_show">
+	
+	<?php 
+	
+	$user=$_SESSION['user_info']['stake_user_code'];
+	
+	
+	 $check=substr($user,0,6);
+	
+	 $c=substr($check,-2);
+	
+	if($c=='DP')
+	{
+		 $a=substr($user,0,4); 
+		
+		 $id_fk=fun_d($a); 
+		 
+		 $name=code_district($id_fk);
+	}
+
+	else
+	{
+		$a=substr($user,0,7); 
+		
+		 $id_fk=fun_b($a);
+		  $name=code_block($id_fk);
+	} 
+	 if($stake_level_district=='ID')
+	{
+		$f='40';
+	$proposal="PROPOSAL FOR GENERAL TRANSFER AND POSTING I.R.O ".$name."";
+	}
+	 if($stake_level_district=='D')
+	{
+		$f='41';
+		//$f_application='42';
+		//$f_assets='43';
+	$proposal="PROPOSAL FOR GENERAL TRANSFER AND POSTING I.R.O ".$name."";
+	}
+	/*echo (" SELECT * FROM intra_pri_district_transfer WHERE from_status in('1','2') and
+	stack_user = '".$user."' and district_level='".$stake_level_district."' and  status='0' order by emp_first_name");die;*/
+	$data = $db->fetch_table(" SELECT * FROM intra_pri_district_transfer WHERE from_status in('1','2') and
+	stack_user = '".$user."' and district_level='".$stake_level_district."' and  status='0' order by emp_first_name");
+	//var_dump($emp_id_detail_ocon);
+	
+	$gp_id_fk=$data[0]['pre_gp_id_fk'];
+    $ps_id_fk=$data[0]['pre_ps_id_fk'];
+    $block_id_fk=$data[0]['pre_block_id_fk'];
+	//$emp_join_prsnt_post_date=$data[0]['emp_join_prsnt_post_date'];
+	$proceding=$data[0]['proceding']; 
+	
+	
+	
+	$district_level=$data[0]['district_level'];
+	
+	
+	
+	//$district_id_fk=$data[0]['district_id_fk'];
+	/*$ps_code=$data[0]['tran_ps_code'];
+	 $block_id_fk=$data[0]['tran_block_id_fk']; 
+	$gp_code=$data[0]['tran_gp_code'];*/
+	
+	 
+	
+	
+	?>
+    
+    
+    
+    <?
+    
+    if($_SESSION['msg']){
+    echo $_SESSION['msg'];
+    
+    unset($_SESSION['msg']);
+    
+    }
+    ?>  
+    
+    
+  
+    
+    <form class="form-horizontal" id="first_form" method="post" action="general_transfer_submit.php" onsubmit="return valid_code();" enctype="multipart/form-data">
+    
+    <input type="hidden" name="sec_tok" id="sec_tok" value="<?=$enc_token?>" />
+     <input type="hidden" name="dis" id="dis" value="<?=$crypto->encode($stake_level_district,4);?>" />
+     <input type="hidden" name="f" id="f" value="<?=$crypto->encode($f,4);?>" />
+   
+   
+    
+    <input type="hidden" name="dis_stack" id="dis_stack" value="<?=$crypto->encode($stake_level_district,4);?>" />
+    <input type="hidden" name="pre_district_id_fk" id="pre_district_id_fk" value="<?=$crypto->encode($id_fk,4);?>" />
+
+     
+     <div class="row mb-3">
+    <label for="inputEmail3" class="col-sm-2 control-label">Proposal Name<span class="star_color">*</span></label>
+    <div class="col-sm-6">
+    <input type="text" class="form-control upper_case" id="proposal"  name="proposal"  readonly="readonly" placeholder="proposal" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');"  autocomplete="off" value="<?= $proposal ?>">
+    </div></div>
+    
+  
+    
+    <?php if($stake_level_district=='ID')
+	{?>
+ <div class="row mb-3">
+    
+        
+        <?php     
+       // $db= new database();
+       /* $block=$db->fetch_table("select block_name,block_code,block_name from prd_location_master_block 
+        Where district_id_fk='21' order by block_name");*/?>
+        <label for="inputPassword3" class="col-sm-1 control-label">Transfer GP/PS Employee: <span class="star_color">*</span></label>
+        <div class="col-sm-2">
+        <select class="form-control upper_case" name="emp_stack" id="emp_stack"onchange="show_employee_stack_t(this.value)">
+        <option value="">-Please Select-</option>
+        
+        <option value="GP">GP EMPLOYEE</option>
+        <option value="PS"> PS EMPLOYEE</option>
+        
+        </select>
+        </div>
+        </div>
+        <?php }?>
+         <?php if($stake_level_district=='D')
+	{?>
+        <div class="row mb-3">
+    
+        
+        <?php     
+       // $db= new database();
+       /* $block=$db->fetch_table("select block_name,block_code,block_name from prd_location_master_block 
+        Where district_id_fk='21' order by block_name");*/?>
+        <label for="inputPassword3" class="col-sm-1 control-label">Transfer GP/PS/ZP Employee: <span class="star_color">*</span></label>
+        <div class="col-sm-2">
+        <select class="form-control upper_case" name="emp_stack" id="emp_stack" onchange="show_employee_stack(this.value)">
+        <option value="">-Please Select-</option>
+        
+        <option value="GP">GP EMPLOYEE</option>
+        <option value="PS"> PS EMPLOYEE</option>
+        <option value="ZP"> ZP EMPLOYEE</option>
+        
+        </select>
+        </div>
+        </div>
+        
+          <?php }?>
+        <?php if($blockId == 0): ?>  
+        <div class="row mb-3">
+       
+			<?php 
+			// Subikar need to work 
+            
+            $db= new database();
+            $block=$db->fetch_table("select block_id_pk,block_name,block_code,block_name from prd_location_master_block 
+            Where district_id_fk='".$id_fk."' order by block_name");
+
+            ?>
+            <label for="inputPassword3" class="col-sm-1 control-label" id="block_show" style="display:none">BLOCK Name Sub: <span class="star_color">*</span></label>
+            <div class="col-sm-2">
+                <select class="form-control upper_case" name="block" id="block"  style="display:none"onchange="show_gp(this.value,block)">
+                <option value="">-Please Select-</option>
+                <?php
+                
+                foreach($block as $key)
+                {
+                
+                ?>
+                <option value="<?php echo $crypto->encode($key['block_id_pk'],4)?>"><?php echo $key['block_name']; ?></option>
+                <?php
+                }
+                ?>
+                </select>
+                </div>
+                
+                
+               </div>
+            <?php else: 
+                $Query = "SELECT block_id_pk from prd_location_master_block WHERE block_code='".$blockId."'";
+                $blockData = $db->fetch_table($Query);
+                $blockIdpk = $blockData[0]['block_id_pk'];
+            ?>
+            	<input type="hidden" name="block" id="block" value="<?php echo $crypto->encode($blockIdpk,4); ?>">
+            <?php endif; ?>    
+                
+            <?php 
+              if($blockId > 0):
+                  $Query = "SELECT lmg.* from prd_location_master_gp as lmg 
+                            LEFT JOIN prd_location_master_block as lmb ON lmg.block_id_fk = lmb.block_id_pk WHERE lmb.block_code ='".$blockId."'";
+                  $gpData = $db->fetch_table($Query);
+              endif;
+            ?>
+            <div class="row mb-3">
+            
+            
+            <label for="inputPassword3" class="col-sm-1 control-label" id="gp_show" style="display:none">GP Name: <span class="star_color">*</span></label>
+            <div class="col-sm-2">
+                <select class="form-control upper_case" name="gp_code" id="gp_code" style="display:none" onchange="show_employee(this.value,'<?php echo $crypto->encode("GP",4); ?>')">
+                 <?php if(count($gpData) > 0): ?>
+                 	<option value="">Select Gram Panchayat</option>
+                 	<?php foreach($gpData as $item):?>
+                 		<option value="<?php echo $crypto->encode($item['gp_id_pk'],4); ?>"><?php echo $item['gp_name']; ?></option>
+                 	<?php endforeach; ?>
+                 <?php endif; ?>
+                
+                
+                </select>
+            </div>
+            </div>
+            
+             <div class="row mb-3">
+            <label for="inputPassword3" class="col-sm-1 control-label" id="employee_show" style="display:none">Employee Name: <span class="star_color">*</span></label>
+            <div class="col-sm-2">
+                <select class="form-control upper_case" name="employee_id" id="employee_id" style="display:none">
+                
+                
+                
+                </select>
+            </div>
+            
+ 
+      
+  </div>
+  <div class="row mb-3">
+  
+           <?php     
+            $db= new database();
+			//echo $id_fk;exit;
+			if($blockId == 0)
+	            $block=$db->fetch_table("select ps_id_pk,ps_name,ps_code from prd_location_master_panchayat_samiti 
+	            Where district_id_fk='".$id_fk."' order by ps_name");				
+			else
+	            $block=$db->fetch_table("select ps_id_pk,ps_name,ps_code from prd_location_master_panchayat_samiti 
+	            Where ps_id_pk='".$id_fk."' order by ps_name");
+            
+
+          
+
+           
+
+
+            ?>
+            <label for="inputPassword3" class="col-sm-1 control-label" id="ps_show" style="display:none">PS Name: <span class="star_color">*</span></label>
+            <div class="col-sm-2">
+                <select class="form-control upper_case" name="ps_code" id="ps_code"  style="display:none" onchange="show_employee(this.value,'<?php echo $crypto->encode("PS",4); ?>')">
+                <option value="">-Please Select-</option>
+                <?php
+                
+                foreach($block as $key)
+                {
+                
+                ?>
+                <option value="<?php echo $crypto->encode($key['ps_id_pk'],4)?>"><?php echo $key['ps_name']; ?></option>
+                <?php
+                }
+                ?>
+                </select>
+                </div>
+                
+                </div>
+                 <div class="row mb-3">
+                 <label for="inputPassword3" class="col-sm-1 control-label" id="employee_show_ps" style="display:none">Employee Name: <span class="star_color">*</span></label>
+            <div class="col-sm-2">
+                <select class="form-control upper_case" name="employee_id_ps" id="employee_id_ps" style="display:none">
+                
+                
+                
+                </select>
+            </div>
+            </div>
+            
+            <div class="row mb-3">
+             <label for="inputPassword3" class="col-sm-1 control-label file-label" style="display:none">Application from for outside District Transfer:</label>
+            <div class="col-sm-2">
+                <input type="file"  style="display:none"class="form-control upper_case" autocomplete="off" name="file[42]"  id="file_a"   >
+            </div>
+            
+             </div>
+            
+            
+            
+             <div class="row mb-3">
+             <label for="inputPassword3" class="col-sm-1 control-label file-label"  style="display:none">Other Document Upload:</label>
+            <div class="col-sm-2">
+                <input type="file"  style="display:none"class="form-control upper_case" autocomplete="off" name="file[41]"  id="file_b"   >
+            </div>
+            
+                </div>
+                
+                <div class="row mb-3">
+             <label for="inputPassword3" class="col-sm-1 control-label file-label" style="display:none">Endorsement of hed of office/Pradhan/Resolution of authorization (PS)/Recommendation of BDO :</label>
+            <div class="col-sm-2">
+                <input type="file"  style="display:none"class="form-control upper_case" autocomplete="off" name="file[43]"  id="file_c"   >
+            </div>
+            
+                </div>
+                
+             <div class="row mb-3">
+             <label for="inputPassword3" class="col-sm-1 control-label file-label-id" style="display:none">Endorsement of hed of office/Pradhan/Resolution of authorization (PS)/Recommendation of BDO :</label>
+            <div class="col-sm-2">
+                <input type="file"  style="display:none"class="form-control upper_case" autocomplete="off" name="file[40]"  id="file_id"   >
+            </div>
+            
+                </div>            
+  
+  <div class="row mb-3" style="margin-left: 43%; margin-top: 4%;">
+    <div class="col-sm-offset-5 col-sm-7">
+    <button type="submit" class="btn btn-info">SAVE</button>
+    </div>
+    </div>
+    
+    </form>
+	<?php 
+	
+	
+	 
+    
+    if($_SESSION['msg1']){
+    echo $_SESSION['msg1'];
+    
+    unset($_SESSION['msg1']);
+    
+    }
+     
+	if($district_level=='ID')
+	{
+	
+	
+	
+	
+	
+	if(count($data)!='0'){ ?>
+	<div class="row" id="cont">
+	<div class="content">
+	<div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad"> 
+	<div class="col-sm-12" style="width:98%;">
+	<h1 class="heading">VIEW EMPLOYEE DETAILS</h1>
+	<div class="border"></div>
+	</br>
+	</br>
+	<div class="emplist">
+	<div class="school">
+	<div class="table-responsive">
+	<table id="myTable" width="110%">
+	<tr>
+	<th>Serial No.</th>
+	<th>Employee ID</th>
+	<th>Employee Name</th>
+	
+	<th>Designation</th>
+	
+	
+	<th>Block Name where posted</th>
+	
+	<th>GP Name where posted</th>
+	
+	
+	
+	<th>PS Name where posted</th>
+	
+	
+	<!--<th>PS Name where posted</th>-->
+	<th>Date of joining in Present Office</th>
+	
+	
+	<th style="width:7%;">Transfer TO Block</th>
+	<th style="width:7%;">Transfer TO GP</th>
+	
+	
+	<th style="width:7%;">Transfer TO PS</th>
+	<th style="width:7%;">Reason</th>
+	<th>Document Upload</th>
+	
+	<th style=" width:30%">Action</th>
+	
+	
+	
+	</tr>
+	<? $cnt=1; if(count($data)){ foreach($data as $item){
+	
+	//$tn_block_id_fk=$item['transfer_block_id_fk']; 
+	
+	?>
+	<tr>
+	<td><?= $cnt;?></td>
+	<td id="emp_id"><?= $item['emp_id_const']=='0'?'':$item['emp_id_const']?></td>
+	<td><?= $item['emp_first_name'].' '.$item['emp_second_name'].' '.$item['emp_last_name']?></td>
+	
+	
+	
+	<td><?= fun_master($item['desig']);?>
+	
+	
+	<td><?= code_block($item['pre_block_id_fk']);?></td>
+	<td><?= code_gp($item['pre_gp_id_fk']);?></td>
+	<td><?= code_ps($item['pre_ps_id_fk']);?></td>
+	<td><?= date("d-m-Y",strtotime($emp_join_prsnt_post_date));?></td>
+	<?php if($item['pre_gp_id_fk']!='0'){?>
+	
+	<td id="block">
+	<?php if($item['transfer_block_id_fk']=='' )
+	{   
+	// Subikar Block Section  
+	$db= new database();
+	  if($blockId > 0):
+	      $Query = "SELECT district_id_fk from  prd_location_master_block WHERE block_code ='".$blockId."'";
+	      $block = $db->fetch_table($Query);
+	      $id_fk = $block[0]['district_id_fk'];
+      endif;
+
+	  	$block=$db->fetch_table("select block_id_pk,block_name,block_code,block_name from prd_location_master_block 
+	Where district_id_fk='".$id_fk."' order by block_name");
+	  	
+    //print_r($Query); 
+	?>
+	
+	<select class="form-control upper_case transBlock" name="block" id="block"  onchange="show_gp_tr(this.value,<?php echo $cnt; ?>)">
+	<option value="">-Please Select-</option>
+	<?php
+	
+	foreach($block as $key)
+	{
+	
+	?>
+	<option value="<?php echo  $crypto->encode($key['block_id_pk'],4);?>"<? if($item['transfer_block_id_fk']==$key['block_id_pk']){ echo  "selected";}?>><?php echo $key['block_name']; ?></option>
+	<?php
+	}
+	?>
+	</select>
+	<?php }else{?>
+	<?= code_block($item['transfer_block_id_fk']);?>
+	<? }?>
+	</td>
+	
+	<td id="gp">
+	
+	<?php if($item['transfer_gp_id_fk']=='')
+	{  ?>  
+	
+	<select class="form-control upper_case gp" name="gp_t<?=$cnt?>" id="gp_t<?=$cnt?>">
+	
+	
+	
+	</select>
+	<?php }else{?>
+	<?= code_gp($item['transfer_gp_id_fk']);?>
+	<? }?>
+	</td>
+	<td></td>
+	<? }?>
+	<?php if($item['pre_ps_id_fk']!='0'){?>
+	
+	<td></td>
+	<td></td>
+	
+	<td id="ps">
+	<?php if($item['transfer_ps_id_fk']=='')
+	{  ?> 
+	
+	<?php     
+	$db= new database();
+	
+	$block=$db->fetch_table("select ps_id_pk,ps_name,ps_code,ps_name from prd_location_master_panchayat_samiti 
+	Where district_id_fk='".$id_fk."' order by ps_name");?>
+	
+	<select class="form-control upper_case transBlock" name="ps" id="ps">
+	<option value="">-Please Select-</option>
+	<?php
+	
+	foreach($block as $key)
+	{
+	
+	?>
+	<option value="<?php echo $crypto->encode($key['ps_id_pk'],4)?>"<? if($item['transfer_ps_id_fk']==$key['ps_id_pk']){ echo  "selected";}?>><?php echo $key['ps_name']; ?></option>
+	<?php
+	}
+	?>
+	</select>
+    <?php }else{?>
+    <?= code_ps($item['transfer_ps_id_fk']);?>
+	<? }?>
+	</td>
+	<?php }?>
+	<td id="reson">
+	<?php if($item['reason']=='')
+	{  ?> 
+	<?php 
+	$transfer_level=$db->fetch_table("SELECT code, description, code_master_id_pk
+	FROM prd_dise_code_master WHERE code IN ('600','601','602','603') AND length(code)=3
+	");
+	?>
+	<select name="reson" style="width:100%;" id="reson" class="form-control">
+	<option value="">---PLEASE SELECT---</option>
+	<? foreach($transfer_level as $key)
+	{
+	
+	?>
+	<option value="<?=$key['code']?>" <? if($item['reason']==$key['code']){ echo  "selected";}?>><?= $key['description']; ?></option>
+	
+	<? } ?>
+	</select>
+	 <?php }else{?>
+    <?= fun_master($item['reason']);?>
+	<? }?>
+	</td>
+	<td>
+	<?php 
+	$db=new database();
+	
+	$arr_file_40 = $db->fetch_table("select file_name,flag from intra_pri_file_upload where emp_id_const = '".$item['emp_id_const']."' AND status = '1' AND flag= 40 "); ?>
+	
+	<?php  if($arr_file_40[0]['file_name']==''){?>
+	
+	<?php  }else{?>
+	
+    <?php if(count($arr_file_40)=='1'){?>
+   <a style="text-decoration:none" href="<?= $config['base_url']?>page/intra_pri/doc_download_trasfer.php?employee_id=<?= $crypto->encode($item['emp_id_const'],4)?>&flag=<?=$arr_file_40[0]['flag']?>" target="_blank">Download</a>
+    <?php }?>
+  
+	<?php  }?>
+	</td>
+	<td>
+    <?php if($item['from_status']=='1')
+	{  ?>
+    <div class="btn-group" role="group" style="width:60%;">
+    <button type="button" class="btn btn-danger emp_revoke"  disabled="disabled"style="display: block;">Revoke</button>
+    
+	<button type="button" class="btn btn-success emp_transfe"  id="trans_emp<?=$item['emp_id_const']?>"  value="<?=$crypto->encode($item['emp_id_const'],4)?>" onclick="emp_transfer(<?php echo $cnt;?>)"style="display: block;">Save Proposal</button>
+    
+      <a id="del_emp<?=$item['emp_id_const']?>"   onClick="del_arrear('<?=$crypto->encode($item['emp_id_const'],4)?>','del');"><i class="fa fa-trash fa-2x" aria-hidden="true" style="color:red"></i></a>
+      </div>
+	<?php }else{?>
+     <div class="btn-group" role="group" style="width:60%;">
+    <button type="button" class="btn btn-danger emp_revoke" id="revoke_emp<?=$item['emp_id_const']?>" value="<?=$crypto->encode($item['emp_id_const'],4);?>"style="display: block;">Revoke</button>
+   
+    <button type="button" class="btn btn-success"  disabled="disabled"  style="display: block;">Save Proposal</button>
+     <a id="del_emp<?=$item['emp_id_const']?>"  onClick="del_arrear('<?=$crypto->encode($item['emp_id_const'],4)?>','del');"><i class="fa fa-trash fa-2x" aria-hidden="true" style="color:red"></i></a>
+	<?php }?>
+    </div>
+	</td>
+	 
+	
+	
+	</tr>
+	
+    
+	
+	
+	<? $cnt+=1; }} else { ?>
+	<tr>
+	<td colspan="3" style="color:red;font-weight:bold">No Data Found</td>
+	</tr>
+	<? } ?>
+	</table>
+	</div>
+	</div>
+	</div>
+	</div>
+	</div>
+	</div>
+	</div>
+	</div>
+	<div class="clear"></div>
+	
+    <?php }?>
+	
+	<div class="row mb-3" style="margin-left: 41%;">
+		<div class="col-sm-offset-5 col-sm-7">
+        <?php if($data[0]['from_status']=='2'){?>
+      
+		<a type="button" id="submit5" name="submit5"class="btn btn-info" data-bs-toggle="modal" data-bs-target="#gpprofModal"> SUBMIT & PREVIEW </a>
+        <? }?>
+        
+        
+		</div>
+	</div>
+	
+	<?php }
+	else {
+		//echo 2333; die;
+			if(count($data)!='0'){ ?>
+    <div class="row" id="cont">
+    <div class="content">
+    <div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad"> 
+    <div class="col-sm-12" style="width:98%;">
+    <h1 class="heading">VIEW EMPLOYEE DETAILS</h1>
+    <div class="border"></div>
+    </br>
+    </br>
+    <div class="emplist">
+    <div class="school">
+    <div class="table-responsive">
+    <table id="myTable_d" width="110%">
+    <tr>
+    <th>Serial No.</th>
+    <th>Employee ID</th>
+    <th>Employee Name</th>
+    
+    <th>Designation</th>
+    
+   
+    <th>Block Name where posted</th>
+   
+     <th>GP Name where posted</th>
+   
+      
+        
+    <th>PS Name where posted</th>
+   
+     
+      <!--<th>PS Name where posted</th>-->
+      <th>Date of joining in Present Office</th>
+      
+    
+      <th style="width:7%;">Transfer TO District</th>
+       
+      <th style="width:7%;">Reason</th>
+      <th>Wheather any disciplinary proceeding has been initiated</th>
+      <th>Wheather the incumbent has availed benifit of such inter district Trasfer before</th>
+      
+     <th> Application from for outside District Transfer</th>
+      <th>Document Upload</th>
+      <th> Endorsement of hed of office/Pradhan/Resolution of authorization (PS)/Recommendation of BDO</th>
+      
+      <th style=" width:30%">Action</th>
+
+       
+    
+    </tr>
+    <? $cnt=1; if(count($data)){ foreach($data as $item){
+     $proceding=$item['proceding']; 
+	 $benifit=$item['benifit'];
+    ?>
+    <tr>
+    <td><?= $cnt;?></td>
+    <td><?= $item['emp_id_const']=='0'?'':$item['emp_id_const']?></td>
+    <td><?= $item['emp_first_name'].' '.$item['emp_second_name'].' '.$item['emp_last_name']?></td>
+    <?php if($item['pre_gp_id_fk']!='0' ||$item['pre_ps_id_fk']!='0' ){?>
+    <td><?= fun_master($item['desig']);?></td>
+    <?php }else{?>
+    
+     <td><?= fun_master_zp($item['desig']);?></td>
+    
+     <?php }?>
+     <td><?= code_block($item['pre_block_id_fk']);?></td>
+     <td><?= code_gp($item['pre_gp_id_fk']);?></td>
+     <td><?= code_ps($item['pre_ps_id_fk']);?></td>
+      <td><?= date("d-m-Y",strtotime($item['emp_join_prsnt_post_date']));?></td>
+   <td id="dis_tn">
+    
+    <?php if($item['transfer_district_id_fk']=='')
+	{  ?> 
+    <?php 
+            $db= new database();
+            $district=$db->fetch_table("select district_id_pk,district_name,district_code from prd_location_master_district 
+            Where district_id_pk!='".$id_fk."' order by district_name");?>
+            
+             <select class="form-control upper_case tran_district" name="tran_district" id="tran_district">
+                <option value="">-Please Select-</option>
+                <?php
+                
+                foreach($district as $key)
+                {
+                
+                ?>
+                <option value="<?php echo $crypto->encode($key['district_id_pk'],4)?>"><?php echo $key['district_name']; ?></option>
+                <?php
+                }
+                ?>
+                </select>
+                
+                 <?php }else{?>
+                 
+                 <?= code_district($item['transfer_district_id_fk']);?>
+	<? }?>
+    
+    </td>
+     
+     
+    
+     
+     
+            
+           <td id="reson_d">   
+		<?php if($item['reason']=='')
+        {  ?> 
+		   <?php 
+    $transfer_level=$db->fetch_table("SELECT code, description, code_master_id_pk
+    FROM prd_dise_code_master WHERE code IN ('600','601','602','603') AND length(code)=3
+    ");
+    ?>
+    <select name="reson_d" style="width:100%;" id="reson_d" class="form-control">
+    <option value="">---PLEASE SELECT---</option>
+    <? foreach($transfer_level as $key)
+    {
+    
+    ?>
+    <option value="<?=$key['code']?>" <? if($reson==$key['code']){ echo  "selected";}?>><?= $key['description']; ?></option>
+    
+    <? } ?>
+    </select>
+    <?php }else{?>
+     <?= fun_master($item['reason']);?>
+	<? }?>
+    </td>
+    
+    
+    <td id="benifit_d">   
+		<?php if($item['benifit']=='')
+        {  ?>
+    <select name="benifit_d" style="width:100%;" id="benifit_d" class="form-control">
+    <option value="">---PLEASE SELECT---</option>
+    
+   <option value="1" <? if($benifit=='1') { echo "selected"; } ?>>YES</option>
+    <option value="0" <? if($benifit=='0') { echo "selected"; } ?>>NO</option>
+    </select>
+    <?php }else{?>
+   
+   <input type="text"  value=" <? if($benifit=='1'){
+	    echo "YES";} else{ echo "NO" ; }?> " readonly="readonly"class="form-control" name="benifit_d" />
+   <?php }?>
+    </td>
+    
+    
+     <td id="proce_d">   
+		<?php if($item['proceding']=='')
+        {  ?>
+    <select name="proce_d" style="width:100%;" id="proce_d" class="form-control">
+    <option value="">---PLEASE SELECT---</option>
+    
+   <option value="1" <? if($proceding=='1') { echo "selected"; } ?>>YES</option>
+    <option value="0" <? if($proceding=='0') { echo "selected"; } ?>>NO</option>
+    </select>
+    <?php }else{?>
+   
+   <input type="text"  value=" <? if($proceding=='1'){
+	    echo "YES";} else{ echo "NO" ; }?> " readonly="readonly"class="form-control" name="proce_d" />
+   <?php }?>
+    </td>
+    
+    <td>
+    <?php 
+    $db=new database();
+		
+		$arr_file_42 = $db->fetch_table("select file_name,flag from intra_pri_file_upload where emp_id_const = '".$item['emp_id_const']."' AND status = '1' AND flag= 42 order by upload_file_id_pk desc LIMIT 1 OFFSET 0");  ?>
+          <?php  if($arr_file_42[0]['file_name']==''){?>
+     
+     <?php  }else{?>
+	
+    <?php if(count($arr_file_42)=='1'){?>
+   <a style="text-decoration:none" href="<?= $config['base_url']?>page/intra_pri/doc_download_trasfer.php?employee_id=<?= $crypto->encode($item['emp_id_const'],4)?>&flag=<?=$arr_file_42[0]['flag']?>" target="_blank">Download<?php //echo substr($arr_file_42[0]['file_name'],6); ?></a>
+    <?php }}?>
+    </td>
+    
+    <td>
+    <?php 
+    $db=new database();
+	
+		$arr_file_41 = $db->fetch_table("select file_name,flag from intra_pri_file_upload where emp_id_const = '".$item['emp_id_const']."' AND status = '1' AND flag= 41 "); ?>
+        
+          <?php  if($arr_file_41[0]['file_name']==''){?>
+     
+     <?php  }else{?>
+	
+    <?php if(count($arr_file_41)=='1'){?>
+   <a style="text-decoration:none" href="<?= $config['base_url']?>page/intra_pri/doc_download_trasfer.php?employee_id=<?= $crypto->encode($item['emp_id_const'],4)?>&flag=<?=$arr_file_41[0]['flag']?> "target="_blank">Download<?php //echo substr($arr_file_41[0]['file_name'],6); ?></a>
+    <?php }}?>
+    </td>
+     <td>
+    <?php 
+    $db=new database();
+		
+		$arr_file_43 = $db->fetch_table("select file_name,flag from intra_pri_file_upload where emp_id_const = '".$item['emp_id_const']."' AND status = '1' AND flag= 43 "); ?>
+        
+          <?php  if($arr_file_43[0]['file_name']==''){?>
+     
+     <?php  }else{?>
+	
+    <?php if(count($arr_file_43)=='1'){?>
+   <a style="text-decoration:none" href="<?= $config['base_url']?>page/intra_pri/doc_download_trasfer.php?employee_id=<?= $crypto->encode($item['emp_id_const'],4)?>&flag=<?=$arr_file_43[0]['flag']?>" target="_blank">Download<?php //echo substr($arr_file_43[0]['file_name'],6); ?></a>
+    <?php }}?>
+    </td>
+    
+    <td>
+    
+    <?php if($item['from_status']=='1')
+	{  ?>
+     <div class="btn-group" role="group" style="width:60%;">
+     <button type="button" class="btn btn-danger emp_revoke" disabled="disabled"style="display: block;">Revoke</button>
+    <button type="button" class="btn btn-success emp_transfe_dis" id="trans_emp<?=$item['emp_id_const']?>"  value="<?=$crypto->encode($item['emp_id_const'],4)?>" onclick="emp_transfer(<?php echo $cnt;?>)"style="display: block;">Save Proposal</button>
+   
+    
+  <a id="del_emp<?=$item['emp_id_const']?>"  onClick="del_arrear('<?=$crypto->encode($item['emp_id_const'],4)?>','del');"><i class="fa fa-trash fa-2x" aria-hidden="true" style="color:red"></i></a>
+    </div>
+     
+    
+    <?php }else{?>
+     <div class="btn-group" role="group" style="width:60%;">
+    <button type="button" class="btn btn-danger emp_revoke" id="revoke_emp<?=$item['emp_id_const']?>" value="<?=$crypto->encode($item['emp_id_const'],4);?>"style="display: block;">Revoke</button>
+    <button type="button" class="btn btn-success"  disabled="disabled"  style="display: block;">Save Proposal</button>
+    <a id="del_emp<?=$item['emp_id_const']?>"  onClick="del_arrear('<?=$crypto->encode($item['emp_id_const'],4)?>','del');"><i class="fa fa-trash fa-2x" aria-hidden="true" style="color:red"></i></a>
+	<?php }?>
+    </div>
+                        </td>
+    
+    
+            
+   
+    </tr>
+    
+    
+    
+    <? $cnt+=1; }} else { ?>
+    <tr>
+    <td colspan="3" style="color:red;font-weight:bold">No Data Found</td>
+    </tr>
+    <? } ?>
+    </table>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    <div class="clear"></div>
+    
+    <?php }?>
+		
+		
+		<div class="row mb-3" style="margin-left: 41%;">
+		<div class="col-sm-offset-5 col-sm-7">
+        <?php if($data[0]['from_status']=='2'){?>
+      
+		<a type="button" id="submit5" name="submit5"class="btn btn-info" data-bs-toggle="modal" data-bs-target="#gpprofModal"> SUBMIT & PREVIEW </a>
+        <? }?>
+        
+        
+		</div>
+	</div>
+		
+		
+		
+	<?php }?>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+<?php
+	//----------------------------------- FOOTER ----------------------------------------------------------------------------------
+	require '../../page/layout/footer.php';
+	//----------------------------------------------------------------------------------------------------------------------------
+	?>
+	<script>
+	
+	
+	function valid_code()
+    {
+		if($('#emp_stack').val()==''){
+		alert('Please select stake.');
+		$('#emp_stack').focus();
+		return false;
+		}
+		
+		
+		if($('#emp_stack').val()=='GP'){
+		var id=$('#employee_id').val();
+			//alert(a);
+			//return false;
+			if(id==null)
+			{
+			
+			alert('Please select Employee.');
+			$('#employee_id').focus();
+			return false;
+			}
+		}
+		if($('#emp_stack').val()=='PS'){
+			var id=$('#employee_id_ps').val();
+			//alert(a);
+			//return false;
+			if(id==null)
+			{
+			
+			alert('Please select Employee.');
+			$('#employee_id_ps').focus();
+			return false;
+			}
+		}
+		if($('#emp_stack').val()=='ZP'){
+			
+			//alert(111);
+			var id=$('#employee_id').val();
+			////alert(id);
+			//return false;
+			if(id==null)
+			{
+			
+			alert('Please select Employee.');
+			$('#employee_id').focus();
+			return false;
+			}
+		}
+		
+		//return false;
+    
+	}
+	
+	
+	function show_employee_stack(val)
+	{
+		
+		
+		
+		if(val=="GP"){
+			
+			$('#block_show').show();
+			$('#block').show();
+			$('#gp_show').show();
+			$('#gp_code').show();
+			$('#employee_show').show();
+			$('#employee_id').show();
+			$('#ps_show').hide();
+			$('#ps_code').hide();
+			$('#employee_show_ps').hide();
+			$('#employee_id_ps').hide();
+			$('#employee_show_zp').hide();
+			$('#employee_id_zp').hide();
+			$('#file_a').show();
+			$('#file_b').show();
+			$('#file_c').show();	
+			$(".file-label").show();		
+		}
+		else if(val=="PS")
+		{
+				$('#block_show').hide();
+				$('#block').hide();
+				$('#gp_show').hide();
+				$('#gp_code').hide();
+				$('#ps_show').show();
+				$('#ps_code').show();
+				$('#employee_show_ps').show();
+				$('#employee_id_ps').show();
+				
+				$('#employee_show').hide();
+				$('#employee_id').hide();
+				
+				$('#employee_show_zp').hide();
+				$('#employee_id_zp').hide();
+				$('#file_a').show();
+				$('#file_b').show();
+				$('#file_c').show();
+				$(".file-label").show();	
+		}
+		else
+		{
+			$('#block_show').hide();
+				$('#block').hide();
+				$('#gp_show').hide();
+				$('#gp_code').hide();
+				$('#ps_show').hide();
+				$('#ps_code').hide();
+				$('#employee_show_ps').hide();
+				$('#employee_id_ps').hide();
+				$('#employee_show').show();
+				$('#employee_id').show();
+				$('#file_a').show();
+				$('#file_b').show();
+				$('#file_c').show();
+				$(".file-label").show();	
+				
+				$.post('<?= $config['base_url'] ?>page/intra_pri/ajax_employee_fetch.php?zp='+val, function(data){
+
+		$("#employee_id").html(data);
+		});
+				
+				
+				
+				//$('#employee_show_zp').show();
+				//$('#employee_id_zp').show();
+				$('#file').show();
+			$('#file_id').show();
+		}
+		//return false;
+		
+	}
+	
+	
+	
+	
+	
+	
+	function show_employee_stack_t(val)
+	{
+		//console.log(val);
+		
+		
+		if(val=="GP"){
+			
+			$('#block_show').show();
+			$('#block').show();
+			$('#gp_show').show();
+			$('#gp_code').show();
+			$('#employee_show').show();
+			$('#employee_id').show();
+			$('#ps_show').hide();
+			$('#ps_code').hide();
+			$('#employee_show_ps').hide();
+			$('#employee_id_ps').hide();
+			$('#employee_show_zp').hide();
+			$('#employee_id_zp').hide();
+			$('.file-label-id').show();
+			$('#file_id').show();
+			
+		}
+		else if(val=="PS")
+		{
+			
+
+				$('#block_show').hide();
+				$('#block').hide();
+				$('#gp_show').hide();
+				$('#gp_code').hide();
+				$('#ps_show').show();
+				$('#ps_code').show();
+				$('#employee_show_ps').show();
+				$('#employee_id_ps').show();
+				
+				$('#employee_show').hide();
+				$('#employee_id').hide();
+				
+				$('#employee_show_zp').hide();
+				$('#employee_id_zp').hide();
+				$('.file-label-id').show();
+			    $('#file_id').show();
+			
+		}
+		else
+		{
+			$('#block_show').hide();
+				$('#block').hide();
+				$('#gp_show').hide();
+				$('#gp_code').hide();
+				$('#ps_show').hide();
+				$('#ps_code').hide();
+				$('#employee_show_ps').hide();
+				$('#employee_id_ps').hide();
+				$('#employee_show').show();
+				$('#employee_id').show();
+				
+				
+				$.post('<?= $config['base_url'] ?>page/intra_pri/ajax_employee_fetch.php?zp='+val, function(data){
+			
+			//alert(data);
+			//return false;
+		//$("#gp_code").html(data);	
+		$("#employee_id").html(data);
+		});
+
+				$('.file-label-id').show();
+			    $('#file_id').show();
+		}
+		//return false;
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+    	
+	function show_gp(vall)
+	{
+		//alert(222);
+		
+		//return false;
+		$.post('<?= $config['base_url'] ?>page/intra_pri/ajax_gp_fetch_new.php?block='+vall, function(data){
+			
+			//alert(data);
+			//return false;
+		$("#gp_code").html(data);	
+		});
+	}
+	
+	function show_gp_tr(vall,k)
+	{
+		//alert(k);
+		var v=k;
+		
+		//return false;
+		$.post('<?= $config['base_url'] ?>page/intra_pri/ajax_gp_fetch_new.php?block='+vall, function(data){
+			
+			//alert(data);
+			//return false;
+		$("#gp_t"+v).html(data);	
+		});
+	}
+	
+	function show_employee(val,k)
+	{
+		//alert(k);
+		
+		//return false;
+		$.post('<?= $config['base_url'] ?>page/intra_pri/ajax_employee_fetch.php?gp='+val+'&stack='+k, function(data){
+			
+			//alert(data);
+
+			//return false;
+			
+		$("#employee_id").html(data);
+		
+		$("#employee_id_ps").html(data);
+			
+		});
+	}
+	
+	
+/*	$('.emp_transfer_<?php ?>').click(function(e) {
+		
+		
+		
+		//var emp_id=$(this).val();
+		var transfer_id=$(this).attr('id');
+		
+		var transfer_id_length=transfer_id.length;
+		var id=transfer_id.substr(9,transfer_id_length);
+		
+		alert(id);
+		
+			  $('#myModal').modal('toggle');
+			  //$('#stop').modal('toggle');
+			  //$('#mbody_transfer').html(data);
+			
+		
+    });*/
+	
+	
+	
+	$("#myTable").on('click','.emp_transfe',function(){
+         // get the current row
+         var currentRow=$(this).closest("tr"); 
+         var stack="ID";
+         var col1=currentRow.find("td:eq(0)").text(); // get current row 1st TD value
+         var emp_id=currentRow.find("td:eq(1)").text(); // get current row 2nd TD
+         var col3=currentRow.find("td:eq(2)").text(); // get current row 3rd TD
+		  /*var col4=currentRow.find("td:eq(3)").text(); // get current row 3rd TD
+		   var col5=currentRow.find("td:eq(4)").text(); // get current row 3rd TD
+		    var col6=currentRow.find("td:eq(5)").text(); // get current row 3rd TD
+			 var col7=currentRow.find("td:eq(6)").text(); // get current row 3rd TD
+			  var col8=currentRow.find("td:eq(7)").text(); // get current row 3rd TD*/
+			  
+			  //alert(emp_id);
+			    var block_id_fk=currentRow.find($('select#block option:selected')).val(); // get current row 3rd TD
+				 var gp_id_fk=currentRow.find($('select.gp option:selected')).val(); // get current row 3rd TD
+				 var ps_id_fk=currentRow.find($('select#ps option:selected')).val(); // get current row 3rd TD
+				 
+				  var reason=currentRow.find($('select#reson option:selected')).val(); // get current row 3rd TD
+				 
+				  
+				 $.post('<?= $config['base_url'] ?>page/intra_pri/ajax_employee_transfer_submit.php?emp_id='+emp_id+'&block_id_fk='+block_id_fk+'&gp_id_fk='+gp_id_fk+'&ps_id_fk='+ps_id_fk+'&stack='+stack+'&reason='+reason, function(data){
+					 //alert(data);
+					  //return false;
+			
+			
+				
+				alert('Success....');
+				location. reload();
+			
+			
+		
+			
+		});
+        // var data=col1+"\n"+col2+"\n"+col3+"\n"+col4+"\n"+col5+"\n"+col6+"\n"+col7+"\n"+col8+"\n"+col9+"\n"+col10+"\n"+col11+"\n"+col12;
+		 
+		// var data=gp_id_fk;
+         
+        //alert(data);
+    });
+	
+	
+	$("#myTable_d").on('click','.emp_transfe_dis',function(){
+		
+         var stack="D";
+         var currentRow=$(this).closest("tr"); 
+         
+         var col1=currentRow.find("td:eq(0)").text(); // get current row 1st TD value
+         var emp_id=currentRow.find("td:eq(1)").text(); // get current row 2nd TD
+         
+				
+				var district_id_fk=currentRow.find($('select#tran_district option:selected')).val(); // get current row 3rd TD// get current row 3rd TD
+				
+				 
+				  var reason=currentRow.find($('select#reson_d option:selected')).val();
+				  
+				  var proce=currentRow.find($('select#proce_d option:selected')).val();
+				  var benifit=currentRow.find($('select#benifit_d option:selected')).val();
+				  //benifit_d // get current row 3rd TD
+				 
+			 $.post('<?= $config['base_url'] ?>page/intra_pri/ajax_employee_transfer_submit.php?emp_id='+emp_id+'&district_id_fk='+district_id_fk+'&stack='+stack+'&reason='+reason+'&proce='+proce+'&benifit='+benifit, function(data){
+					// alert(data);
+					// return false;
+			
+			
+				
+				alert('Success....');
+				location. reload();
+			
+			
+		
+			
+		});
+		 
+		 
+    });
+	
+	
+//	
+//	    function file_upload(k,f,emp_id){
+//    
+//   // alert(emp_id);
+//    
+//	//return false;
+//    
+//    
+//    var property = document.getElementById(k).files[0];
+//    var image_name = property.name;
+//    var image_extension = image_name.split('.').pop().toLowerCase();
+//    
+//    if(jQuery.inArray(image_extension,['pdf']) == -1){
+//    alert("Invalid PDF file");
+//	
+//	return false;
+//    }
+//    
+//    var form_data = new FormData();
+//    form_data.append("file",property);
+//    form_data.append('f',f);
+//	// form_data.append('app_id',app_id);
+//	 form_data.append('emp_id',emp_id);
+//	 
+//	// alert(app_id);
+//	 
+//	// return false;
+//    
+//    $.ajax({
+//      url : 'ajax_intra_pri_transfer_file_upload.php',
+//      type : 'POST',
+//      data:form_data,
+//      contentType:false,
+//      cache:false,
+//      processData:false,
+//        success : function(data) {
+//        //alert(data);
+//          
+//        //return false;
+//		if(data== '40'){
+//		location. reload();
+//		$("#doc").prop('disabled',true);
+//		}
+//		if(data== '41'){
+//		location. reload();
+//		$("#doc_d").prop('disabled',true);
+//		
+//		
+//		}
+//          
+//          
+//         
+//          
+//          alert('Uploaded....');
+//        },
+//        error:function(){
+//          alert('Server Error');
+//        }
+//      });
+//    
+//    }
+	
+	
+	
+		
+	$(document).on("click","#submit5",function() {
+
+
+	var dis = $("#dis").val();
+	
+	//alert(dis);
+
+  $.ajax({
+      url : 'ajax_preview_transfer_form.php',
+      type : 'POST',
+      data : { "dis" : dis
+				
+				},
+        success : function(response) { 
+		
+		
+		//alert(response);
+			//var result1 = $.parseJSON(response);
+			
+			$(".mbody").html(response);
+			
+        },
+        error:function(){
+          alert('Server Error');
+        }
+      });
+});
+	
+	
+//$(document).on("click","#submit6",function() {
+//	//alert(111); 
+//	
+//	//var id=$("#emp_id").val();
+//	$('#finalize').modal('toggle');
+//	
+//	
+//	
+//	});
+	
+	
+	
+	$('.emp_revoke').click(function(e) {
+		var link1=$(this).val();
+		var arr=link1.split('&');
+		$('#confirm_revoke').modal('show');
+		
+		$('#revoke_emp_id').val(arr[0]);
+		//$('#revoke_gp_id').val(arr[1]);
+		//$('#decoded_emp_id').val(arr[2]);
+		
+    });
+	
+	
+	
+		function del_arrear(k,l)
+	{
+		
+	
+		$('#delete_arrear').modal('show');
+		$('#del_emp_id').val(k);
+		$('#del_stack').val(l);
+		//$('#delete_arrear').modal({backdrop: 'static', keyboard: false})  
+		//$('#emp_arrear_id').val(arrear_id);
+		//$('#table_row_id').val(row);
+	}
+	
+	
+	
+	
+	
+	</script>
+    
+
+
+
+    <div class="modal fade" id="gpprofModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<style>
+.modal-backdrop fade in{
+	height:auto !important;
+}
+</style>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" style="width: 160%; margin-left: -30%;">
+      <div class="modal-header">
+	  <h4 class="modal-title" id="myModalLabel">Transfer Details </h4>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        
+      </div>
+      <div class="modal-body"> 
+      <div class="mbody"> 
+      </div>
+      </div>
+      <div class="modal-footer">
+        <!--<button type="button" class="btn btn-success" > FORWARD</button>-->
+        <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="modal fade bs-example-modal-sm" id="finalize" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+   		 <div class="modal-dialog modal-sm">
+   			 <div class="modal-content" style="width: 110%; margin-left: -25%;">
+    			<div class="modal-header">
+    				<h4 class="modal-title" id="myModalLabel">Transfer Details</h4>
+    					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    
+   				 </div>
+    <div class="modal-body"> 
+    <form action="ajax_employee_transfer_submit.php" method="post">
+    <p class="alert alert-warning"><strong><i class="fa fa-exclamation-triangle"></i> Are You Sure To Submit Employee  Transfer & Posting Proposal ?</strong></p>
+    </div>
+    <div class="modal-footer">
+    
+    <div class="btn-group">
+    <input type="hidden" name="sec_tok" id="sec_tok" value="<?=$enc_token?>" />
+    
+  
+     <input type="hidden" name="stack_final" id="stack_final" value="<?= $crypto->encode($stake_level_district,4); ?>" /> 
+     
+    <input type="submit" name="submit" value="YES" class="btn btn-success finalize" />
+    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">NO</button>      
+    </div>
+    </div>
+    </div>
+    
+    </form>
+    </div>
+    </div>
+
+
+      
+      
+          <div class="modal fade bs-example-modal-sm" id="confirm_revoke" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+   		 <div class="modal-dialog modal-sm">
+   			 <div class="modal-content" style="width: 110%; margin-left: -25%;">
+    			<div class="modal-header">
+    				<h4 class="modal-title" id="myModalLabel">Transfer Details</h4>
+    					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    
+   				 </div>
+    <div class="modal-body"> 
+    <form action="ajax_employee_transfer_submit.php" method="post">
+    <p class="alert alert-warning"><strong><i class="fa fa-exclamation-triangle"></i> Do You Want To Revoke This Employee?</strong></p>
+    </div>
+    <div class="modal-footer">
+    
+    <div class="btn-group">
+    <input type="hidden" name="revoke_emp_id" id="revoke_emp_id">
+    <input type="hidden" name="stack_final_revoke" id="stack_final_revoke" value="<?= $crypto->encode($stake_level_district,4); ?>" /> 
+     
+    <input type="submit" name="submit" value="YES" class="btn btn-success finalize" />
+    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">NO</button>      
+    </div>
+    </div>
+    </div>
+    
+    </form>
+    </div>
+    </div>
+    
+    
+    <div class="modal fade bs-example-modal-sm" id="delete_arrear" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+   		 <div class="modal-dialog modal-sm">
+   			 <div class="modal-content" style="width: 110%; margin-left: -25%;">
+    			<div class="modal-header">
+    				<h4 class="modal-title" id="myModalLabel">Transfer Details</h4>
+    					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    
+   				 </div>
+    <div class="modal-body"> 
+    <form action="ajax_employee_transfer_submit.php" method="post">
+    <p class="alert alert-warning"><strong><i class="fa fa-exclamation-triangle"></i> Do You Want To Delete This Employee?</strong></p>
+    </div>
+    <div class="modal-footer">
+    
+    <div class="btn-group">
+    <input type="hidden" name="del_emp_id" id="del_emp_id">
+    <!--<input type="text" name="del_stack" id="del_stack">-->
+    <input type="hidden" name="stack_del_final" id="stack_del_final" value="<?= $crypto->encode($stake_level_district,4); ?>" /> 
+     
+    <input type="submit" name="submit" value="YES" class="btn btn-success finalize" />
+    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">NO</button>      
+    </div>
+    </div>
+    </div>
+    
+    </form>
+    </div>
+    </div>
+  

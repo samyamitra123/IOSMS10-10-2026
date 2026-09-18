@@ -1,0 +1,94 @@
+RewriteEngine on
+#RewriteCond %{HTTP_REFERER} ^http://(www\.)? digitalbellies\.com [NC]
+#RewriteRule (.*)    - [F]
+
+# Check if the request is coming to the IP address
+RewriteCond %{HTTP_HOST} ^164\.100\.233\.144$
+RewriteRule ^(.*)$ https://priemp.wbprd.gov.in/$1 [R=301,L]
+
+
+
+RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /page/404.php?e=1 [L]
+
+#RewriteCond $1 !^(index\.php|themes|page|readwrite|icons|robots\.txt)
+#RewriteRule ^(.*)$ index.php/$1 [L]
+
+
+#Redirect 301 /  https://priemp.wbprd.gov.in/index.php
+
+#RewriteCond $1 !^(index\.php|css|fonts|img|includes|js|login|page|themes|vendor)
+#RewriteRule ^(.*)$ index.php/$1 [L]
+
+#RewriteCond %{REQUEST_URI} ^/cgi-bin/$
+#RewriteRule ^(.*)$ /page/404.php?e=1 [L]
+
+RewriteCond %{REQUEST_URI} ^/manual/$
+RewriteRule ^(.*)$ /page/404.php?e=1 [L]
+
+
+#Options +FollowSymLinks
+#RewriteEngine On
+#RewriteRule ^icons.*$ https://priemp.wbprd.gov.in/
+
+# disable directory browsing
+Options All -Indexes
+
+
+
+ErrorDocument 400 /page/404.php?e=1
+ErrorDocument 401 /page/404.php?e=2
+ErrorDocument 402 /page/404.php?e=3
+ErrorDocument 403 /page/404.php?e=4
+ErrorDocument 404 /page/404.php?e=5
+ErrorDocument 405 /page/404.php?e=6
+ErrorDocument 406 /page/404.php?e=7
+ErrorDocument 407 /page/404.php?e=8
+ErrorDocument 408 /page/404.php?e=9
+ErrorDocument 409 /page/404.php?e=10
+ErrorDocument 410 /page/404.php?e=11
+ErrorDocument 500 /page/404.php?e=12
+ErrorDocument 501 /page/404.php?e=13
+ErrorDocument 505 /page/404.php?e=14
+
+#ServerSignature Off
+
+#Header set Content-Security-Policy " default-src 'self'"
+
+
+<IfModule mod_headers.c>
+	Header set X-XSS-Protection "1; mode=block"
+	Header always append X-Frame-Options SAMEORIGIN
+	Header set X-Content-Type-Options "nosniff"
+	Header set Strict-Transport-Security "max-age=63072000" 
+</IfModule>
+
+<IfModule mod_headers.c>
+#Header set Content-Security-Policy " img-src 'self'; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none';"
+
+Header set Content-Security-Policy " script-src 'self' 'unsafe-inline' 'unsafe-hashes' https://priemp.wbprd.gov.in; style-src 'self' 'unsafe-inline' 'unsafe-hashes' https://priemp.wbprd.gov.in; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'self'; frame-ancestors 'none'; form-action 'self';"
+
+</IfModule>
+
+
+
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK|DELETE|OPTIONS|PUT|DEBUG)
+RewriteRule .* - [F]
+
+
+
+
+<FilesMatch "\.(htaccess|htpasswd|ini)$">
+ Order Allow,Deny
+ Deny from all
+</FilesMatch>
+
+
+
+php_flag log_errors off
+
+<IfModule php5_module>
+    php_value session.cookie_httponly true
+</IfModule>
+

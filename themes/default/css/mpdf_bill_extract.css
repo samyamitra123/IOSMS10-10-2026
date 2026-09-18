@@ -1,0 +1,61 @@
+
+@charset "utf-8";
+/* CSS Document */
+body{}
+.sig table {
+		border-collapse:collapse;
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		font-family:Arial, Helvetica, sans-serif;
+		font-size:15px;
+	}
+.sig table .heading{
+	background-color:#CCCCCC;
+	color: #000;
+	padding:5px;
+	font-family:Arial, Helvetica, sans-serif;
+	
+}
+.sig2 table {
+		border-collapse:collapse;
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		font-size:11px;
+	}
+.sig2 table .heading{
+	background-color:#CCCCCC;
+	color: #000;
+	padding:5px;
+	
+}
+
+.sig3 table {
+		font-size:11px;
+	}
+.one table {
+		
+		font-size:15px;
+	}
+.three table {
+		
+		font-size:12px;
+		 font-style: italic;
+	}
+table {
+		
+		font-family:Arial, Helvetica, sans-serif;
+	}
+table, th, td {
+		
+		font-family:Arial, Helvetica, sans-serif;
+	}
+th, td {
+		
+		font-family:Arial, Helvetica, sans-serif;
+	}
+
+.colgray{
+	
+	background-color: #EEE;
+	font-family:Arial, Helvetica, sans-serif;
+}

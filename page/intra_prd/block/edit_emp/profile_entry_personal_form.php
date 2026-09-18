@@ -1,0 +1,864 @@
+<?
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, post-check=0, pre-check=0");
+header("Pragma: no-cache");
+if($_SERVER['HTTP_REFERER']==''){
+	header("Location:../../../dashboard.php");
+}
+
+if(
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '. $config['base_url'] . "page/login.php");
+	exit;
+}
+$time_token=time();
+$_SESSION['security_token']=$time_token;
+$enc_token=md5('369'.$time_token);
+
+$emp_id_pk=isset($_GET['emp_id_pk'])?$_GET['emp_id_pk']:' ';
+$cryptoGraph=new cryptography();
+
+$true_stat=$cryptoGraph->encode('true',4);
+$false_stat=$cryptoGraph->encode('false',4);
+
+if($_GET['confirm'] == 'success')
+{
+	$msg='<div class="alert alert-success" style="text-align:center"><strong>Salary Details of the Employee submitted Successfully...</strong></div>';
+}
+else if($_GET['confirm'] == 'false')
+{
+	$msg='<div class="alert alert-danger" style="text-align:center"><strong>Data insertion failed. Please try again...</strong></div>';
+}
+
+//$tchcd=isset($_GET['tchcd']) ? $_GET['tchcd']:'';
+
+
+//------------------------------ PAGE VARIABLES --------------------------------------------------------------------------------
+
+//Page variables
+$common['title'] = "Profile Form| PRD | Govt. of West Bengal ";
+
+//Meta tag variables
+//$common['meta']['keyword'] = 'West Bengal School Education Department, SED department';
+//$common['meta']['description'] = 'West Bengal School Education Department, SED department';
+
+//Self variable
+
+//------------------------------------------------------- HEADER --------------------------------------------------------------
+require '../../../../page/layout/header.php';
+//---------------------------------- MENU -------------------------------------------------------------------------------------
+require '../../../../page/layout/menu.php';
+//-----------------------------Business Logic----------------------------------------------------------------------------------
+function dateshow($dateval)
+{	
+	$date=substr($dateval,0,10);
+	//return $date;
+	$datearr=explode('-',$date);
+	$dob= $datearr['2'].'-'.$datearr['1'].'-'.$datearr['0'];
+	return $dob=='--'?'':$dob;
+}
+
+function get_emp($id,$gp_id)
+{
+	$db  = new database();	
+	$obj_crpto = new cryptography();
+
+	$data = $db->fetch_table("
+							SELECT 
+								gp_id_fk,
+								emp_desig,
+								emp_father_name ,
+								emp_mother_name ,
+								emp_religion ,
+								emp_mother_tongue ,
+								emp_marital_status ,
+								emp_spouse_name ,
+								emp_spouse_job_status ,
+								emp_spouse_details ,
+								emp_spouse_pay ,
+								emp_spouse_hra ,
+								spouse_medical_allowance,
+								emp_spouse_res ,
+								emp_spouse_house_schm ,
+								emp_pan_no ,
+								emp_blood_grp ,
+								emp_height ,
+								emp_diff_able ,
+								emp_disable_status ,
+								emp_idf_mark ,
+								emp_form_status,
+								spouse_medical_allowance,
+								conv_allow_status,
+								emp_pension_status,
+								spouse_ss_enrolled
+							FROM prd_employee_master
+							WHERE emp_id_pk = '".$obj_crpto->decode($id,4)."'
+							and gp_id_fk = '".$obj_crpto->decode($gp_id,4)."'
+	
+	");
+	return $data;
+}
+if(!empty($_GET['emp_id_pk']))
+{
+	$emp_data = get_emp($_GET['emp_id_pk'],$_GET['gp_id']);
+}
+else
+{
+	$emp_data = get_emp($emp_id,$gpid);
+}
+$emp_desig=$emp_data[0]['emp_desig'];
+$emp_father_name=$emp_data[0]['emp_father_name'];
+$fname=explode(' ',$emp_father_name);
+$emp_mother_name=$emp_data[0]['emp_mother_name'];
+$mname=explode(' ',$emp_mother_name);
+$emp_religion=$emp_data[0]['emp_religion'];
+$emp_mother_tongue=$emp_data[0]['emp_mother_tongue'];
+$emp_marital_status=$emp_data[0]['emp_marital_status'];
+$emp_spouse_name=$emp_data[0]['emp_spouse_name'];
+$sname=explode(' ',$emp_spouse_name);
+$emp_spouse_job_status=$emp_data[0]['emp_spouse_job_status'];
+$emp_spouse_details=$emp_data[0]['emp_spouse_details'];
+$emp_spouse_pay=$emp_data[0]['emp_spouse_pay']=='0'?'':$emp_data[0]['emp_spouse_pay'];
+$emp_spouse_hra=$emp_data[0]['emp_spouse_hra']=='0'?'':$emp_data[0]['emp_spouse_hra'];
+$spouse_medical_allowance= $emp_data[0]['spouse_medical_allowance'];
+$emp_spouse_res=$emp_data[0]['emp_spouse_res'];
+$emp_spouse_house_schm=$emp_data[0]['emp_spouse_house_schm'];
+$emp_pan_no=$emp_data[0]['emp_pan_no'];
+$emp_blood_grp=$emp_data[0]['emp_blood_grp'];
+$emp_height=$emp_data[0]['emp_height']=='0'?'':$emp_data[0]['emp_height'];
+$emp_diff_able=$emp_data[0]['emp_diff_able'];
+$emp_disable_status=$emp_data[0]['emp_disable_status'];
+$conv_status=$emp_data[0]['conv_allow_status'];
+$emp_idf_mark=$emp_data[0]['emp_idf_mark'];
+$emp_form_status=$emp_data[0]['emp_form_status'];
+$gp_id=$emp_data[0]['gp_id_fk'];
+$emp_pension_status=$emp_data[0]['emp_pension_status'];
+$spouse_ss_enrolled = $emp_data[0]['spouse_ss_enrolled'];
+
+?>
+
+<script>
+	
+	function viewSpouse(type)
+	{
+		/*if(type!='242'){
+		$('#spouse_label').show();
+		$('#spouse_field_fname').show();
+		$('#spouse_field_maname').show();
+		$('#spouse_field_last').show();
+		$('#spouse_employee_label').show();
+		$('#spouse_employee_field').show();
+		}else{
+		$('#employed_not').attr('checked', false);
+		$('#spouse_details_label').hide();
+		$('#spouse_details_field').hide();
+		$('#spouse_pay_tr').hide();
+		$('#employed_details').val('');
+		/*$('#spouse_fname').val('FIRST');
+		$('#spouse_mname').val('MIDDLE');
+		$('#spouse_lname').val('LAST');*/
+		/*$('#spouse_pay').val('');
+		$('#spouse_hra').val('');
+		$('#spouse_label').hide();
+		$('#spouse_field_fname').hide();
+		$('#spouse_field_maname').hide();
+		$('#spouse_field_last').hide();
+		$('#spouse_employee_label').hide();
+		$('#spouse_employee_field').hide();
+		$('#spouse_pay_field').hide();
+		$('#spouse_hra_div').hide();
+		$('#spouse_hra_tr').hide();
+		$('#spouse_pay_tr').hide();
+		}*/
+		if(type=='242' || type==''|| type=='243' || type=='244' || type=='245' || type=='246')
+		{
+			$('#employed_not').attr('checked', false);
+			$('#spouse_details_label').hide();
+			$('#spouse_details_field').hide();
+			$('#spouse_pay_tr').hide();
+			$('#employed_details').val('');
+			/*$('#spouse_fname').val('FIRST');
+			$('#spouse_mname').val('MIDDLE');
+			$('#spouse_lname').val('LAST');*/
+			$('#spouse_pay').val('');
+			//$('#spouse_medical_allowance').val();
+			$('#spouse_hra').val('');
+			$('#spouse_label').hide();
+			$('#spouse_field_fname').hide();
+			$('#spouse_field_maname').hide();
+			$('#spouse_field_last').hide();
+			$('#spouse_employee_label').hide();
+			$('#spouse_employee_field').hide();
+			$('#spouse_pay_field').hide();
+			$('#spouse_hra_div').hide();
+			$('#spouse_hra_tr').hide();
+			$('#spouse_pay_tr').hide();
+			//$('#spouse_medical_tr').hide();
+			//$('#spouse_medical_div').hide();
+		}
+		if(type=='241')
+		{
+			$('#spouse_label').show();
+			$('#spouse_field_fname').show();
+			$('#spouse_field_maname').show();
+			$('#spouse_field_last').show();
+			$('#spouse_employee_label').show();
+			$('#spouse_employee_field').show();
+		}
+	}
+	
+	function sposeDetails()
+	{
+		if(document.getElementById('employed_not').checked==true)
+		{
+			$('#spouse_details_label').show();
+			$('#spouse_details_field').show();
+			$('#spouse_pay_tr').show();
+			$('#spouse_hra_tr').show();
+			//$('#spouse_medical_tr').show();
+			//$('#spouse_medical_div').show();
+			$('#spouse_pay_field').show();
+			//$('#spouse_medical_allowance').show();
+			$('#spouse_hra_div').show();
+			//$('#spouse_medical_tr').show();
+			//$('#spouse_medical_div').show();
+		}
+		else
+		{
+			$('#employed_details').val('');
+			$('#spouse_pay').val('');
+			//$('#spouse_medical_allowance').val();
+			$('#spouse_hra').val('');
+			$('#spouse_details_label').hide();
+			$('#spouse_details_field').hide();
+			$('#spouse_pay_tr').hide();
+			$('#spouse_hra_tr').hide();
+			//$('#spouse_medical_tr').hide();
+			//$('#spouse_medical_div').hide();
+			$('#spouse_pay_field').hide();
+			//$('#spouse_medical_allowance').hide();
+			$('#spouse_hra_div').hide();
+			//$('#spouse_medical_tr').hide();
+			//$('#spouse_medical_div').hide();
+		}
+	}
+	
+	function residentalView(type)
+	{
+		if(type=='251')
+		{
+			$('#residental_label').show();
+			$('#residental_field').show();
+		}
+		else
+		{
+			$('#residental_label').hide();
+			$('#residental_field').hide();
+		}
+	}
+	
+	function stateDetailsView(type)
+	{
+		if(type=='1')
+		{
+			$('#state_details_label').show();
+			$('#state_details_field').show();
+			$('#conv_eligible_label').show();
+			$('#conv_eligible_div').show();
+		}
+		else
+		{
+			$('#state_details_label').hide();
+			$('#state_details_field').hide();
+			$('#state_details').val('');
+			$('#conv_eligible_label').hide();
+			$('#conv_eligible_div').hide();
+		}
+	}
+</script> 
+
+<script>
+	$(document).ready(function() 
+	{
+		if($('#employed_not').is(':checked')==true)
+		{
+			$('#spouse_details_label').show();
+			$('#spouse_details_field').show();
+			$('#spouse_pay_tr').show();
+			$('#spouse_hra_tr').show();
+			//$('#spouse_medical_tr').show();
+			//$('#spouse_medical_div').show();
+			$('#spouse_pay_field').show();
+			//$('#spouse_medical_allowance').show();
+			$('#spouse_hra_div').show();
+			//$('#spouse_medical_tr').show();
+			//$('#spouse_medical_div').show();
+		}
+		if($("#differently_able").val()=='1')
+		{
+			$('#state_details_label').show();
+			$('#state_details_field').show();
+			$('#conv_eligible_label').show();
+			$('#conv_eligible_div').show();		
+		}
+		if($("#residental_status").val()=='251')
+		{
+			$('#residental_label').show();
+			$('#residental_field').show();	
+		}
+		if($("#marital_status").val()=='241')
+		{
+			$('#spouse_label').show();
+			$('#spouse_field_fname').show();
+			$('#spouse_field_maname').show();
+			$('#spouse_field_last').show();	
+			$('#spouse_employee_label').show();
+			$('#spouse_employee_field').show();
+		}
+	
+	});
+</script>
+<style>
+.form-horizontal .control-label 
+{
+	text-align:left;
+}
+</style>
+
+<div class="content">
+	<? require '../../../../page/common_back_btns.php'; ?>
+    <div class="welcome_msg">
+        <h2>WELCOME:  <?php echo $_SESSION['user_info']['stake_abbr']; ?>
+        <?php
+        if(isset($_SESSION['location']['gp_name'])) {
+        echo $_SESSION['location']['gp_name'];
+        }elseif(isset($_SESSION['location']['block_name'])) {
+        echo $_SESSION['location']['block_name'];
+        } elseif(isset($_SESSION['location']['district_name'])) {
+        echo $_SESSION['location']['district_name'];
+        } elseif(isset($_SESSION['location']['state_name'])) {
+        echo $_SESSION['location']['state_name'];
+        } ?></h2><h3>
+        <? echo $_SESSION['location']['block_name']. " ,".$_SESSION['location']['district_name'];
+        ?></h3>
+    </div>
+    <!-- Latest compiled and minified JavaScript -->
+    <div class="row" id="cont">
+        <div class="col-lg-12 col-md-8 col-sm-8" id="sm-pad"> 
+            <div class="col-sm-12" style="width:98%;">
+                <h1 class="heading">Personal Details</h1>
+                <div class="border"></div>
+                </br>
+                <?php 
+					if($msg)
+					{
+						echo $msg;
+						echo "<br/>";
+					}
+					if($error_msg)
+					{
+						echo $error_msg;
+						echo "<br/>";
+					}
+					if(!empty($_GET['emp_id_pk']))
+					{
+						$employee_id=$cryptoGraph->decode($_REQUEST['emp_id_pk'],4);
+					}
+					else
+					{
+						$employee_id=$cryptoGraph->decode($emp_id,4);
+					}
+                ?>
+                <form class="form-horizontal" id="loginForm" method="post" action="profile_entry_personal_update.php" onsubmit="return valid_code();">
+                    <input type="hidden" name="emp_id_pk" value="<?= $employee_id ?>" />
+                    <input type="hidden" name="desig" value="<?= $emp_desig ?>" />
+                    <input type="hidden" name="form_status" value="<?=$emp_form_status ?>" />
+                    <input type="hidden" name="gp_id" value="<?=$gp_id ?>" />
+                    <input type="hidden" name="sec_tok" id="sec_tok" value="<?=$enc_token?>" />
+                    <input type="hidden" name="pension_stat" id="pension_stat" value="<?= $emp_pension_status ?>"  />
+                    <input type="hidden" name="update_id" id="update_id" />
+					<input type="hidden" name="pension_id" id="pension_id" />
+
+                    <div class="row mb-3">
+                        <label for="inputEmail3" class="col-sm-3 control-label">Father's Name</label>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control upper_case" id="father_fname"  name="father_fname" placeholder="First Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');" value="<?=$fname[0]; ?>">
+                        </div>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control upper_case" id="father_mname"  name="father_mname" placeholder="Middle Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');" value="<?=$fname[1]; ?>">
+                        </div>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control upper_case" id="father_lname"  name="father_lname" placeholder="Last Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');" value="<?=$fname[2]; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <label for="inputEmail3" class="col-sm-3 control-label">Mother's Name</label>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control upper_case" id="mother_fname"  name="mother_fname" placeholder="First Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');"value="<?=$mname[0]; ?>">
+                        </div>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control upper_case" id="mother_mname"  name="mother_mname" placeholder="Middle Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');"value="<?=$mname[1]; ?>">
+                        </div>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control upper_case" id="mother_lname"  name="mother_lname" placeholder="Last Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');"value="<?=$mname[2]; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <label for="inputPassword3" class="col-sm-3 control-label">Religion<span class="star_color">*</span></label>
+                        <div class="col-sm-3">
+							<?php
+                            $db = new database();
+                            $arr = $db->fetch_table("select code,description from prd_dise_code_master where substring(code,1,2)='16' and length(code)='3' ORDER BY description");
+                            ?>
+                            <select class="form-control" name="religion" id="religion" >
+                                <option value="">-Please Select-</option>
+                                <?php foreach($arr as $key){ $key['code']. '<br />'; ?>
+                                <option value="<?php echo $key['code']; ?>"<? if($emp_religion==$key['code']){ echo "selected";}?>><?php echo $key['description']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <label for="inputPassword3" class="col-sm-3 control-label">Mother Tongue <span class="star_color">*</span></label>
+                        <div class="col-sm-3">
+							<?php
+                            $db = new database();
+                            $arr_mother = $db->fetch_table( "select code,description from prd_dise_code_master where substring(code,1,2)='70' and length(code)='4'");
+                            ?>
+                            <select class="form-control" name="mother_tounge" id="mother_tounge">
+                                <option value="">-Please Select-</option>
+                                <?php foreach($arr_mother as $key){ $key['code']. '<br />'; ?>
+                                <option value="<?php echo $key['code']; ?>" <? if($emp_mother_tongue==$key['code']){ echo "selected";}?>><?php echo $key['description']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <label for="inputPassword3" class="col-sm-3 control-label">Marital status<span class="star_color">*</span></label>
+                        <div class="col-sm-3">
+							<?php
+                            $db = new database();
+                            $arr_m = $db->fetch_table( "select code,description from prd_dise_code_master where substring(code,1,2)='24' and length(code)='3'");
+                            ?>
+                            <select class="form-control" name="marital_status" id="marital_status" onChange="return viewSpouse(this.value);">
+                                <option value="">-Please Select-</option>
+                                <?php  foreach($arr_m as $key){ $key['code']. '<br />'; ?>
+                                <option value="<?php echo $key['code']; ?>" <? if($emp_marital_status==$key['code']){ echo "selected";}?>><?php echo $key['description']; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_label" style="display:none">Spouse Name<span class="star_color">*</span></label>
+                        <div class="col-sm-3" id="spouse_field_fname" style="display:none">
+                        	<input type="text" class="form-control upper_case"  name="spouse_fname" id="spouse_fname" placeholder="First Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');" value="<?=$sname[0]; ?>">
+                        </div>
+                        <div class="col-sm-3" id="spouse_field_maname" style="display:none">
+                        	<input type="text" class="form-control upper_case"  name="spouse_mname" id="spouse_mname" placeholder="Middle Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');" value="<?=$sname[1]; ?>">
+                        </div>
+                        <div class="col-sm-3" id="spouse_field_last" style="display:none">
+                        	<input type="text" class="form-control upper_case"  name="spouse_lname" id="spouse_lname" placeholder="Last Name" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');" value="<?=$sname[2]; ?>">
+                        </div>
+                    </div>
+                    
+                    <?php 
+					if($emp_desig!='1120' && $emp_desig!='1124')
+                    {  
+						if ($sname[0] == "" && $emp_spouse_pay=="")
+						{ ?>
+                            <div class="row mb-3">
+                                <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_employee_label" style="display:none">Whether Spouse is Employed<span class="star_color">*</span></label>
+                                <div class="col-sm-3" id="spouse_employee_field" style="display:none">
+                                    <input type="checkbox" name="employed_not" id="employed_not" autocomplete="off" value="1"  onClick="return sposeDetails();" >
+                                    <label for="employed_not"><span></span></label>
+                                </div>
+                            </div>
+                            <?php 
+						} 
+						else if ($sname[0] != "" && $emp_spouse_pay=="")
+						{ ?>
+                            <div class="row mb-3">
+                                <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_employee_label" style="display:none">Whether Spouse is Employed<span class="star_color">*</span></label>
+                                <div class="col-sm-3" id="spouse_employee_field" style="display:none">
+                                    <input type="checkbox" name="employed_not" id="employed_not" autocomplete="off" value="1"  onClick="return sposeDetails();" >
+                                    <label for="employed_not"><span></span></label>
+                                </div>
+                            </div>
+						<?php  }
+						else if ($sname[0] != "" && $emp_spouse_pay!="")
+						{?>
+                            <div class="row mb-3">
+                                <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_employee_label" style="display:none">Whether Spouse is Employed<span class="star_color">*</span></label>
+                                <div class="col-sm-3" id="spouse_employee_field" style="display:none">
+                                    <input type="checkbox" name="employed_not" id="employed_not" autocomplete="off" value="1" checked="checked" onClick="return sposeDetails();" >
+                                    <label for="employed_not"><span></span></label>
+                                </div>
+                            </div>
+						<?php } ?> 
+						
+						<div class="row mb-3">
+                            <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_details_label" style="display:none">Employment Detail<span class="star_color">*</span></label>
+                            <div class="col-sm-3" id="spouse_details_field" style="display:none">
+                            	<input type="text" class="form-control upper_case" name="employed_details" id="employed_details" placeholder="Employment Details" autocomplete="off" value="<?=$emp_spouse_details; ?>">
+                            </div>
+                            <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_pay_tr" style="display:none">Spouse Pay<span class="star_color">*</span></label>
+                            <div class="col-sm-3" id="spouse_pay_field" style="display:none">
+                            	<input type="text" class="form-control" name="spouse_pay" id="spouse_pay" placeholder="SPOUSE PAY" autocomplete="off" value="<?=$emp_spouse_pay ?>"onKeyPress="return keyRestrict(event,'0123456789');" >
+                            </div>
+						</div>
+						
+						<div class="row mb-3">
+                            <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_hra_tr" style="display:none">Spouse HRA<span class="star_color">*</span></label>
+                            <div class="col-sm-3" id="spouse_hra_div" style="display:none">
+                            	<input type="text" class="form-control" name="spouse_hra" id="spouse_hra" placeholder="SPOUSE HRA" autocomplete="off" value="<?=$emp_spouse_hra ?>" onKeyPress="return keyRestrict(event,'0123456789');">
+                            </div>
+						</div>
+						<div class="row mb-3">
+                            <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_ss_tr">Spouse Opted for enrolment in Swasthya Sathi:<span class="star_color">*</span></label>
+                            <div class="col-sm-3" id="spouse_ss_div">
+                                <select name="spouse_ss_enrolled" id="spouse_ss_enrolled" class="form-control">
+                                    <option value="">Please Select</option>
+                                    <option value="1" <? if($spouse_ss_enrolled=='1'){ echo "selected";}?>>Yes</option>
+                                    <option value="0" <? if($spouse_ss_enrolled=='0'){ echo "selected";}?>>No</option>
+                                </select>
+                            </div>
+						</div>						
+						<div class="row mb-3">
+                            <label for="inputPassword3" class="col-sm-3 control-label" id="spouse_medical_tr">Employee Opted for enrolment in WB Health Scheme:<span class="star_color">*</span></label>
+                            <div class="col-sm-3" id="spouse_medical_div">
+                                <select name="spouse_medical_allowance" id="spouse_medical_allowance" class="form-control" >
+                                    <option value="">Please Select</option>
+                                    <option value="1" <? if($spouse_medical_allowance=='1'){ echo "selected";}?>>Yes</option>
+                                    <option value="0" <? if($spouse_medical_allowance=='0'){ echo "selected";}?>>No</option>
+                                </select>
+                            </div>
+						</div>
+						
+						<div class="row mb-3">
+                            <label for="inputPassword3" class="col-sm-3 control-label">Residential Status<span class="star_color">*</span></label>
+                            <div class="col-sm-3">
+								<?php
+                                $db = new database();
+                                $arr_r = $db->fetch_table("select code,description from prd_dise_code_master where substring(code,1,2)='25' and length(code)='3' and code!='256'");
+                                ?>
+                                <select class="form-control" name="residental_status" id="residental_status" onChange="return residentalView(this.value);" >
+                                    <option value="">-Please Select-</option>
+                                    <?php foreach($arr_r as $key){ ?>
+                                    <option value="<?php  echo $key['code']; ?>" <? if($key['code']==$emp_spouse_res){ echo "selected";}?>><?php echo $key['description']; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <label for="inputPassword3" class="col-sm-3 control-label" id="residental_label" style="display:none">Housing Scheme <span class="star_color">*</span></label>
+                            <div class="col-sm-3" id="residental_field"  style="display:none">
+                            	<input type="text" class="form-control upper_case" name="house_space_name" id="house_space_name" placeholder="Housing Scheme Name" autocomplete="off" value="<?=$emp_spouse_house_schm ?>">
+                            </div>
+						</div> 
+                    <?php } ?> 
+                    
+                    <div class="row mb-3">
+                        <label for="inputPassword3" class="col-sm-3 control-label">PAN NO.</label>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control upper_case" name="pan_no" id="pan_no" placeholder="PAN NUMBER" autocomplete="off" value="<?=$emp_pan_no ?>" maxlength="10">
+                        </div>
+                        <label for="inputPassword3" class="col-sm-3 control-label">Blood Group</label>
+                        <div class="col-sm-3">
+                            <select class="form-control" name="tch_blood_group" id="tch_blood_group">
+                                <option value="">-Please Select-</option>
+                                <?php
+                                $db = new database();
+                                $arr_blood = $db->fetch_table("select * from prd_dise_code_master where length(code)=5 and code like '20%' order by code ");
+                                foreach($arr_blood as $key){ $key['code']. '<br />'; ?>
+                                <option value="<?php echo $key['code']; ?>"  <? if($emp_blood_grp==$key['code']){ echo "selected";}?>><?php echo $key['description']; ?>
+                                </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <label for="inputPassword3" class="col-sm-3 control-label">Height (In cm)</label>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control" name="height" id="height" placeholder="HEIGHT" maxlength="4" autocomplete="off" value="<?=$emp_height ?>" onKeyPress="return keyRestrict(event,'0123456789.');">
+                        </div>
+                        <label for="inputPassword3" class="col-sm-3 control-label">Identification Mark</label>
+                        <div class="col-sm-3">
+                        	<input type="text" class="form-control upper_case" name="identification_mark" id="identification_mark" placeholder="Identification Mark" autocomplete="off" value="<?=$emp_idf_mark ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <label for="inputPassword3" class="col-sm-3 control-label">Whether Differently Able <span class="star_color">*</span></label>
+                        <div class="col-sm-3">
+                            <select class="form-control" name="differently_able" id="differently_able" onChange="return stateDetailsView(this.value);">
+                                <option value="">Please Select</option>
+                                <option value="1" <? if($emp_diff_able=='1') { echo "selected"; } ?>>YES</option>
+                                <option value="0" <? if($emp_diff_able=='0') { echo "selected"; } ?>>NO</option>
+                            </select>
+                        </div>
+                        <label for="inputPassword3" class="col-sm-3 control-label" id="state_details_label" style="display:none" >Status of Disability <span class="star_color">*</span></label>
+                        <div class="col-sm-3" id="state_details_field" style="display:none" >
+                        	<input type="text" class="form-control upper_case" name="state_details" id="state_details" placeholder="Status of Disability" autocomplete="off" value="<?= $emp_disable_status ?>" onKeyPress="return keyRestrict(event,'abcdefghijklmnopqrstuvwxyz ');">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <label for="inputPassword3" class="col-sm-3 control-label" id="conv_eligible_label" style="display:none">Whether Eligible  For Conveyance Allowance <span class="star_color">*</span></label>
+                        <div class="col-sm-3" id="conv_eligible_div" style="display:none">
+                            <select class="form-control" name="conv_eligible" id="conv_eligible" >
+                                <option value="">Please Select</option>
+                                <option value="1" <? if($conv_status=='1' || $conv_eligible=='1') { echo "selected"; } ?>>YES</option>
+                                <option value="0" <? if($conv_status=='0' || $conv_eligible=='0') { echo "selected"; } ?>>NO</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <p style="border-top:1px dashed #27769F; text-align:center;"></p>
+                    <div class="row mb-3">
+                        <div class="col-sm-12">
+                            <button type="submit" class="btn btn-info" style="float:right">SAVE & CONTINUE <i class="fa fa-chevron-right"></i></button>
+                            <a href="profile_entry_sal.php?emp_id_pk=<? if(!empty($_GET['emp_id_pk'])){ echo $_GET['emp_id_pk']; } else { echo $emp_id;} ?>&gp_id=<? if(!empty($_GET['gp_id'])){ echo $_GET['gp_id']; } else { echo $gpid;} ?>" class="btn btn-danger" style="float:left;"><i class="fa fa-chevron-left"></i> PREVIOUS</a>
+                        </div>
+                    </div>
+                    
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="clear"></div>
+<?
+  //----------------------------------- FOOTER ----------------------------------------------------------------------------------
+require '../../../../page/layout/footer.php';
+//----------------------------------------------------------------------------------------------------------------------------
+?>  
+    
+<script>
+	function valid_code()
+	{
+		if($('#religion').val()=='')
+		{
+			alert('Please Select Religion.');
+			$('#religion').focus();
+			return false;
+		}
+		if($('#mother_tounge').val()=='')
+		{
+			alert('Please Select Mother Tounge.');
+			$('#mother_tounge').focus();
+			return false;
+		}
+		if($('#marital_status').val()=='')
+		{
+			alert('Please Select Marital Status.');
+			$('#marital_status').focus();
+			return false;
+		}
+		if($('#marital_status').val()=='241')
+		{
+			if($('#spouse_fname').val()=='' || $('#spouse_fname').val()=='FIRST')
+			{
+				alert('Please Enter Spouse FIRST Name.');
+				$('#spouse_fname').focus();
+				return false;
+			}
+		}
+		if(document.getElementById('employed_not').checked==true)
+		{
+			if($('#employed_details').val()=='')
+			{
+				alert('Please Enter Details of employment.');
+				$('#employed_details').focus();
+				return false;
+			}
+			if($('#spouse_pay').val()=='')
+			{
+				alert('Please Enter Spouse Pay.');
+				$('#spouse_pay').focus();
+				return false;
+			}
+			if($('#spouse_hra').val()=='')
+			{
+				alert('Please Enter Spouse Hra.');
+				$('#spouse_hra').focus();
+				return false;
+			}
+			
+		}
+		if($('#spouse_medical_allowance').val()=='')
+			{
+				alert('Please Select Spouse opted for enrolment in West Bengal Health Scheme.');
+				$('#spouse_medical_allowance').focus();
+				return false;
+			}
+		if($('#residental_status').val()=='')
+		{
+			alert('Please Select Residental Status.');
+			$('#residental_status').focus();
+			return false;
+		}
+		if($('#residental_status').val()=='251')
+		{
+			if($('#house_space_name').val()=='')
+			{
+				alert('Please enter housing details.');
+				$('#house_space_name').focus();
+				return false;
+			}
+		}
+		if($('#differently_able').val()=='')
+		{
+			alert('Please Select Whether Differently Able.');
+			$('#differently_able').focus();
+			return false;
+		}
+		if($('#differently_able').val()=='1')
+		{
+			if($('#state_details').val()=='')
+			{
+				alert('Please enter status of disability.');
+				$('#state_details').focus();
+				return false;
+			}
+			if($('#conv_eligible').val()=='')
+			{
+				alert('Please select whether eligible for conveyance allowance or not.');
+				$('#conv_eligible').focus();
+				return false;
+			}
+		}
+		if($('#pan_no').val()!='')
+		{
+			var test=valid_pan();
+			if(test==false)
+			{
+				$('#pan_no').focus();	
+				return false;
+			}
+		}
+		var a=valid_updation();
+		//alert(a);
+		if(a!=true)
+		{
+			return false;
+		}
+	}
+	
+	function valid_pan()
+	{
+		var pan=document.getElementById("pan_no").value;
+		var regpan = /^([a-zA-Z]){3}([P]){1}([a-zA-Z]){1}([0-9]){4}([a-zA-Z]){1}?$/;
+		if(pan!="")
+		{
+			if(regpan.test(pan) == false)
+			{
+				alert("Permanent Account Number (PAN No.) is not valid.");
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+	}
+	
+	function valid_updation()
+	{		
+			
+		var stake='<?php echo $_SESSION['user_info']['stake_user']; ?>';
+		var true_stat='<?php echo $true_stat; ?>';
+		var false_stat='<?php echo $false_stat; ?>';
+		
+		var emp_father_first_name= '<?php echo $fname[0]; ?>';
+		var emp_father_middle_name= '<?php echo $fname[1]; ?>';
+		var emp_father_last_name= '<?php echo $fname[2]; ?>';
+		var emp_mother_first_name= '<?php echo $mname[0]; ?>';
+		var emp_mother_middle_name= '<?php echo $mname[1]; ?>';
+		var emp_mother_last_name= '<?php echo $mname[2]; ?>';
+		var emp_religion= '<?php echo $emp_religion; ?>';
+		var emp_mother_tongue= '<?php echo $emp_mother_tongue; ?>';
+		var emp_marital_status= '<?php echo $emp_marital_status; ?>';
+		var emp_spouse_first_name= '<?php echo $sname[0]; ?>';
+		var emp_spouse_middle_name= '<?php echo $sname[1]; ?>';
+		var emp_spouse_last_name= '<?php echo $sname[2]; ?>';
+		var emp_spouse_job_status= '<?php echo $emp_spouse_job_status; ?>';
+		var emp_spouse_details= '<?php echo $emp_spouse_details; ?>';
+		var emp_spouse_pay= '<?php echo $emp_spouse_pay; ?>';
+		var emp_spouse_hra= '<?php echo $emp_spouse_hra; ?>';
+		var spouse_medical_allowance= '<?php echo $spouse_medical_allowance; ?>';
+		var emp_spouse_res= '<?php echo $emp_spouse_res; ?>';
+		var emp_spouse_house_schm= '<?php echo $emp_spouse_house_schm; ?>';
+		var emp_pan_no= '<?php echo $emp_pan_no; ?>';
+		var emp_blood_grp= '<?php if($emp_blood_grp=='0'){echo "";}else{echo $emp_blood_grp;} ?>';
+		var emp_height= '<?php echo $emp_height; ?>';
+		var emp_diff_able= '<?php echo $emp_diff_able; ?>';
+		var emp_disable_status= '<?php echo $emp_disable_status; ?>';
+		var conv_status= '<?php echo $conv_status; ?>';
+		var emp_idf_mark= '<?php echo $emp_idf_mark; ?>';
+		
+		var val_emp_father_first_name= $('#father_fname').val().trim();
+		var val_emp_father_middle_name= $('#father_mname').val().trim();
+		var val_emp_father_last_name= $('#father_lname').val().trim();
+		var val_emp_mother_first_name= $('#mother_fname').val().trim();
+		var val_emp_mother_middle_name= $('#mother_mname').val().trim();
+		var val_emp_mother_last_name= $('#mother_lname').val().trim();
+		var val_emp_religion= $('#religion').val();
+		var val_emp_mother_tongue= $('#mother_tounge').val();
+		var val_emp_marital_status= $('#marital_status').val();
+		var val_emp_spouse_first_name= $('#spouse_fname').val().trim();
+		var val_emp_spouse_middle_name= $('#spouse_mname').val().trim();
+		var val_emp_spouse_last_name= $('#spouse_lname').val().trim();
+		
+		if ($('#employed_not').is(":checked"))
+		{
+		  var val_emp_spouse_job_status=1;
+		}
+		else
+		{
+			var val_emp_spouse_job_status=0;
+		}
+		
+		var val_emp_spouse_details= $('#employed_details').val().trim();
+		var val_emp_spouse_pay= $('#spouse_pay').val();
+		var val_emp_spouse_hra= $('#spouse_hra').val();
+		var val_spouse_medical_allowance= $('#spouse_medical_allowance').val();
+		var val_emp_spouse_res= $('#residental_status').val();
+		var val_emp_spouse_house_schm= $('#house_space_name').val().trim();
+		var val_emp_pan_no= $('#pan_no').val().trim();
+		var val_emp_blood_grp= $('#tch_blood_group').val();
+		var val_emp_height= $('#height').val();
+		var val_emp_diff_able= $('#differently_able').val();
+		var val_emp_disable_status= $('#state_details').val().trim();
+		var val_conv_status= $('#conv_eligible').val();
+		var val_emp_idf_mark= $('#identification_mark').val().trim();
+		/*if(stake=='3299001')
+		{
+			alert(emp_spouse_middle_name+"  "+val_emp_spouse_middle_name);
+			return false;
+		} */
+		if(emp_father_first_name!=val_emp_father_first_name || emp_father_middle_name!=val_emp_father_middle_name || emp_father_last_name!=val_emp_father_last_name || emp_mother_first_name!=val_emp_mother_first_name || emp_mother_middle_name!=val_emp_mother_middle_name || emp_mother_last_name!=val_emp_mother_last_name || emp_religion!=val_emp_religion || emp_mother_tongue!=val_emp_mother_tongue || emp_marital_status!=val_emp_marital_status || emp_spouse_first_name!=val_emp_spouse_first_name || emp_spouse_middle_name!=val_emp_spouse_middle_name || emp_spouse_last_name!=val_emp_spouse_last_name || emp_spouse_job_status!=val_emp_spouse_job_status || emp_spouse_details!=val_emp_spouse_details || emp_spouse_pay!=val_emp_spouse_pay || emp_spouse_hra!=val_emp_spouse_hra || spouse_medical_allowance!=val_spouse_medical_allowance || emp_spouse_res!=val_emp_spouse_res || emp_spouse_house_schm!=val_emp_spouse_house_schm || emp_pan_no!=val_emp_pan_no || emp_blood_grp!=val_emp_blood_grp || emp_height!=val_emp_height || emp_diff_able!=val_emp_diff_able || emp_disable_status!=val_emp_disable_status || conv_status!=val_conv_status || emp_idf_mark!=val_emp_idf_mark)
+		{
+			$('#update_id').val(true_stat);
+		}
+		else
+		{
+			$('#update_id').val(false_stat);
+		}
+		if(emp_father_first_name!=val_emp_father_first_name || emp_father_middle_name!=val_emp_father_middle_name || emp_father_last_name!=val_emp_father_last_name || emp_religion!=val_emp_religion || emp_marital_status!=val_emp_marital_status || emp_spouse_first_name!=val_emp_spouse_first_name || emp_spouse_middle_name!=val_emp_spouse_middle_name || emp_spouse_last_name!=val_emp_spouse_last_name || emp_pan_no!=val_emp_pan_no || emp_idf_mark!=val_emp_idf_mark)
+		{
+			$('#pension_id').val(true_stat);
+		}
+		else
+		{
+			$('#pension_id').val(false_stat);
+		}
+		return true;
+	
+	}
+</script>

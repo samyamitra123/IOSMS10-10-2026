@@ -1,0 +1,274 @@
+ <?php
+session_start();
+ob_start();
+error_reporting(0);
+if($_SERVER['HTTP_REFERER']==''){
+	header("Location:../../dashboard.php");
+}
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require '../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+require_once '../../../includes/library/myvalidation.class.php';
+//require '../../../page_visite.php';
+if (
+	  !isset($_SESSION['user_info']['stake_user'])
+	|| !isset($_SESSION['user_info']['stake_level'])
+	|| !isset($_SESSION['user_info']['flag'])
+
+	){
+	header('Location: '. $config['base_url'] . "page/login.php");
+	exit;
+}
+$sec_time_token=$_POST['sec_tok'];
+$session_token=$_SESSION['security_token'];
+$enc_session=md5('369'.$session_token);
+if($sec_time_token!=$enc_session)
+{
+	$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Time Out!..Please Try Again.</strong></div>';
+	include 'zp_profile_form.php';
+	exit;
+}
+else
+{
+	$dise_name= strtoupper($_POST['dise_name']);
+	$aeo_name= strtoupper($_POST['aeo_name']);
+	/*$secretary_name= strtoupper($_POST['secretary_name']);
+	$fc_cao_name= strtoupper($_POST['fc_cao_name']);
+	$accountant_name= strtoupper($_POST['accountant_name']);*/
+	//$ps_name=$_POST['ps_name'];
+	//$executive_officer_name=$_POST['executive_name'];
+	//$mobile_no=$_POST['mobile_no'];
+	$tan_no=strtoupper($_POST['tan_no']);
+	$gst_no=strtoupper($_POST['gst_no']);
+	$pan_no=strtoupper($_POST['pan_no']);
+	$pl_code=strtoupper($_POST['pl_code']);
+	$road_name= strtoupper($_POST['road_name']);
+	$vill_name= strtoupper($_POST['vill_name']);
+	$post_office= strtoupper($_POST['post_office']);
+	$pollice_st= strtoupper($_POST['pollice_st']);
+	$district_id= $_POST['district_id'];
+	//$ps_id=$_POST['ps_id'];
+	$ddo_code=strtoupper($_POST['ddo_code']);
+	$pin=$_POST['pin'];
+	$operator_code_pf= $_POST['operator_code_pf'];
+	$t_code_pf= $_POST['t_code_pf'];
+	
+	if($_POST['contactno']=='')
+	{
+		$contact_no=0;
+	}
+	else
+	{
+		$contact_no=$_POST['contactno'];
+	}
+	$email= $_POST['email'];
+
+
+/////////////////////////////////////////////////////////////////////////////// SERVER SIDE VALIDATION  ///////////////////////////////////////////////////////////////////////////////////////////////
+
+	
+	if($validator->blank_select($dise_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter District Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	/*else if($validator->blank_select($ps_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter PS Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($mobile_no) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Mobile Number.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($executive_officer_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Executive Officer Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}*/
+	
+	else if($validator->blank_select($aeo_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter AEO Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	/*else if($validator->blank_select($secretary_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Secretary Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($fc_cao_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter FA & CAO Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($accountant_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Accountant Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}*/
+	else if($validator->blank_select($tan_no) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Tan Number.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($pl_code) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter PL Operator Code.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($road_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Road Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($vill_name) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Villege/Town Name.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($post_office) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Post Office.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($pollice_st) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Police Station.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	
+	else if($validator->pattern_number($mobile_no) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Numeric Mobile Number.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($pin) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Insert Pincode</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->pattern_number($pin) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Numeric Pincode.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	
+	else if($validator->pattern_number($contact_no) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Numeric Contact Number.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->blank_select($ddo_code) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter DDO code.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if(!empty($mobile_no) && strlen($mobile_no)!=10)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Mobile Number Should be 10 Digit Long.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if(!empty($pin) && strlen($pin)!=6)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Pincode Should be 6 Digit Long.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	/*else if($validator->blank_select($ddo_code) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter DDO code.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}*/
+	else if($validator->blank_select($email) == FALSE)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter Email Id.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if(!empty($contact_no) && strlen($contact_no)>12)
+	{
+		$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Contact Number Should be Maximum 12 Digit Long.</strong></div>';
+		include 'zp_profile_form.php';
+		exit;
+	}
+	else if($validator->pattern_number($operator_code_pf) == FALSE)
+	{
+	$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter OPERATOR CODE(PF SUBSCRIPTION).</strong></div>';
+	include 'zp_profile_form.php';
+	exit;
+	}
+			
+			
+	else if($validator->pattern_number($t_code_pf) == FALSE)
+	{
+	$error_msg='<div class="alert alert-danger" style="text-align:center"><strong>Please Enter TREASURY CODE(PF SUBSCRIPTION).</strong></div>';
+	include 'zp_profile_form.php';
+	exit;
+	}
+	else
+	{
+
+		$db=new database();
+		
+		
+		$query=$db->update("UPDATE zpemp_zp_profile SET
+							district_id_fk='".$district_id."',
+							aeo_name='$aeo_name',
+							road_name='$road_name' , 
+							post_office_name='$post_office',
+							police_station_name='$pollice_st', 
+							pin_code='$pin',
+							cotract_no='$contact_no',
+							email='$email', 
+							last_upd_time='now()' , 
+							ip_address='".$_SERVER['REMOTE_ADDR']."',
+							vill_name='$vill_name',
+							tan_no='$tan_no',
+							gst_no='$gst_no',
+							pl_code='$pl_code',
+							ddo_code='$ddo_code',
+							pan_no='$pan_no',
+							operator_code_pf='$operator_code_pf',
+							t_code_pf='$t_code_pf'
+							WHERE district_id_fk='".$district_id."'");
+		
+		
+		if($query)
+		{
+			$_SESSION["msg"]='<div class="alert alert-success" style="text-align:center;"><strong>ZP profile submitted Successfully...</strong></div>';
+			header('Location:zp_profile_form.php');
+		}
+		else
+		{
+			$_SESSION["msg"]='<div class="alert alert-danger" style="text-align:center;"><strong>ZP profile submitted failed...</strong></div>';
+			header('Location:zp_profile_form.php');
+		}
+	}
+}
+
+?>
+

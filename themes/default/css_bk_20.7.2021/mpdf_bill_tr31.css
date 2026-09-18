@@ -1,0 +1,37 @@
+
+@charset "utf-8";
+/* CSS Document */
+body{ font-size:12px;}
+.sig table {
+		border-collapse:collapse;
+		border-radius: 5px;
+		-moz-border-radius: 5px;
+		font-family:Arial, Helvetica, sans-serif;
+		font-size:12px;
+	}
+.sig table .heading{
+	background-color:#CCCCCC;
+	color: #000;
+	padding:5px;
+	font-family:Arial, Helvetica, sans-serif;
+	
+}
+
+table {
+		font-size:13px;
+		font-family:Arial, Helvetica, sans-serif;
+	}
+table, th, td {
+		font-size:13px;
+		font-family:Arial, Helvetica, sans-serif;
+	}
+th, td {
+		font-size:13px;
+		font-family:Arial, Helvetica, sans-serif;
+	}
+
+.colgray{
+	
+	background-color: #EEE;
+	font-family:Arial, Helvetica, sans-serif;
+}

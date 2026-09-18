@@ -1,0 +1,134 @@
+[
+  {
+    "DIST_LGD": 303,
+    "DIST_NAME": "24 PARAGANAS NORTH",
+    "DIST_NAME_BENG": "উত্তর ২৪ পরগনা",
+    "DIST_LGD_PRI": 263
+  },
+  {
+    "DIST_LGD": 304,
+    "DIST_NAME": "24 PARAGANAS SOUTH",
+    "DIST_NAME_BENG": "দক্ষিণ ২৪ পরগনা",
+    "DIST_LGD_PRI": 264
+  },
+  {
+    "DIST_LGD": 305,
+    "DIST_NAME": "BANKURA",
+    "DIST_NAME_BENG": "বাঁকুড়া",
+    "DIST_LGD_PRI": 265
+  },
+  {
+    "DIST_LGD": 306,
+    "DIST_NAME": "PURBA BARDHAMAN",
+    "DIST_NAME_BENG": "পূর্ব বর্ধমান",
+    "DIST_LGD_PRI": 266
+  },
+  {
+    "DIST_LGD": 307,
+    "DIST_NAME": "BIRBHUM",
+    "DIST_NAME_BENG": "বীরভূম",
+    "DIST_LGD_PRI": 267
+  },
+  {
+    "DIST_LGD": 308,
+    "DIST_NAME": "COOCHBEHAR",
+    "DIST_NAME_BENG": "কোচবিহার",
+    "DIST_LGD_PRI": 268
+  },
+  {
+    "DIST_LGD": 309,
+    "DIST_NAME": "SILIGURI MAHAKUMA PARISAD",
+    "DIST_NAME_BENG": "দার্জিলিং",
+    "DIST_LGD_PRI": 269
+  },
+  {
+    "DIST_LGD": 310,
+    "DIST_NAME": "DINAJPUR DAKSHIN",
+    "DIST_NAME_BENG": "দক্ষিণ দিনাজপুর",
+    "DIST_LGD_PRI": 270
+  },
+  {
+    "DIST_LGD": 311,
+    "DIST_NAME": "DINAJPUR UTTAR",
+    "DIST_NAME_BENG": "উত্তর দিনাজপুর",
+    "DIST_LGD_PRI": 271
+  },
+  {
+    "DIST_LGD": 312,
+    "DIST_NAME": "HOOGHLY",
+    "DIST_NAME_BENG": "হুগলি",
+    "DIST_LGD_PRI": 272
+  },
+  {
+    "DIST_LGD": 313,
+    "DIST_NAME": "HOWRAH",
+    "DIST_NAME_BENG": "হাওড়া",
+    "DIST_LGD_PRI": 273
+  },
+  {
+    "DIST_LGD": 314,
+    "DIST_NAME": "JALPAIGURI",
+    "DIST_NAME_BENG": "জলপাইগুড়ি",
+    "DIST_LGD_PRI": 274
+  },
+  {
+    "DIST_LGD": 316,
+    "DIST_NAME": "MALDAH",
+    "DIST_NAME_BENG": "মালদা",
+    "DIST_LGD_PRI": 275
+  },
+  {
+    "DIST_LGD": 317,
+    "DIST_NAME": "PURBA MEDINIPUR",
+    "DIST_NAME_BENG": "পূর্ব মেদিনীপুর",
+    "DIST_LGD_PRI": 276
+  },
+  {
+    "DIST_LGD": 318,
+    "DIST_NAME": "PASCHIM MEDINIPUR",
+    "DIST_NAME_BENG": "পশ্চিম মেদিনীপুর",
+    "DIST_LGD_PRI": 277
+  },
+  {
+    "DIST_LGD": 319,
+    "DIST_NAME": "MURSHIDABAD",
+    "DIST_NAME_BENG": "মুর্শিদাবাদ",
+    "DIST_LGD_PRI": 278
+  },
+  {
+    "DIST_LGD": 320,
+    "DIST_NAME": "NADIA",
+    "DIST_NAME_BENG": "নদীয়া",
+    "DIST_LGD_PRI": 279
+  },
+  {
+    "DIST_LGD": 321,
+    "DIST_NAME": "PURULIA",
+    "DIST_NAME_BENG": "পুরুলিয়া",
+    "DIST_LGD_PRI": 280
+  },
+  {
+    "DIST_LGD": 664,
+    "DIST_NAME": "ALIPURDUAR",
+    "DIST_NAME_BENG": "আলিপুরদুয়ার",
+    "DIST_LGD_PRI": 263853
+  },
+  {
+    "DIST_LGD": 702,
+    "DIST_NAME": "KALIMPONG",
+    "DIST_NAME_BENG": "কালিম্পঙ",
+    "DIST_LGD_PRI": 276167
+  },
+  {
+    "DIST_LGD": 703,
+    "DIST_NAME": "JHARGRAM",
+    "DIST_NAME_BENG": "ঝাড়গ্রাম",
+    "DIST_LGD_PRI": 276162
+  },
+  {
+    "DIST_LGD": 704,
+    "DIST_NAME": "PASCHIM BURDWAN",
+    "DIST_NAME_BENG": "পশ্চিম বর্ধমান",
+    "DIST_LGD_PRI": 276164
+  }
+]

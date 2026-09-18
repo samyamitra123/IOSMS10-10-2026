@@ -1,0 +1,1361 @@
+<?php
+
+ /*echo $status='<span style="color:RED;font-weight:bold">***Due to server maintenance of WBIFMS portal, sending XML files generated at IOSMS portal for salary bill sent to  the IFMS portal has been stoped.INCONVENIENCE IS REGRETTED.</span>'; die;*/
+echo $status='<span style="color:RED;font-weight:bold">*** You may check and verify all the details of Salary before and after sending files to IFMS.</span>'; 
+?>
+<br>
+
+<?php
+echo $status='<span style="color:RED;font-weight:bold">*** User has to verify data before sending and must check the data after sending.</span>'; 
+//---------------------------- LIBRARY INCLUDE ----------------------------
+//copy this two lines to every page
+error_reporting(0);
+//header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, max-age=0, post-check=0, pre-check=0");
+//header("Pragma: no-cache");
+ob_start();
+session_start();
+require_once '../../../includes/config/config.php';
+require_once '../../../includes/config/database.config.php';
+require_once'../../../includes/library/database.class.php';
+require_once '../../../includes/library/cryptography.class.php';
+require_once '../../all_function/fun_store/zp_ps_gp_function.php';
+
+
+
+/*if($_SESSION['user_info']['stake_user']=='3299001' || $_SESSION['user_info']['stake_user']=='32010091' ||  $_SESSION['user_info']['stake_user']=='3201009') $_SESSION['user_info']['stake_user']=='3214012')
+{
+	echo 1; die;
+}
+*/
+
+/*if($_SESSION['user_info']['stake_user']=='32010091')
+{*/
+//require '../../page_visite.php';
+$logged_user=$_SESSION['user_info']['stake_abbr'];
+$ngipfSal = $_SESSION['location']['ngipf_sal'];
+//print("NIGPF STATUS".$ngipfSal);
+$k = strtotime("first day of last month");
+$arr = date("Y-m-d", $k);
+$crypto = new cryptography();
+/* $month_ini = new DateTime("first day of last month");
+  $arr=$month_ini->format('Y-m-d'); // 2012-02-01
+  echo $arr; */
+$month_arr = explode('-', $arr);
+$salary_monthyear = $month_arr[0] . $month_arr[1];
+$db = new database();
+$fun_store = new zp_ps_gp_class();
+if($logged_user=='FC&CAO')
+{
+$party_code = '008';
+}
+else if($logged_user=='EO')
+{
+	$party_code = '007';
+}
+else if($logged_user=='BDO')
+{
+	$party_code = '006';
+}
+function ifms_error_description_generate($code) 
+{
+    $db = new database();
+    $err_desc_fetch = $db->fetch_table(" SELECT description FROM prd_ifms_response_code_master WHERE code='" . $code . "' ");
+    return $err_desc_fetch[0]['description'];
+}
+
+$current_year=date("Y");
+	$prev_yrr=$current_year-1;
+	$next_year=$current_year+1;
+	$fin_prev_yrr=$current_year.'04';
+	$fin_yr_start=$current_year.'03';
+	$fin_yr_end=$next_year.'03';
+	
+	 //$ropa_status=$crypto->decode($_POST['ropa_status'],4); 
+	//$ropa_status=$_POST['ropa_status']; 
+	//var_dump($ropa_status); die;
+?>
+
+<style>
+	.hide{display: none;}
+    #sucess{
+	background-color: green;
+	border: medium none salmon;
+	border-radius: 8px;
+	box-shadow: 2px 3px 3px #7d7c7d;
+	color: #ffffff;
+	font-family: Verdana,Geneva,sans-serif;
+	font-size: 13px;
+	padding: 8px;
+	text-align:center;
+	font-weight:bold;
+    }
+    #error{
+	background-color: red;
+	border: medium none salmon;
+	border-radius: 8px;
+	box-shadow: 2px 3px 3px #7d7c7d;
+	color: #ffffff;
+	font-family: Verdana,Geneva,sans-serif;
+	font-size: 13px;
+	padding: 8px;
+	text-align:center;
+	font-weight:bold;
+    }
+    .school table
+    {
+	border-collapse:collapse;
+	background-color: #FFFFFF;
+	font-family: "calibri";
+    }
+    .school table, .school td, .school th
+    {
+	/*border:1px solid #fff;*/
+	padding: 4px;
+	text-align:center;
+    }
+
+    .school table th{
+	background-color: #3E9B96;
+	border:1px solid #fff;
+	color: #fff;
+	padding: 6px;
+	text-align:center;
+    }
+    .school table{
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	overflow: hidden;
+	font-size: 14px;
+    }
+    .school{
+	background-color: #FFFFFF;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	padding: 10px;
+
+    }
+    .school .title h2{
+	color: #FFF;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	background-color: #0D8BBD;
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+    }
+    .school .action .ui-widget{
+	font-size: 11px;
+    }
+    .school .action{
+	text-align: center;
+    }
+    .school .action .ui-button .ui-button-text{
+	padding: 5px 10px;
+    }
+
+</style>
+
+<script>
+    $(document).ready(function () {
+        $("tr:odd").css("background-color", "#CCE6FF");
+        $("tr:even").css("background-color", "#DDF7FF");
+        //$( ".modal fade in" ).css( "height", "1000px" );
+    });
+</script>
+
+<?php
+
+$crypto = new cryptography();
+
+if (
+	!isset($_SESSION['user_info']['stake_user']) || !isset($_SESSION['user_info']['stake_level']) || !isset($_SESSION['user_info']['flag'])
+) {
+    header('Location: ' . $config['base_url'] . "page/login.php");
+    exit;
+}
+
+function date_frmt_change($original_date) 
+{
+    if ($original_date == "0001-01-01" || $original_date == '1970-01-01' || $original_date == NULL || $original_date == "") 
+	{
+		return NULL;
+    } 
+	else 
+	{
+		return $newDate = date("Y-m-d", strtotime($original_date));
+    }
+}
+
+$monthyear = $crypto->decode($_REQUEST['bill_report_year'], 4) . $crypto->decode($_REQUEST['bill_report_month'], 4);
+ $bill_serial_no=$_POST['bill_serial_no'];
+
+
+$db = new database();
+if($logged_user=='FC&CAO')
+{
+$zp_profile_fetch=$db->fetch_table("
+								SELECT pl_code,ddo_code FROM zpemp_zp_profile WHERE district_id_fk='".$_SESSION['location']['district_id']."'
+								");
+								
+$pl_operator_code=$zp_profile_fetch[0]['pl_code'];
+$treasury_code=substr($zp_profile_fetch[0]['ddo_code'],0,3);
+$id="zp_id_fk = '".$_SESSION['location']['district_id']."'";
+$condisation="sal.zp_id_fk=emp.zp_id_fk";
+
+$bill_details= $db->fetch_table("
+										SELECT * FROM prd_block_bill_details 
+										WHERE zp_id_fk = '".$_SESSION['location']['district_id']."'
+										AND bill_no = '" . $_POST['bill'] . "'
+										AND status='1'
+										AND salary_monthyear = '" . $monthyear . "'  AND bill_serial_no= '".$bill_serial_no."'
+										
+								");
+}
+else if($logged_user=='EO')
+{
+	$ps_profile_fetch=$db->fetch_table("
+										SELECT ddo_code,treasury_code FROM psemp_ps_profile WHERE ps_id_fk='".$_SESSION['location']['ps_id']."'
+								");
+								
+$pl_operator_code=$ps_profile_fetch[0]['ddo_code'];
+$treasury_code=substr($ps_profile_fetch[0]['treasury_code'],0,3);
+$id="ps_id_fk = '".$_SESSION['location']['ps_id']."'";
+$condisation="sal.ps_id_fk=emp.ps_id_fk";
+
+$bill_details= $db->fetch_table("
+										SELECT * FROM prd_block_bill_details 
+										WHERE ps_id_fk = '".$_SESSION['location']['ps_id']."'
+										AND bill_no = '" . $_POST['bill'] . "'
+										AND status='1'
+										AND salary_monthyear = '" . $monthyear . "'  AND bill_serial_no= '".$bill_serial_no."'
+										
+								");
+}
+
+else if($logged_user=='BDO')
+{
+	/*$ps_profile_fetch=$db->fetch_table("
+										SELECT ddo_code,treasury_code FROM psemp_ps_profile WHERE ps_id_fk='".$_SESSION['location']['ps_id']."'
+								");
+								*/
+								
+	
+	$treasury_dts = $db->fetch_table("select ddo_code,treasury_block_code from 
+									prd_dise_admin
+									WHERE 
+									block_code='" . $_SESSION['user_info']['stake_user'] . "'");
+
+
+$treasury_code=$treasury_dts[0]['treasury_block_code'];
+ $pl_operator_code=$treasury_dts[0]['ddo_code']; 
+	
+								
+/*$pl_operator_code=$ps_profile_fetch[0]['ddo_code'];
+$treasury_code=substr($ps_profile_fetch[0]['treasury_code'],0,3);*/
+$id="block_code='" . $_SESSION['user_info']['stake_user'] . "'";
+$condisation="sal.gp_id_fk=emp.gp_id_fk";
+
+$bill_details= $db->fetch_table("
+										SELECT * FROM prd_block_bill_details 
+										WHERE block_code='" . $_SESSION['user_info']['stake_user'] . "'
+										AND bill_no = '" . $_POST['bill'] . "'
+										AND status='1'
+										AND salary_monthyear = '" . $monthyear . "'  AND bill_serial_no= '".$bill_serial_no."'
+										
+								");
+}
+
+/*$bill_type=$crypto->decode($_POST['bill_type'],4);
+$requisition_type=$crypto->decode($_POST['requisition_type'],4);*/ 
+	$bill_type= $bill_details[0]['zp_emp_type'];
+	$requisition_type=$bill_details[0]['requisition_type']; 
+	$ropa_status=$bill_details[0]['ropa_status']; 
+/*$requisition = $db->fetch_table("SELECT code FROM prd_dise_code_master WHERE code_master_id_pk='405'");
+$requisition_type = $requisition[0]['code'];
+*/
+//print_r($bill_details); 
+
+//print($ropa_status); exit;
+if($bill_type == 366) // Excluding  for all Govt Employee For NGIPF SUBSCRIPTION
+{
+	$ngipfSal = 0;
+}
+if($requisition_type != 1001) // Excluding  for all Requisation Type For NGIPF SUBSCRIPTION
+{
+	$ngipfSal = 0;
+}
+if($requisition_type == 1001 && $ropa_status ==2) // Excluding  1001 AND Ropa Status 2 i.e 9008 Bill for all Requisation Type For NGIPF SUBSCRIPTION
+{
+	$ngipfSal = 1;
+}
+$drn_checking = $db->fetch_table("
+										SELECT * FROM prd_block_bill_details 
+										WHERE ".$id."
+										AND bill_no = '" . $_POST['bill'] . "'
+										AND salary_monthyear = '" . $monthyear . "' AND requisition_type='" . $requisition_type . "' 
+										AND status='1'  AND bill_serial_no= '".$bill_serial_no."'
+										
+										");
+
+if ($drn_checking[0]['drn_number'] == "") 
+{
+   $drn_number = $fun_store->drn_generation($party_code);
+} 
+else 
+{
+	$drn_number=$drn_checking[0]['drn_number'];
+	
+    $sftp_details_fetch = $db->fetch_table(" SELECT sftp_benf_id_pk,sftp_benf_sending_status,active_status,sftp_benf_file_name,sftp_benf_response_status FROM prd_sftp_benf_upload_response WHERE bill_id_fk='" . $drn_checking[0]['block_bill_pk'] . "' AND active_status in ('1','2') ");
+	
+	$payment_failure_details=$db->fetch_table(" SELECT count(*) as total_count_fail
+												FROM prd_sftp_benf_failure_details fail 
+												INNER JOIN prd_sftp_benf_upload_response benf
+												ON fail.sftp_benf_id_fk=benf.sftp_benf_id_pk
+												WHERE benf.bill_id_fk='" . $drn_checking[0]['block_bill_pk'] . "' AND benf.active_status='1'
+												AND fail.response_from='10' AND fail.active_status in('1','2','3')");
+
+}
+
+/*if ($monthyear != date('Ym')) 
+{
+    ?>
+    <div class="alert alert-danger" style="width: 28%;margin-left: 43%;text-align: center;"><strong>Please Select Current Month and Year</strong></div>
+    <?php
+} */
+
+
+
+if(($treasury_code=='') || ($pl_operator_code=='')) 
+{
+	echo '<div class="alert alert-danger" style="width: 23%;margin-left: 43%;text-align: center;"><strong>Wrong PL Opertaor Code/ DDO code or Wrong Treasury Code. PL Opertaor Code or Wrong Treasury Code.</strong></div>';
+}
+ /*if(!ctype_alpha($treasury_code) || !ctype_digit($pl_operator_code)) 
+{
+	echo '<div class="alert alert-danger" style="width: 23%;margin-left: 43%;text-align: center;"><strong>Wrong PL Opertaor Code or Wrong Treasury Code. Please update Zilla Parishad Profile.</strong></div>';
+}*/
+
+else 
+{
+    $check_dpsc_bill = $db->fetch_table("
+											SELECT count(*) FROM prd_block_bill_details 
+											WHERE ".$id."
+											AND salary_monthyear = '" . $monthyear . "' AND requisition_type='" . $requisition_type . "' 
+											AND status='1'  AND bill_serial_no= '".$bill_serial_no."'
+											
+											");
+
+    $check_dpsc_bill_exist = $db->fetch_table("
+												SELECT count(*) FROM prd_block_bill_details 
+												WHERE ".$id."
+												AND bill_no = '" . $_POST['bill'] . "'
+												AND salary_monthyear = '" . $monthyear . "' AND requisition_type='" . $requisition_type . "' 
+												AND status='1'  AND bill_serial_no= '".$bill_serial_no."'
+												
+											");
+   
+
+if($requisition_type=='1004')
+{
+
+				/*$arrear_bill_id_pk=$db->fetch_table("SELECT bill_id_fk FROM prd_employee_bonus_details WHERE 
+				salary_monthyear = '" . $monthyear . "' AND ".$id."
+				AND bill_serial_no='".$bill_serial_no."'");*/
+				
+			
+				$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				FROM prd_employee_master emp 
+				INNER JOIN prd_employee_bonus_details sal 
+				ON sal.emp_id_fk=emp.emp_id_pk and ".$condisation."
+				INNER JOIN prd_block_bill_details bill
+				ON sal.bill_id_fk=bill.block_bill_pk 
+				WHERE 
+				trim(sal.monthyear)='".$prev_yrr.$current_year."'
+				AND emp.emp_status in('1','9','2') 
+				AND sal.delete_status='1' 
+				AND bonus_status='5'
+				AND sal.".$id."
+				AND sal.bill_serial_no='".$bill_serial_no."'
+				
+				");
+									
+}
+else if($requisition_type=='1005')
+{
+
+				/*$arrear_bill_id_pk=$db->fetch_table("SELECT bill_id_fk FROM prd_employee_bonus_details WHERE 
+				salary_monthyear = '" . $monthyear . "' AND ".$id."
+				AND bill_serial_no='".$bill_serial_no."'");*/
+				
+			
+				$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				FROM prd_employee_master emp 
+				INNER JOIN prd_festival_advance_employee_details sal 
+				ON sal.emp_id_fk=emp.emp_id_pk and ".$condisation."
+				INNER JOIN prd_block_bill_details bill
+				ON sal.bill_id_fk=bill.block_bill_pk 
+				WHERE 
+				trim(sal.fad_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				
+				AND sal.festival_advance_status='5'
+				AND sal.".$id."
+				AND sal.bill_serial_no='".$bill_serial_no."'
+				
+				");
+									
+}
+else if($requisition_type=='1002')
+{
+
+	
+	$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf,sal.zp_emp_type
+				FROM prd_employee_master emp 
+				INNER JOIN prd_employee_arrear sal 
+				ON sal.emp_id_fk=emp.emp_id_pk and ".$condisation."
+				INNER JOIN prd_block_bill_details bill
+				ON sal.bill_id_fk=bill.block_bill_pk 
+				WHERE 
+				trim(sal.salary_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				AND sal.delete_status='1' 
+				AND sal.is_saved='1'
+				AND sal.status_flag='3'
+				AND sal.".$id."
+				AND sal.bill_serial_no='".$bill_serial_no."'
+				group by sal.zp_emp_type
+				
+				");
+}
+
+else if($requisition_type=='1003')
+{
+	if($logged_user=='BDO')
+	{
+	
+	
+	$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				from prd_location_master_block block
+		inner join prd_location_master_gp gp on block.block_id_pk=gp.block_id_fk          
+		inner join prd_employee_master emp on gp.gp_id_pk=emp.gp_id_fk
+		left join prd_employee_salary_save sal ON (sal.emp_id_fk=emp.emp_id_pk and CAST(block.block_code as character varying)=sal.block_code)
+		where 
+				trim(sal.salary_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				AND sal.delete_status='1' 
+				AND sal.is_saved='1'
+				AND sal.status_flag='3'
+				AND sal.".$id."
+				AND sal.requisition_type='".$requisition_type."'
+				");
+	}
+	else if($logged_user=='EO')
+	{
+		$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				from prd_location_master_panchayat_samiti samiti      
+		inner join prd_employee_master emp on samiti.ps_id_pk= emp.ps_id_fk
+		left join prd_employee_salary_save sal ON (sal.emp_id_fk=emp.emp_id_pk and samiti.ps_id_pk =sal.ps_id_fk)
+		where 
+				trim(sal.salary_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				AND sal.delete_status='1' 
+				AND sal.is_saved='1'
+				AND sal.status_flag='3'
+				AND sal.".$id."
+				AND sal.requisition_type='".$requisition_type."'
+				
+				
+				");
+	}
+	else if($logged_user=='FC&CAO')
+	{
+				
+		$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				from prd_location_master_district as district      
+		inner join prd_employee_master emp on district.district_id_pk= emp.zp_id_fk
+		left join prd_employee_salary_save sal ON (sal.emp_id_fk=emp.emp_id_pk and district.district_id_pk =sal.zp_id_fk)
+		where 
+				trim(sal.salary_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				AND sal.delete_status='1' 
+				AND sal.is_saved='1'
+				AND sal.status_flag='4'
+				AND sal.".$id."
+				AND sal.requisition_type='".$requisition_type."'
+				
+				
+				");
+	}
+	
+}
+
+else if($requisition_type=='1001')
+{
+	if($logged_user=='BDO')
+	{
+	
+	/*if($_SESSION['user_info']['stake_user']=='3299001')
+	{
+		echo ("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				from prd_location_master_block block
+		inner join prd_location_master_gp gp on block.block_id_pk=gp.block_id_fk          
+		inner join prd_employee_master emp on gp.gp_id_pk=emp.gp_id_fk
+		left join prd_employee_salary_save sal ON (sal.emp_id_fk=emp.emp_id_pk and CAST(block.block_code as character varying)=sal.block_code)
+		where 
+				trim(sal.salary_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				AND sal.delete_status='1' 
+				AND sal.is_saved='1'
+				AND sal.status_flag='3'
+				AND sal.".$id."
+				AND sal.requisition_type='".$requisition_type."'
+				AND sal.ropa_status='".$ropa_status."'
+				");die;
+	}*/
+	
+	$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				from prd_location_master_block block
+		inner join prd_location_master_gp gp on block.block_id_pk=gp.block_id_fk          
+		inner join prd_employee_master emp on gp.gp_id_pk=emp.gp_id_fk
+		left join prd_employee_salary_save sal ON (sal.emp_id_fk=emp.emp_id_pk and CAST(block.block_code as character varying)=sal.block_code)
+		where 
+				trim(sal.salary_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				AND sal.delete_status='1' 
+				AND sal.is_saved='1'
+				AND sal.status_flag='3'
+				AND sal.".$id."
+				AND sal.requisition_type='".$requisition_type."'
+				AND sal.ropa_status='".$ropa_status."'
+				");
+	}
+	else if($logged_user=='EO')
+	{
+		$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				from prd_location_master_panchayat_samiti samiti      
+		inner join prd_employee_master emp on samiti.ps_id_pk= emp.ps_id_fk
+		left join prd_employee_salary_save sal ON (sal.emp_id_fk=emp.emp_id_pk and samiti.ps_id_pk =sal.ps_id_fk)
+		where 
+				trim(sal.salary_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				AND sal.delete_status='1' 
+				AND sal.is_saved='1'
+				AND sal.status_flag='3'
+				AND sal.".$id."
+				AND sal.requisition_type='".$requisition_type."'
+				AND sal.ropa_status='".$ropa_status."'
+				
+				");
+	}
+	else if($logged_user=='FC&CAO')
+	{
+				
+		$total_benf = $db->fetch_table("SELECT count(distinct(emp.emp_id_pk)) as total_benf
+				from prd_location_master_district as district      
+		inner join prd_employee_master emp on district.district_id_pk= emp.zp_id_fk
+		left join prd_employee_salary_save sal ON (sal.emp_id_fk=emp.emp_id_pk and district.district_id_pk =sal.zp_id_fk)
+		where 
+				trim(sal.salary_monthyear)='".$monthyear."'
+				AND emp.emp_status in('1','9') 
+				AND sal.delete_status='1' 
+				AND sal.is_saved='1'
+				AND sal.status_flag='4'
+				AND sal.".$id."
+				AND sal.zp_emp_type='".$bill_type."'
+				AND sal.requisition_type='".$requisition_type."'
+				AND sal.ropa_status='".$ropa_status."'
+				
+				");
+	}
+	
+}
+
+									
+										
+//echo $drn_number.'--'.$requisition_type.'--'.$bill_type.'--'.$bill_serial_no; die;
+
+    $encode_drn = $crypto->encode($drn_number, 4);
+    $encode_requsition = $crypto->encode($requisition_type, 4);
+	 //$encode_emp_type = $crypto->encode($bill_type, 4); 
+	 $encode_emp_type=$crypto->encode($bill_type,4);
+    $encode_bill_serial_no=$crypto->encode($bill_serial_no,4);
+	$ropa_status_new=$crypto->encode($ropa_status,4);
+	   
+    // NGIPF SAL SUBSCRIPTION START
+    if($ngipfSal == 1)
+      {
+			$Query = "SELECT * from prd_gpf_subscriber_master WHERE drn_number='".$drn_number."'";   
+		    $salSubscriptionStatus = $db->fetch_table($Query);
+		    $ngipfSalSendStatus = 0;
+		    if(count($salSubscriptionStatus) > 0)
+		     {
+		     	$salSubscriptionStatus = $salSubscriptionStatus[0];
+		     	$ngipfSalSendStatus = 1;
+		     	//print_r($salSubscriptionStatus);
+		     }
+		     //print($ngipfSalSendStatus); exit;
+		    // NGIPF SAL SUBSCRIPTION END
+	   }
+    
+			
+			////////////////////////////////////////////////////////////////LOAN DEDUCTION E//////////////////////////////////////////////////////////////			
+			
+			?>
+			<script>
+			//	    	$('#send_bill_sum_id').click(function(){
+			//	   
+			//		$('#page-load').show();
+			//
+			//   success:function(result){
+			//       $('#page-load').hide();  
+			//   }
+			//});
+			</script>
+			
+		
+		<div class="col-sm-12">
+            <div class="emplist">
+                <div class="school">
+                    <div class="table-responsive">
+                        <div class="form-group">
+                        <input type="hidden" id="user" name="user" value="<?php echo $logged_user;?>" />
+                            <table width="100%">
+                                <tr style="background-color: rgb(221, 247, 255);">
+                                    <th colspan="6">
+                                    	<h5>BILLING STATUS [ DRN No:<?php echo $drn_number; ?> ]</h5>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th scope="col" width="20%">SL NO</th>
+                                    <th width="20%">BILL PARTICULAR</th>
+                                    <th width="20%">SEND TO IFMS</th>
+                                    <th width="20%">STATUS</th>
+                                    <th width="20%">ACTION</th>
+                                </tr>
+                                <tr>
+                                    <td width="20%">1.</td>
+                                    <td width="20%" style="color:#6a4f4b;">Upload Bill Summary To IFMS</td>
+                                    <td width="20%">
+                                        <div class="link_p2">
+											<?php if ($drn_checking[0]['bill_sending_status'] == '2' && $drn_checking[0]['response_code'] == '0') 
+											{
+                                            ?>
+                                            	<img src="<?php echo $config['base_url']; ?>themes/default/image/send_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; opacity:0.3;" />
+                                            <?php
+                                            } 
+											else 
+											{
+                                            ?>
+                                                <a onClick="value_pass('<?php echo $encode_requsition; ?>', '<?php echo $encode_drn; ?>','<?php echo $encode_emp_type; ?>','<?php echo $monthyear; ?>','<?php echo $encode_bill_serial_no; ?>','<?php echo $ropa_status_new; ?>');" > <img id="send_bill_sum_id" src="<?php echo $config['base_url']; ?>themes/default/image/send_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; cursor:pointer" /></a>
+                                                
+                                                <img id="send_bill_sum_id_disable" src="<?php echo $config['base_url']; ?>themes/default/image/send_btn.png" class="img-responsive" style="width:50%; margin:0 auto; opacity:0.3;display:none;" />
+                                            <?php } ?>
+                                        </div>
+                                    </td>
+                                    <td id="status_bill_sum_send" <?php  if(ifms_error_description_generate($drn_checking[0]['response_code'])=='Success'){ ?> style="color:#00b248;" <?php }else{ ?> style="color:#c43e00;" <?php } ?>><?php echo ifms_error_description_generate($drn_checking[0]['response_code']); ?> </td>
+                                    <td>
+                                        <span id="edit_action_first_row" style="display:none;"></span>
+                                        <?php if ($drn_checking[0]['bill_sending_status'] == '2' && $drn_checking[0]['response_code'] != '0') 
+										{
+                                        ?>
+                                        	<span id="edit_action_first_row2"></span>
+                                        <?php } ?>
+                                    </td>
+                                </tr>
+                                <?php if ($total_benf[0]['total_benf']>0) 
+								{
+                                ?>
+                                    <tr>
+                                        <td width="20%">2. </td>
+                                        <td width="20%" style="color:#6a4f4b;">Upload Beneficiary file To IFMS</td>
+                                        <td width="20%">
+                                            <div class="link_p2">
+												<?php if ($drn_checking[0]['bill_sending_status'] != '2' ) 
+                                                {
+                                                ?>
+                                                    <img id="upload_image" src="<?php echo $config['base_url']; ?>themes/default/image/upload_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; opacity:0.5;">
+                                                    <a id="send_benf"  style="display:none;"  onClick="value_pass_sftp('<?php echo $encode_requsition; ?>', '<?php echo $encode_drn; ?>','<?php echo $encode_emp_type; ?>','<?php echo $monthyear; ?>' ,'<?php echo $encode_bill_serial_no; ?>','<?php echo $ropa_status_new; ?>');"><img src="<?php echo $config['base_url']; ?>themes/default/image/upload_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; cursor:pointer;"></a>
+                                                <?php
+                                                } 
+                                                //else if (count($sftp_details_fetch) == '0')
+												else if (count($sftp_details_fetch) == '0' || ($sftp_details_fetch[0]['sftp_benf_response_status']=='6' || $sftp_details_fetch[0]['active_status']=='2'))  
+                                                { //echo 11;
+                                                ?>
+                                                    <img id="upload_image" src="<?php echo $config['base_url']; ?>themes/default/image/upload_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; opacity:0.5; display:none;">
+                                                    <a id="send_benf"  onClick="value_pass_sftp('<?php echo $encode_requsition; ?>', '<?php echo $encode_drn; ?>','<?php echo $encode_emp_type; ?>','<?php echo $monthyear; ?>','<?php echo $encode_bill_serial_no; ?>','<?php echo $ropa_status_new; ?>');"><img src="<?php echo $config['base_url']; ?>themes/default/image/upload_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; cursor:pointer"></a>
+                                                <?php
+                                                } 
+                                                else 
+                                                {
+													
+                                                ?>
+                                                    <img id="upload_image" src="<?php echo $config['base_url']; ?>themes/default/image/upload_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; opacity:0.5; ">
+                                                <? } ?>
+                                            </div>
+                                        </td>
+                                        <td id="status1" width="20%"  <?php if($sftp_details_fetch[0]['sftp_benf_response_status']=='6' || $sftp_details_fetch[0]['sftp_benf_response_status'] == '7'){ ?> style="color:#ff3d00;" <?php }else{ ?>style="color:#00b248;" <?php } ?> >
+                                        <?php
+											if($sftp_details_fetch[0]['sftp_benf_response_status'] == '')
+											{
+												if ($sftp_details_fetch[0]['sftp_benf_sending_status'] == '3') 
+												{
+													echo "Upload Confirmation Pending";
+												} 
+												else if ($sftp_details_fetch[0]['sftp_benf_sending_status'] == '4') 
+												{
+													echo "File Uploaded Successfully";
+												}
+											}
+											else if($sftp_details_fetch[0]['sftp_benf_response_status']=='5' || $sftp_details_fetch[0]['sftp_benf_response_status']=='8')
+											{
+												echo "IFMS Reference Number Generated";
+											}
+											else if($sftp_details_fetch[0]['sftp_benf_response_status']=='6')
+											{
+												echo "Wrong Format has been returned";
+											}
+											else if($sftp_details_fetch[0]['sftp_benf_response_status'] == '7')
+											{
+												echo "Wrong Data has been returned";
+											}
+                                        ?>
+                                        </td>
+                                        <td width="20%">
+                                            <div>
+												<?php if ($sftp_details_fetch[0]['sftp_benf_sending_status'] == '3') 
+                                                {?>
+                                                	<a onClick="done_file_check('<?php echo $crypto->encode($sftp_details_fetch[0]['sftp_benf_id_pk'],4); ?>');"><i style="font-size:24px;color:#266eac;cursor:pointer;" class="fa" id="refresh_icon_static">&#xf046;</i><i class="fa fa-check-square-o" style="font-size:24px;color:#266eac;display:none;" id="refresh_icon_dynamic"></i></a> &nbsp;&nbsp;&nbsp;
+                                                <?php 
+                                                }
+                                                else if($sftp_details_fetch[0]['sftp_benf_sending_status'] == '4' && $sftp_details_fetch[0]['sftp_benf_response_status'] == '') 
+                                                {
+                                                ?>
+                                                	<a onClick="benf_status_check('<?php echo $crypto->encode($sftp_details_fetch[0]['sftp_benf_file_name'],4); ?>','<?php echo $encode_drn; ?>','<?php echo $crypto->encode( $monthyear,4); ?>');"><i style="font-size:24px;color:#266eac;cursor:pointer;" class="fa" id="refresh_icon_static">&#xf046;</i><i class="fa fa-check-square-o" style="font-size:24px;color:#266eac;display:none;" id="refresh_icon_dynamic"></i></a> &nbsp;&nbsp;&nbsp;
+                                                <?php }
+                                                else
+                                                { ?>
+                                                	<i style="font-size:24px;color:#266eac; opacity:0.5;" class="fa">&#xf046;</i><i class="fa fa-check-square-o" style="font-size:24px;color:#266eac;display:none;"></i> &nbsp;&nbsp;&nbsp;
+                                                <?php 
+                                                }
+                                                if($sftp_details_fetch[0]['sftp_benf_response_status']=='7')
+                                                { 
+                                                ?>
+                                                	<span id="edit_action_first_row2" onClick="sftp_edit('<?php echo $crypto->encode($sftp_details_fetch[0]['sftp_benf_id_pk'],4); ?>');"><img style="padding-bottom: 10px;" width="25" src="<?= $config['base_url']; ?>themes/default/image/edit_icon.png" alt="Edit"/></span>
+                                                <?php 
+                                                }
+                                                else
+                                                {?>
+                                                	<span id="edit_action_first_row2" ><img style="padding-bottom: 10px; opacity:0.5;" width="25" src="<?= $config['base_url']; ?>themes/default/image/edit_icon.png" alt="Edit"/></span>
+                                                <?php } ?>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php 
+								} ?>
+                                <!-- NGIPF Subscription Section Start-->
+                                <?php if($ngipfSal == 1):?>
+                                <tr>
+
+                                    <td width="20%">1.</td>
+
+                                    <td width="20%" style="color:#6a4f4b;">Upload PF Subscription</td>
+
+                                    <td width="20%">
+
+                                        <div class="link_p2">
+
+											<?php if ($ngipfSalSendStatus == 0) 
+
+											{
+
+                                            ?>
+                                                
+                                                <img id="upload_pf" src="<?php echo $config['base_url']; ?>themes/default/image/upload_btn.png"  class="img-responsive" 
+                                                <?php if($sftp_details_fetch[0]['sftp_benf_sending_status'] != '4'):?>
+                                                style="width:50%; margin:0 auto; opacity:0.5;"
+                                                <?php else: ?>
+                                                style="width:50%; margin:0 auto; opacity:0.5;display: none;"
+                                                <?php endif; ?>
+                                                >
+                                                
+                                                <a id="upload-pf-subscription" 
+                                                <?php if($sftp_details_fetch[0]['sftp_benf_sending_status'] != '4'):?>
+                                                	style="display:none;" 
+                                                <?php endif; ?>
+                                                onClick="SendNgipf('<?php echo $encode_drn; ?>');" > <img id="upload_image" src="<?php echo $config['base_url']; ?>themes/default/image/upload_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; cursor:pointer;"></a>
+
+                                            <?php
+
+                                            } 
+
+											else 
+
+											{
+
+                                            ?>
+                                              <img src="<?php echo $config['base_url']; ?>themes/default/image/upload_btn.png"  class="img-responsive" style="width:50%; margin:0 auto; opacity:0.3;" />
+
+                                            <?php } ?>
+
+                                        </div>
+
+                                    </td>
+
+                                    <td id="status_bill_sum_send" <?php echo ($salSubscriptionStatus['status'])?'style="color:#00b248;"':'style="color:#c43e00;"'?>> 
+                                    	<?php  if($salSubscriptionStatus['status'] == 1){ ?>  
+                                        <a onClick="DownloadNgipf('<?php echo $encode_drn; ?>');" style="width:50%; margin:0 auto; cursor:pointer;">Check PF Status</a>> 
+                                    		Success
+                                    	<?php }else{ ?> 
+
+                                    		<?php if(isset($salSubscriptionStatus['status'])) { ?>
+                                            <a onClick="DownloadNgipf('<?php echo $encode_drn; ?>');" style="width:50%; margin:0 auto; cursor:pointer;">Check PF Status</a>> 
+                                    		<span class="pf-status hide">Waiting For Bill tag</span>                                   			
+                                            <?php } else { ?>
+                                    		<a onClick="DownloadNgipf('<?php echo $encode_drn; ?>');" style="width:50%; margin:0 auto; cursor:pointer;" class="check-status hide">Check PF Status</a>
+                                    		<span class="pf-status hide">Waiting For Bill tag</span>
+                                    	   <?php } ?>
+                                    	<?php } ?>
+                                    		
+                                    	</td>
+
+                                    <td>
+
+                                        <span id="edit_action_first_row" style="display:none;"></span>
+
+                                        <?php if ($drn_checking[0]['bill_sending_status'] == '2' && $drn_checking[0]['response_code'] != '0') 
+
+										{
+
+                                        ?>
+
+                                        	<span id="edit_action_first_row2"></span>
+
+                                        <?php } ?>
+
+                                    </td>
+
+                                </tr>  
+                                <?php endif; ?>                              
+                                <!-- NGIPF Subscription Section End-->								
+                                <tr>
+                                    <td width="20%">3. </td>
+                                    <td width="20%" style="color:#6a4f4b;">Bill Status View</td>
+                                    <td width="20%"><div class="link_p3">
+                                    <a id="view_status"  onClick="value_pass_view('<?php echo $encode_requsition; ?>', '<?php echo $encode_drn; ?>','<?php echo $monthyear; ?>');"> <img src="<?php echo $config['base_url']; ?>themes/default/image/status_btn.png" class="img-responsive" style="width:50%; margin:0 auto; cursor:pointer"></a></div></td>
+                                    <td id="view_bill_status" width="20%" > </td>
+                                    <td></td>
+                                </tr>
+                                <tr style="background-color: #DCEDC8;">
+                                    <td width="20%" style="background-color: #DCEDC8;">4. </td>
+                                    
+                                    <td width="20%" style="background-color: #DCEDC8; color:#6a4f4b;"> Payment Status View</td>
+                                    <td width="20%" style="background-color: #DCEDC8;">
+                                    	<div class="btn btn-default" style=" float:center; cursor:default; color:#1A237E;width:105px;"> &nbsp;<a href="<?= $config['base_url']?>page/all_moduls/payment_details_view/payment_details.php?monthyear=<?php echo $crypto->encode($monthyear,4);?>&requisition_type=<?php echo $crypto->encode($requisition_type,4); ?>"><i class="fa fa-money fa-2x reason_view" aria-hidden="true" style="color:#33691E;cursor:pointer;" ></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    	<a style="cursor:pointer;"><i class="fa fa-street-view fa-2x eason_view" aria-hidden="true" style="color:#33691E;"></i></a>
+                                    	</div>
+                                    </td>
+                                    <td width="20%" style="background-color: #DCEDC8;color: #FF3D00;" id="status_payment">
+                                    <?php	if($sftp_details_fetch[0]['sftp_benf_response_status'] == '8')
+											{
+												echo "Payment File Generated";
+											}
+									?>
+                                    </td>
+                                    <td width="20%" style="background-color: #DCEDC8;">
+                                        <div>
+                                            <?php if($sftp_details_fetch[0]['sftp_benf_response_status'] == '5' || ($sftp_details_fetch[0]['sftp_benf_response_status'] != '7' && $sftp_details_fetch[0]['sftp_benf_response_status'] != '8')) 
+                                            {
+                                            ?>
+                                                <a onClick="benf_status_check('<?php echo $crypto->encode($sftp_details_fetch[0]['sftp_benf_file_name'],4); ?>','<?php echo $encode_drn; ?>','<?php echo $crypto->encode($monthyear,4); ?>');"><i style="font-size:24px;color:#266eac;cursor:pointer;" class="fa" id="refresh_icon_static">&#xf046;</i><i class="fa fa-check-square-o" style="font-size:24px;color:#266eac;display:none;" id="refresh_icon_dynamic"></i></a> &nbsp;&nbsp;&nbsp;
+                                            <?php }
+                                            else
+                                            { ?>
+                                                <i style="font-size:24px;color:#266eac; opacity:0.5;" class="fa">&#xf046;</i><i class="fa fa-check-square-o" style="font-size:24px;color:#266eac;display:none;"></i> &nbsp;&nbsp;&nbsp;
+                                            <?php 
+                                            }
+                                            if($payment_failure_details[0]['total_count_fail']!='0')
+                                            { 
+                                            ?> 
+                                                <!--<span id="edit_action_first_row3" onClick="payment_edit('<?php echo $crypto->encode($sftp_details_fetch[0]['sftp_benf_id_pk'],4); ?>');"><img style="padding-bottom: 10px;" width="25" src="<?= $config['base_url']; ?>themes/default/image/edit_icon.png" alt="Edit"/></span>-->
+                                            <?php 
+                                            }
+                                            else
+                                            {?>
+                                                <!--<span id="edit_action_first_row4" ><img style="padding-bottom: 10px; opacity:0.5;" width="25" src="<?= $config['base_url']; ?>themes/default/image/edit_icon.png" alt="Edit"/></span>-->
+                                            <?php } ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!--<tr>
+                                    <td width="20%" style="background-color: #E0E0E0;">5. </td>
+                                    <td width="20%" style="background-color: #E0E0E0;">Failed Transaction Correction </td>
+                                    <td width="20%" style="background-color: #E0E0E0;">  
+                                    	<a onClick="value_pass('<?php echo $encode_requsition; ?>', '<?php echo $encode_drn; ?>');" > <img id="send_bill_sum_id" src="<?php echo $config['base_url']; ?>themes/default/image/send_btn_2.png"  class="img-responsive" style="width:50%; margin:0 auto; cursor:pointer" /></a> 
+                                    </td>
+                                    <td width="20%" style="background-color: #E0E0E0;"> </td>
+                                    <td width="20%" style="background-color: #E0E0E0;"> </td>
+                                </tr>-->
+                            </table>
+                        	<div id="emplist"></div>
+                        </div>
+                    </div> 
+                </div>
+            </div> 
+		</div>
+	<div class="onclick_loader" id="page-load"><img src="<?php echo $config['base_url']; ?>themes/default/image/page_loader.gif" class="img-responsive onclick_load"/></div>	
+	<?php
+		} 
+//}
+/*else
+{
+	
+ echo $status='<span style="color:RED;font-weight:bold">*** Due to the security aspects of the server of State Data Center, sending XML files generated at IOSMS portal for salary bill sent to  the IFMS portal has been stoped. As soon as posible problem will be solved.INCONVENIENCE IS REGRETTED.</span>'; die;
+}*/
+
+?>
+
+<script>
+//**************************************************************
+
+
+	$(document).ready(function () 
+	{
+		//     $('#page-load').show();
+		//        $('#page-load').delay(1000).fadeOut();
+		//      });
+	});
+	function SendNgipf(drn_no)
+	 {
+	 	$('#page-load').show(); 
+	 	$.post('<?= $config['base_url'] ?>page/api/gpf/salary.php?drn='+drn_no, function (data) {
+	 		//console.log(data);
+	 		if(data == 'Success');
+	 		  {
+				// Subikar Added for NGIPF
+				$('#upload_pf').show();
+				$('#upload-pf-subscription').hide(); 
+				$('#page-load').delay(100).fadeOut();
+				$('.check-status').show();               
+	 		  }
+	 	});
+	 }
+	 function DownloadNgipf(drn_no)
+	   {
+	   	var url = '<?= $config['base_url'] ?>page/api/gpf/salarystatus.php?drn='+drn_no;
+        console.log(url);
+	 	$.post(url, function (data) {
+	 		$('.pf-status').html(data);
+	 		$('.pf-status').show();
+	 	});	   	
+	   }	
+	function value_pass(encode_requsition, drn_number, emp_type,monthyear,bill_serial_no,ropa_status_new)
+	{
+		//alert(11);
+		
+		$('#page-load').show();
+		
+		var requsition = encode_requsition;
+		var drn_no = drn_number;	
+		var user1=$('#user').val();	
+		var emp_type=emp_type;
+		//alert(emp_type);
+		//return false;
+			//alert( user1);
+			//return false;
+		if(user1=='FC&CAO')
+		{
+			$.post('<?= $config['base_url'] ?>page/intra_zp/salary_fcncao/text_file/xml_file.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type +'&monthyear='+monthyear + '&bill_serial_no=' + bill_serial_no+ '&ropa_status_new='+ropa_status_new, function (data) {
+			//alert(data);
+			
+			});
+			//alert(bill_serial_no);
+			$.post('<?= $config['base_url'] ?>page/api/ifms/zp/index.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type+'&monthyear='+monthyear + '&bill_serial_no=' + bill_serial_no+ '&ropa_status_new='+ropa_status_new, function (data) {
+			//alert(data);
+			//return false;
+			$('#page-load').delay(100).fadeOut();
+			if (data.trim() == 'Success')
+			{
+			$('#status_bill_sum_send').css('color', '#008e76');
+			$('#status_bill_sum_send').text(data);
+			$('#upload_image').hide();
+			$('#send_benf').show();
+			$('#send_bill_sum_id_disable').show();
+			$('#send_bill_sum_id').hide();
+			$('#edit_action_first_row').hide();
+			$('#edit_action_first_row2').hide();
+			$('#bill_status_row').show();
+			} 
+			else
+			{
+			$('#status_bill_sum_send').css('color', '#c62828');
+			$('#status_bill_sum_send').text(data);
+			$('#edit_action_first_row').show();
+			$('#edit_action_first_row2').hide();
+			}
+			});
+		}
+		
+		if(user1=='EO')
+		
+		{
+			//alert(11);
+			$.post('<?= $config['base_url'] ?>page/intra_ps/eo/text_file_ifms/xml_file.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type +'&monthyear='+monthyear + '&bill_serial_no=' + bill_serial_no + '&ropa_status_new='+ropa_status_new, function (data) {
+			//console.log(data);
+			});
+			
+			$.post('<?= $config['base_url'] ?>page/api/ifms/ps/index.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type+'&monthyear='+monthyear + '&bill_serial_no=' + bill_serial_no+ '&ropa_status_new='+ropa_status_new, function (data) {
+			//console.log(data);
+			//return false;
+			$('#page-load').delay(100).fadeOut();
+			if (data.trim() == 'Success')
+			{
+			$('#status_bill_sum_send').css('color', '#008e76');
+			$('#status_bill_sum_send').text(data);
+			$('#upload_image').hide();
+			$('#send_benf').show();
+			$('#send_bill_sum_id_disable').show();
+			$('#send_bill_sum_id').hide();
+			$('#edit_action_first_row').hide();
+			$('#edit_action_first_row2').hide();
+			$('#bill_status_row').show();
+			} 
+			else
+			{
+			$('#status_bill_sum_send').css('color', '#c62828');
+			$('#status_bill_sum_send').text(data);
+			$('#edit_action_first_row').show();
+			$('#edit_action_first_row2').hide();
+			}
+			}); 
+		
+		}
+		
+		if(user1=='BDO')
+		
+		{
+			$.post('<?= $config['base_url'] ?>page/intra_prd/block/text_file_ifms/xml_file.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type +'&monthyear='+monthyear + '&bill_serial_no=' + bill_serial_no+ '&ropa_status_new='+ropa_status_new, function (data) {
+			//alert(data);false;  
+			});
+			
+			$.post('<?= $config['base_url'] ?>page/api/ifms/gp/index.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type+'&monthyear='+monthyear + '&bill_serial_no=' + bill_serial_no+ '&ropa_status_new='+ropa_status_new, function (data) {
+			//alert(data);
+			//return false;
+			$('#page-load').delay(100).fadeOut();
+			if (data.trim() == 'Success')
+			{
+			$('#status_bill_sum_send').css('color', '#008e76');
+			$('#status_bill_sum_send').text(data);
+			$('#upload_image').hide();
+			$('#send_benf').show();
+			$('#send_bill_sum_id_disable').show();
+			$('#send_bill_sum_id').hide();
+			$('#edit_action_first_row').hide();
+			$('#edit_action_first_row2').hide();
+			$('#bill_status_row').show();
+			} 
+			else
+			{
+			$('#status_bill_sum_send').css('color', '#c62828');
+			$('#status_bill_sum_send').text(data);
+			$('#edit_action_first_row').show();
+			$('#edit_action_first_row2').hide();
+			}
+			});
+		
+		}
+		
+	}
+	
+	//**************************************************************
+	
+	function value_pass_sftp(encode_requsition, drn_number, emp_type,monthyear,bill_serial_no,ropa_status_new)
+	{
+		//alert(11);
+		$('#page-load').show();
+		var requsition = encode_requsition;
+		var drn_no = drn_number;
+		var user1=$('#user').val();	
+		
+		if(user1=='FC&CAO')
+		
+		{
+		$.post('<?= $config['base_url'] ?>page/api/ifms/zp/sftp_index.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type+'&monthyear='+monthyear+ '&bill_serial_no=' + bill_serial_no + '&ropa_status_new='+ropa_status_new, function (data) {
+			//alert(data);
+			$("#status1").html(data);
+			$('#page-load').delay(500).fadeOut();
+			if (data.trim() == '2')
+			{
+				$("#status1").html("SFTP Connection Fails");
+			}
+			if (data.trim() == '0')
+			{
+				$("#status1").html("File Uploading Fails");
+			}
+			if (data.trim() == '1')
+			{
+				$("#status1").html("File Uploaded Successfully");
+				$('#upload_image').show();
+				$('#send_benf').hide();
+				<?php if($ngipfSal == 1): ?>
+				// Subikar Added for NGIPF
+				$('#upload_pf').hide();
+				$('#upload-pf-subscription').show();
+				<?php endif; ?>				
+			}
+		});
+		}
+		else if(user1=='EO')
+		{
+			
+			$.post('<?= $config['base_url'] ?>page/api/ifms/ps/sftp_index.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type+'&monthyear='+monthyear+ '&bill_serial_no=' + bill_serial_no + '&ropa_status_new='+ropa_status_new, function (data) {
+			
+			$("#status1").html(data);
+			$('#page-load').delay(500).fadeOut();
+			if (data.trim() == '2')
+			{
+				$("#status1").html("SFTP Connection Fails");
+			}
+			if (data.trim() == '0')
+			{
+				$("#status1").html("File Uploading Fails");
+			}
+			if (data.trim() == '1')
+			{
+				$("#status1").html("File Uploaded Successfully");
+				$('#upload_image').show();
+				$('#send_benf').hide();
+				<?php if($ngipfSal == 1): ?>
+				// Subikar Added for NGIPF
+				$('#upload_pf').hide();
+				$('#upload-pf-subscription').show();
+				<?php endif; ?>					
+			}
+		});
+		}
+		
+		if(user1=='BDO')
+		
+		{
+			
+		$.post('<?= $config['base_url'] ?>page/api/ifms/gp/sftp_index.php?bill_type='+requsition+'&drn_no='+drn_no+'&emp_type='+emp_type+'&monthyear='+monthyear+ '&bill_serial_no=' + bill_serial_no + '&ropa_status_new='+ropa_status_new, function (data) {
+			//alert(data);
+			//return false;
+			console.log(data); 
+			$("#status1").html(data);
+			$('#page-load').delay(500).fadeOut();
+			if (data.trim() == '2')
+			{
+				$("#status1").html("SFTP Connection Fails");
+			}
+			if (data.trim() == '0')
+			{
+				$("#status1").html("File Uploading Fails");
+			}
+			if (data.trim() == '1')
+			{
+				$("#status1").html("File Uploaded Successfully");
+				$('#upload_image').show();
+				$('#send_benf').hide();
+				<?php if($ngipfSal == 1): ?>
+				// Subikar Added for NGIPF
+				$('#upload_pf').hide();
+				$('#upload-pf-subscription').show();
+				<?php endif; ?>					
+			}
+		});
+		}
+	}
+	
+	//**************************************************************
+	
+	function value_pass_view(encode_requsition, drn_number,monthyear)
+	{
+		$('#page-load').show();
+		var requsition = encode_requsition;
+		var drn_no = drn_number;
+		var user1=$('#user').val();	
+		if(user1=='FC&CAO')
+		
+		{
+		$.post('<?= $config['base_url'] ?>page/api/ifms/zp/bill_status_check.php?bill_type=' + requsition + '&drn_no=' + drn_no+'&monthyear='+monthyear, function (data) {
+			$('#page-load').delay(500).fadeOut();
+			if (data)
+			{
+			   
+			        $('#view_bill_status').css('color', '#ff8f00');
+				$('#view_bill_status').text(data);
+				
+			}
+		});
+		}
+		else if(user1=='EO')
+		{
+			$.post('<?= $config['base_url'] ?>page/api/ifms/ps/bill_status_check.php?bill_type='+requsition+'&drn_no='+drn_no+'&monthyear='+monthyear,function(data){
+			$('#page-load').delay(500).fadeOut();
+			if (data)
+			{
+			   
+			$('#view_bill_status').css('color', '#ff8f00');
+			$('#view_bill_status').text(data);
+				
+			}
+		});
+		}
+		
+		if(user1=='BDO')
+		
+		{
+		$.post('<?= $config['base_url'] ?>page/api/ifms/gp/bill_status_check.php?bill_type=' + requsition + '&drn_no=' + drn_no+'&monthyear='+monthyear, function (data) {
+			$('#page-load').delay(500).fadeOut();
+			if (data)
+			{
+			   
+			     $('#view_bill_status').css('color', '#ff8f00');
+				$('#view_bill_status').text(data);
+				
+			}
+		});
+		}
+	}
+	
+	//**************************************************************
+	
+	function benf_status_check(sftp_benf_file_name,drn_number,monthyear)
+	{
+		//alert(11);
+		$('#page-load').show();
+		var user1=$('#user').val();	
+		if(user1=='FC&CAO')
+		{
+			var user='zp';
+		}
+		else if(user1=='EO')
+		{
+			var user='ps';
+		}
+		else if(user1=='BDO')
+		{
+			var user='gp';
+		}
+		$('#page-load').show();
+		$('#refresh_icon_static').hide();
+		$('#refresh_icon_dynamic').show();
+		$.post('<?= $config['base_url'] ?>page/api/ifms/sftp_cron/prd_ifms_cron_job.php?user='+user+'&sftp_benf_file_name='+sftp_benf_file_name+'&drn_number='+drn_number+'&monthyear='+monthyear, function (data) {
+			//alert(data);
+			$('#page-load').delay(500).fadeOut();
+			//$('#status1').html(data); 
+			//location.reload();
+		});
+	}
+	
+	//**************************************************************
+	
+	function done_file_check()
+	{
+		var user1=$('#user').val();	
+		if(user1=='FC&CAO')
+		{
+			var user='zp';
+		}
+		else if(user1=='EO')
+		{
+			var user='ps';
+		}
+		else if(user1=='BDO')
+		{
+			var user='gp';
+		}
+		$('#page-load').show();
+		/*$('#refresh_icon_static').hide();
+		$('#refresh_icon_dynamic').show();*/
+		$.post('<?= $config['base_url'] ?>page/api/ifms/sftp_cron/dot_done_ifms_cron_job.php?user='+user, function (data) {
+			//alert(data);
+			$('#page-load').delay(500).fadeOut();
+			//location.reload();
+			//$('#status1').html(data); 
+		});
+	}
+	
+	//**************************************************************
+	
+	function sftp_edit(benf_id)
+	{
+		var user1=$('#user').val();	
+		$('#page-load').show();
+		$('#page-load').delay(500).fadeOut();
+		$('#myModal').modal('show');
+		if(user1=='FC&CAO')
+		
+		{
+		$.post('<?= $config['base_url'] ?>page/api/ifms/zp/sftp_wrong_data_edit.php?benf_id=' + benf_id, function (data) {
+			$("#mbody").html(data);
+			$("#empshow").html(data);
+			$("#success").hide();
+			$("#failed").hide();
+		});
+		}
+		else if(user1=='EO')
+		{
+			$.post('<?= $config['base_url'] ?>page/api/ifms/ps/sftp_wrong_data_edit.php?benf_id=' + benf_id, function (data) {
+			$("#mbody").html(data);
+			$("#empshow").html(data);
+			$("#success").hide();
+			$("#failed").hide();
+		});
+		}
+		
+		
+		else if(user1=='BDO')
+		
+		{
+		$.post('<?= $config['base_url'] ?>page/api/ifms/gp/sftp_wrong_data_edit.php?benf_id=' + benf_id, function (data) {
+			$("#mbody").html(data);
+			$("#empshow").html(data);
+			$("#success").hide();
+			$("#failed").hide();
+		});
+		}
+		
+		
+		
+	}
+	
+	//**************************************************************
+	
+	function payment_edit(benf_id)
+	{
+		$('#page-load').show();
+		$('#page-load').delay(500).fadeOut();
+		$('#myModal').modal('show');
+		$.post('<?= $config['base_url'] ?>page/api/ifms/zp/epayment_wrong_data_edit.php?benf_id=' + benf_id, function (data) {
+			$("#mbody").html(data);
+			$("#empshow").html(data);
+			
+				/*if($('#msg').html('<div class="alert alert-success" style="text-align:center"><strong> Employee updation has been successfully finalized... </strong></div>'););
+			{
+				$('#edit_action_first_row4').show();
+			}
+			else
+			{
+				$('#edit_action_first_row3').hide();
+			}*/
+			
+		});
+	}
+</script>
+
+
+<!----------------------------------------------------------------- Employee MODAL Start---------------------------------->
+
+
+<div class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="width: 150%;margin-left: -25.5%;">
+            <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Employee Details</h4>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span aria-hidden="true" onClick="location.reload();">&times;</span></button>
+                
+            </div>
+            <div class="modal-body"> 
+                <div id="mbody"> 
+                </d

@@ -1,0 +1,129 @@
+<?php
+session_start();
+error_reporting(0);
+ob_start();
+require_once '../../includes/config/config.php';
+require_once '../../includes/config/database.config.php';
+require '../../includes/library/database.class.php';
+require_once '../../includes/library/cryptography.class.php';
+if($_SERVER['HTTP_REFERER']==''){
+	header("Location:dashboard_intra_pri.php");
+}
+$crypto=new cryptography();
+$db=new database();
+
+//unset($_SESSION['user_info']['emp_id_const']);
+	//echo $_SESSION['user_info']['officer_id_const'];exit;
+
+ $emp_id_const=$_REQUEST['emp_id_const'];
+	//print_r($_SESSION['user_info']); exit;
+        $emp_id_detail_oc = $db->fetch_table(" SELECT * FROM intra_pri_overage_condonation_master WHERE emp_id_const = '".$emp_id_const."'");
+        
+		if($emp_id_detail_oc[0]['emp_id_const'] != 0 || $emp_id_detail_oc[0]['emp_id_const'] != ''){
+			$applicationId = $emp_id_detail_oc[0]['application_id'];
+		$Query = "SELECT count(forwarding_id_pk) as countoffid from intra_pri_forwarding WHERE application_id ='".$applicationId."'";
+		$CountofForward = $db->fetch_table($Query);
+		$CountofForward = $CountofForward[0]['countoffid'];
+
+		if($CountofForward > 0)
+          {			
+			$Query = "SELECT forwarding_id_pk from intra_pri_forwarding WHERE application_id ='".$applicationId."'AND status=1 AND from_officer_id_const ='".$_SESSION['user_info']['officer_id_const']."' order by forwarding_id_pk DESC LIMIT 1 OFFSET 0";
+			$lastOfficerID = $db->fetch_table($Query);
+
+		  	  if(count($lastOfficerID) == 0)
+				{
+					//echo json_encode($Query);
+		            exit;
+				}
+			  else
+			  {
+			  	$_SESSION['user_info']['emp_id_const'] = $emp_id_detail_oc[0]['emp_id_const'];
+			  	
+			  }
+			  	
+	        }
+	        else
+	        {
+	        	$_SESSION['user_info']['emp_id_const'] = $emp_id_detail_oc[0]['emp_id_const'];
+	        }
+		}
+		else
+		{
+			$_SESSION['user_info']['emp_id_const'] = $emp_id_detail_oc[0]['emp_id_const'];
+		}
+		//print_r($emp_id_detail_oc[0]['emp_id_const']); exit;
+        $Query = "SELECT * FROM prd_employee_master 
+				 WHERE emp_id_const = '".$emp_id_const."' ";
+        $emp_id_detail=$db->fetch_table($Query);
+        //print_r($emp_id_detail); exit;
+		//else{
+	   if($emp_id_detail[0]['zp_id_fk'] != '' && $emp_id_detail[0]['zp_id_fk'] != 0){	
+	   $Query = "SELECT master.*, desig.designation_name as designation, desigfirst.designation_name as emp_first_desig FROM prd_employee_master as master
+				 LEFT JOIN zpemp_emp_desig_master as desig 
+				 ON master.emp_desig = desig.designation_id
+				 LEFT JOIN zpemp_emp_desig_master as desigfirst 
+				 ON master.emp_desig_first_app = desigfirst.designation_id
+				 WHERE master.emp_id_const = '".$emp_id_const."' ";
+			}
+		else
+		    {
+	   $Query = "SELECT master.*, desig.description as designation, desigfirst.description as emp_first_desig FROM prd_employee_master as master
+				 LEFT JOIN prd_dise_code_master as desig 
+				 ON CAST(master.emp_desig AS character varying) = desig.code
+				 LEFT JOIN prd_dise_code_master as desigfirst 
+				 ON CAST(master.emp_desig_first_app AS character varying) = desigfirst.code
+				 WHERE master.emp_id_const = '".$emp_id_const."' ";
+
+		    }		 
+    
+	$emp_id_detail=$db->fetch_table($Query);
+
+
+	$emp_first_desig = $emp_id_detail[0]['emp_first_desig'];
+
+	$catagory_id_fetch = $db->fetch_table(" SELECT description FROM prd_dise_code_master WHERE code = '".$emp_id_detail[0]['emp_caste']."'");
+	
+	if($emp_id_detail[0]['emp_sex'] == 91){ $sex = 'MALE';} else if($emp_id_detail[0]['emp_sex'] == 92){ $sex = 'FEMALE';} else if($emp_id_detail[0]['emp_sex'] == 93){ $sex = 'OTHERS';}
+
+	if($emp_id_detail[0]['gp_id_fk'] != '' && $emp_id_detail[0]['gp_id_fk'] != 0){
+		$gp_ps_zp =$db->fetch_table(" SELECT gp_id_pk as pk, gp_name as name FROM prd_location_master_gp WHERE gp_id_pk='".$emp_id_detail[0]['gp_id_fk']."' ");
+		$gp_ps_zp_label = "Name of GP Posted";
+		$gp_ps_zp_identity = "GP";
+	}
+	else if($emp_id_detail[0]['ps_id_fk'] != '' && $emp_id_detail[0]['ps_id_fk'] != 0){
+		$gp_ps_zp =$db->fetch_table(" SELECT ps_id_pk as pk, ps_name as name FROM prd_location_master_panchayat_samiti WHERE ps_id_pk ='".$emp_id_detail[0]['ps_id_fk']."' ");
+		$gp_ps_zp_label = "Name of PS Posted";
+		$gp_ps_zp_identity = "PS";
+	}
+	else if($emp_id_detail[0]['zp_id_fk'] != '' && $emp_id_detail[0]['zp_id_fk'] != 0){
+		$gp_ps_zp =$db->fetch_table(" SELECT district_id_pk as pk, district_name as name FROM prd_location_master_district WHERE district_id_pk ='".$emp_id_detail[0]['zp_id_fk']."' ");
+		$gp_ps_zp_label = "Name of ZP Posted";
+		$gp_ps_zp_identity = "ZP";
+	}
+	
+	
+	
+	//var_dump(strlen($emp_id_detail[0]['emp_first_gp_ps_zp_code'])); die;
+	if(strlen($emp_id_detail[0]['emp_first_gp_ps_zp_code']) == 10){ 
+		$first_gp_ps_zp_code =$db->fetch_table(" SELECT gp_id_pk as pk, gp_name as name FROM prd_location_master_gp WHERE gp_code='".$emp_id_detail[0]['emp_first_gp_ps_zp_code']."' ");
+		$first_gp_ps_zp_label = "Name of GP Posted";
+		$first_gp_ps_zp_identity = "GP";
+	}
+	else if(strlen($emp_id_detail[0]['emp_first_gp_ps_zp_code']) == 7){ 
+		$first_gp_ps_zp_code =$db->fetch_table(" SELECT ps_id_pk as pk, ps_name as name FROM prd_location_master_panchayat_samiti WHERE ps_code ='".$emp_id_detail[0]['emp_first_gp_ps_zp_code']."' ");
+		$first_gp_ps_zp_label = "Name of PS Posted";
+		$first_gp_ps_zp_identity = "PS";
+	}
+	else if(strlen($emp_id_detail[0]['emp_first_gp_ps_zp_code']) == 4){ 
+		$first_gp_ps_zp_code =$db->fetch_table(" SELECT district_id_pk as pk, district_name as name FROM prd_location_master_district WHERE district_code ='".$emp_id_detail[0]['emp_first_gp_ps_zp_code']."' ");
+		$first_gp_ps_zp_label = "Name of ZP Posted";
+		$first_gp_ps_zp_identity = "ZP";
+	}
+//print_r($emp_id_detail);
+
+echo json_encode(array($emp_id_detail[0]['emp_first_name'], $emp_id_detail[0]['emp_second_name'], $emp_id_detail[0]['emp_last_name'], date("d-m-Y",strtotime($emp_id_detail[0]['emp_dob'])), $emp_id_detail[0]['emp_sex'], $emp_id_detail[0]['designation'], $emp_id_detail[0]['emp_desig'], $gp_ps_zp[0]['name'], $gp_ps_zp[0]['pk'], $emp_id_detail[0]['emp_first_memo_no'], date("d-m-Y",strtotime($emp_id_detail[0]['emp_first_join_date'])), $sex, $gp_ps_zp_label, $gp_ps_zp_identity, $_SESSION['user_info']['emp_id_const'], $emp_id_detail[0]['emp_first_gp_ps_zp_code'], $emp_id_detail[0]['emp_desig_first_app'], $emp_first_desig, $first_gp_ps_zp_code[0]['name'], $first_gp_ps_zp_code[0]['pk'], $first_gp_ps_zp_label, $first_gp_ps_zp_identity, $emp_id_detail[0]['emp_caste'], $catagory_id_fetch[0]['description'] ));
+
+
+//echo json_encode(array($emp_id_detail[0]));
+		//}
+?>

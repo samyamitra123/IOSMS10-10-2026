@@ -1,0 +1,46 @@
+<?php
+
+header("Cache-Control: no-store, no-cache, must-revalidate, no-transform, max-age=0, post-check=0, pre-check=0");
+
+header("Pragma: no-cache");
+
+
+
+ob_start();
+
+header("Access-Control-Allow-Headers: Origin");
+
+
+
+require '../../../includes/config/config.php';
+
+require '../../../includes/config/database.config_api.php';
+
+require '../../../includes/library/database.class.php';
+
+require_once '../../../includes/library/cryptography.class.php';
+
+require_once '../../../includes/library/myvalidation.class.php';
+
+include( '../../all_function/fun_store/ifms_functions.php');
+
+require_once 'ngipfsalary.class.php';
+
+$redirectUrl = $_SERVER['HTTP_REFERER'];
+
+$crypto = new cryptography();
+
+global $db,$drn;
+$db = new database();
+$drntype = isset($_REQUEST['drntype'])?$_REQUEST['drntype']:0;
+$drn = ($drntype ==1)?$_REQUEST['drn']:$crypto->decode($_REQUEST['drn'],4);
+//print($drn); exit;
+$Ngipf = new NGIPFSALARY_API();
+
+$Ngipf->DownloadSalaryBill();
+
+
+
+
+
+?>
