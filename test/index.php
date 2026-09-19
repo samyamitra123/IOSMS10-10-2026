@@ -1,4 +1,4 @@
 <?php
-echo "The site will be available soon."
+echo "The site will be available soon"
 ?>
 
